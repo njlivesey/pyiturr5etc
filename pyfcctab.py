@@ -12,7 +12,7 @@ from IPython.display import display, HTML
 class Service:
     """A service that can be allocated to a band"""
     def __init__(self, name, abbreviation=None, science=False, science_support=False):
-        self.name = name.lower()
+        self.name = name.lower().strip()
         if abbreviation is None:
             self.abbreviation = self.name
         self.science = science
@@ -53,7 +53,6 @@ services_list = [
     Service("STANDARD FREQUENCY AND TIME SIGNAL", abbreviation="Time", science_support=True),
     Service("STANDARD FREQUENCY AND TIME SIGNAL-SATELLITE", abbreviation="Time", science_support=True),
 ]
-
 services = {service.name: service for service in services_list}
 
 # --------------------------------------------------------------------- Bounds
@@ -105,9 +104,9 @@ class Allocation:
             result = self.service.upper()
         else:
             result = self.service.capitalize()
-        if self.modifiers:
+        if len(self.modifiers) != 0:
             result += " " + " ".join([f"({m})" for m in self.modifiers])
-        if self.footnotes != "":
+        if len(self.footnotes) != 0:
             result += " " + " ".join(self.footnotes)
         return (result)
 
@@ -164,7 +163,7 @@ class Allocation:
         footnotes = remainder.split()
         # Create the result
         result = cls()
-        result.service = service
+        result.service = service #.strip()
         result.modifiers = modifiers
         result.footnotes = footnotes
         result.primary = primary
@@ -190,14 +189,17 @@ class NotBandError(Exception):
 
 class Band:
     """A frequency bounds and the allocations thereto (i.e., contents of a cell in the FCC tables)"""
-    def __str__(self):
+    def __str__(self, separator="\n"):
         """Return a string representation of a Band"""
-        result = str(self.bounds) + "\n"
+        result = str(self.bounds) + separator
         for a in self.allocations:
-            result = result + str(a) + "\n"
+            result = result + str(a) + separator
         if self.footnotes != "":
-            result = result + "\n" + " ".join(self.footnotes)
+            result = result + separator + " ".join(self.footnotes)
         return (result)
+
+    def compact_str(self):
+        return self.__str__(separator="/")
 
     def __eq__(self,a):
         """Compare two sets of Band information"""
@@ -484,13 +486,10 @@ def parse_table(table, unit, dump_raw=False, dump_ordered=False):
                 if band.definitelyUSA():
                     usa_start = min(ib, usa_start)
                 if dump_ordered:
-                    print ("------------------")
-                    print (band)
-                    print (band.definitelyUSA())
+                    print (band.compact_str() + " -- " +str(band.definitelyUSA()))
             except (NotBandError):
                 if dump_ordered:
-                    print ("---------- Invalid cell")
-                    print (b)
+                    print (f"**Invalid: {b}")
                 pass
 
     # Work out which cells are repated
@@ -532,7 +531,7 @@ def parse_table(table, unit, dump_raw=False, dump_ordered=False):
                 for i in range(3):
                     entries.append(boxes[0])
             elif n_unique == 2:
-                raise NotImplementedError("OK, got here")
+                raise NotImplementedError(f"OK, got here {ir}")
             elif n_unique == 3:
                 # Similarly straightforward
                 i = 0
@@ -579,11 +578,12 @@ def _digest_collection(entries, unit):
     for entry in entries:
         # See if this one is at least the start of a band
         try:
-            test = Band.parse(entry, unit)
-            # OK, it worked, so dispatch the one we've been working on
-            # thus far.  However, be careful, there are circmstances
-            # in which this can simply be a repeat of the previous
-            # one.
+            if entry is not None:
+                test = Band.parse(entry, unit)
+            # OK, it worked (or it's not none), so dispatch the one
+            # we've been working on thus far.  However, be careful,
+            # there are circmstances in which this can simply be a
+            # repeat of the previous one.
             if entry != previous and accumulator is not None:
                 output_collection.append(Band.parse(accumulator, unit))
             accumulator = entry
@@ -605,7 +605,7 @@ def parse_file(fccfile, table_range=range(0,65), **kwargs):
     """Go through tables in fcc file and parse them"""
 
     tables = fccfile.tables
-    unit = units.kHz
+    unit = units.dimensionless_unscaled
     # Setup empty result
     itu_accumulators, fcc_accumulators = _get_empty_collections()
     itu_collections, fcc_collections = _get_empty_collections()
