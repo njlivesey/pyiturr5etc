@@ -7,6 +7,7 @@ import astropy.units as units
 
 import pandas as pd
 from IPython.display import display, HTML
+from versions import Version
 
 # --------------------------------------------------------------------- Services
 class Service:
@@ -270,11 +271,10 @@ class Band:
             raise NotBandError("Text doesn't start with bounds, so not a band")
         # Now the remainder will either be allocations, blanks or collections of footnotes
         service_names = services.keys()
-        footnotes = None
+        footnotes = []
         allocations = []
         primary_allocations = []
         secondary_allocations = []
-        # print(lines)
         for l in lines[1:]:
             if l.strip() == "":
                 continue
@@ -283,14 +283,15 @@ class Band:
             # See if this line conveys an allocation
             allocation = Allocation.parse(l)
             if allocation is not None:
+                if len(footnotes) != 0:
+                    raise NotBandError("Back to allocation after footnotes")
                 if allocation.primary:
                     primary_allocations.append(allocation)
                 else:
                     secondary_allocations.append(allocation)
                 allocations.append(allocation)
             else:
-                footnotes=l.split()
-                # print (f"***** Footnotes: {footnotes}")
+                footnotes += l.split()
         # Done looping over the lines, so tidy things up.
         if footnotes is None:
             footnotes = []
@@ -322,12 +323,9 @@ def _dump_cells(cells):
 def pretty_print(df):
     return display(HTML(df.to_html().replace(r"\n","<br>")))
 
-page_patches = {
-    "International Table": "Page 5",
-    "NG527A": "Page 52",
-    "Flexible Use (30)": "Page 54"}
-
 class OtherTable(Exception):
+    pass
+class FCCTableError(Exception):
     pass
 
 def harvest_footnotes(fccfile, n_tables=64):
@@ -353,11 +351,11 @@ def _get_empty_collections():
         fcc_collections.append(list())
     return itu_collections, fcc_collections
 
-def parse_table(table, unit, dump_raw=False, dump_ordered=False):
+    
+def parse_table(table, unit, version=Version("20200818"), dump_raw=False, dump_ordered=False):
     """Go through one table in the document and return a guess as to its contents"""
     # Check that this is the kind of table we can cope with
-    if len(table.rows[-1].cells) == 0:
-        raise OtherTable
+    pass
     # First get the first row and work out if this is a table with headers or not
     header = first_line(table.rows[0].cells[0])
     n_rows = len(table.rows)
@@ -373,20 +371,30 @@ def parse_table(table, unit, dump_raw=False, dump_ordered=False):
     else:
         first_useful_row = 0
     # Get the last row and check it's not just full of page numbers
-    footer = first_line(table.rows[-1].cells[0])
+    try:
+        footer = first_line(table.rows[-1].cells[0])
+    except IndexError:
+        footer = ""
     footer_prefix = "Page"
     has_footer = footer[0:len(footer_prefix)] == footer_prefix
     if has_footer:
         last_useful_row = n_rows-2
     else:
         last_useful_row = n_rows-1
-    # Also, get the page number if it's in the last row/column
+    # Also, get the page number if it's in the last row/column (or thereabouts)
+    last_working_row = -1
     if not has_header:
-        page = last_line(table.rows[-1].cells[-1])
+        for ir in [-1,-2,-3]:
+            try:
+                page = last_line(table.rows[ir].cells[-1])
+                last_working_row = ir
+                break
+            except IndexError:
+                pass
     # Some page numbers are hard to deduce, these we patch
-    page = page_patches.get(page, page)
+    page = version.patch_page(page)
     # Check to see if the table ends with a page number
-    entry = first_line(table.rows[-1].cells[-1])
+    entry = first_line(table.rows[last_working_row].cells[-1])
     ends_with_page_number = entry[0:len(footer_prefix)] == footer_prefix
 
     # Possibly dump the raw table
@@ -440,7 +448,12 @@ def parse_table(table, unit, dump_raw=False, dump_ordered=False):
         for cIn, c in enumerate(r.cells):
             for rOut in range(top[rIn,cIn], bottom[rIn,cIn]):
                 for cOut in range(left[rIn,cIn], right[rIn,cIn]):
-                    ordered[rOut][cOut] = cell2text(c)
+                    new_value = cell2text(c)
+                    current_value =  ordered[rOut][cOut]
+                    if current_value != None and current_value != new_value:
+                        raise FCCTableError(f"Trampled unexpectedly {rOut},{cOut} from {rIn},{cIn}")
+                    else:
+                        ordered[rOut][cOut] = new_value
 
     # Possibly dump the ordered table
     if dump_ordered:
@@ -458,111 +471,25 @@ def parse_table(table, unit, dump_raw=False, dump_ordered=False):
     bottom = bottom[first_useful_row:last_useful_row+1,:]
     n_rows = n_rows - first_useful_row
 
-    # Find all the edges that don't get crossed by a merged cell.
-    # However, be careful about pages that end with a Page number
-    # entry in the final cell.
-    edge_crossed = np.ndarray(shape=[max_boxes], dtype=bool)
-    edge_crossed[:] = False
-    for r in range(n_rows-int(ends_with_page_number)):
-        for c in range(n_cols_per_row[r]):
-            edge_crossed[left[r,c]+1:right[r,c]] = True
-    # Turn that into an easily readable code for debugging purposes
-    code = ""
-    for c in edge_crossed:
-        code += "01"[int(c)]
-
-    # Work out the fundamental boundaries in the grid.  First we work
-    # out where the FCC rules column starts.
-    i = np.arange(max_boxes)
-    fcc_rules_start = np.max(i[edge_crossed==False])
-    # Work out where the US-specific assignments start
-    usa_start = fcc_rules_start
-    for boxes in ordered:
-        if dump_ordered:
-            print ("===========================================================================")
-        for ib, b in enumerate(boxes[0:fcc_rules_start]):
-            try:
-                band = Band.parse(b, unit)
-                if band.definitelyUSA():
-                    usa_start = min(ib, usa_start)
-                if dump_ordered:
-                    print (band.compact_str() + " -- " +str(band.definitelyUSA()))
-            except (NotBandError):
-                if dump_ordered:
-                    print (f"**Invalid: {b}")
-                pass
-
-    # Work out which cells are repated
-    repeated = np.ndarray(shape=[n_rows, max_boxes], dtype=bool)
-    repeated[:,:] = False
-    for ir, boxes in enumerate(ordered):
-        for ib in range(1, n_boxes_per_row[ir]):
-            repeated[ir, ib] = boxes[ib] == boxes[ib-1]
-    # Reset the first column in each section to be not repeated (doubt any are anyway)
-    repeated[:,usa_start] = False
-    repeated[:,fcc_rules_start] = False
-    always_repeated = np.all(repeated, axis=0)
-
     # Create a pair of lists to hold the results
     itu_collections, fcc_collections = _get_empty_collections()
     for ir, boxes in enumerate(ordered):
+        # OK, get the layout for this page/row
+        layout = version.get_layout(page, ir+first_useful_row)
+        assert layout[6] == "/", f"Bad layout: {layout}"
+        if int(layout[7:]) != max_boxes:
+            raise ValueError("Supplied layout does not match table")
+        sources = [int(l,16) for l in layout[0:6]]
         # First the ITU entries
         entries = []
-        n_itu_boxes = usa_start
-        if n_itu_boxes == 1:
-            # Only one range so they're all that column
-            for i in range(3):
-                entries.append(boxes[0])
-        if n_itu_boxes == 2:
-            # Only two boxes.  I've checked and know that, in all
-            # cases these correspond to regions 1 then 2/3
-            entries.append(boxes[0])
-            entries.append(boxes[1])
-            entries.append(boxes[1])
-        if n_itu_boxes == 3:
-            # This is straightforward, each to their own
-            for i in range(n_itu_boxes):
-                entries.append(boxes[i])
-        else:
-            # Here, things are a bit more complicated, find how many repeated cases there are.
-            n_repeats = sum(repeated[ir,0:n_itu_boxes])
-            n_unique = n_itu_boxes-n_repeats
-            if n_unique == 1:
-                for i in range(3):
-                    entries.append(boxes[0])
-            elif n_unique == 2:
-                raise NotImplementedError(f"OK, got here {ir}")
-            elif n_unique == 3:
-                # Similarly straightforward
-                i = 0
-                for b, r in zip(boxes[0:n_itu_boxes], repeated[ir, 0:n_itu_boxes]):
-                    if not r:
-                        entries.append(b)
-            else:
-                for ib, b in enumerate(boxes):
-                    print (f"------------------ Box {ib}")
-                    print (b)
-                    print (f"Repeat: {repeated[ir, ib]}")
-                raise ValueError("Too many unique boxes")
-        # Do some checking
-        assert len(entries)==3, f"Should have 3 entries for the ITU columns {entries}"
-        for c, e in zip(itu_collections, entries):
-            c.append(e)
-
-        # Now the USA entries
-        entries = []
-        # First the US table entres
-        entries.append(boxes[usa_start])
-        entries.append(boxes[fcc_rules_start-1])
-        # Now the corresponding FCC rules
-        entries.append(boxes[fcc_rules_start])
-        for c, e in zip(fcc_collections, entries):
-            c.append(e)
+        for i in range(3):
+            itu_collections[i].append(boxes[sources[i]])
+        for i in range(3):
+            fcc_collections[i].append(boxes[sources[i+3]])
 
     # Finish off
     diagnostics = {
         "page": page,
-        "code": code,
         "has_header": has_header}
     return itu_collections, fcc_collections, unit, diagnostics
 
@@ -591,7 +518,11 @@ def _digest_collection(entries, unit):
             # The current entry isn't a band, it must be finishing the
             # band in the accumulator.  Check it's not just a repeat.
             if entry != previous:
-                accumulator = accumulator + entry
+                if accumulator is None:
+                    accumulator = entry
+                else:
+                    if entry is not None:
+                        accumulator = accumulator + entry
         previous = entry
     # OK, now we've got to the end, deal with the final entry
     try:
@@ -604,6 +535,7 @@ def _digest_collection(entries, unit):
 def parse_file(fccfile, table_range=range(0,65), **kwargs):
     """Go through tables in fcc file and parse them"""
 
+    version = Version("20200818")
     tables = fccfile.tables
     unit = units.dimensionless_unscaled
     # Setup empty result
@@ -613,7 +545,7 @@ def parse_file(fccfile, table_range=range(0,65), **kwargs):
     for it in table_range:
         table = tables[it]
         these_itu_entries, these_fcc_entries, unit, diagnostics = parse_table(
-            table, unit, **kwargs)
+            table, unit, version, **kwargs)
         # If this table has got a header, then dispatch the previously
         # collected table entries.
         if diagnostics["has_header"]:
@@ -627,6 +559,7 @@ def parse_file(fccfile, table_range=range(0,65), **kwargs):
     # Now displatch the final table
     for i in range(3):
         itu_collections[i] += _digest_collection(itu_accumulators[i], unit)
+    # Code needed here to properly annotate the FCC collections.
     
     return itu_collections, fcc_collections
         
