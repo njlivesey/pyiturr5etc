@@ -1,7 +1,19 @@
 """Some low level routines for (mainly parsing) the FCC tables"""
 
+from IPython.display import display, HTML
+
 def cell2text(cell, munge=False):
-    result = [p.text for p in cell.paragraphs]
+    result = []
+    for p in cell.paragraphs:
+        entry = p.text
+        # Possibly strip \n's off the start
+        if len(result) == 0:
+            try:
+                while entry[0] == "\n":
+                    entry = entry[1:]
+            except IndexError:
+                pass
+        result.append(entry)
     if munge:
         return "\n".join(result)
     else:

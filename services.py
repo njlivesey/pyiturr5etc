@@ -16,8 +16,8 @@ class Service:
     def identify(cls, line):
         result = None
         ll = line.lower()
-        for name, service in services.items():
-            candidates = [ name ] + service.aliases
+        for service in _services:
+            candidates = [ service.name ] + service.aliases
             for candidate in candidates:
                 cl = candidate.lower()
                 if ll[0:len(cl)] == cl:
@@ -28,7 +28,7 @@ class Service:
                             result = service
         return result
 
-_services_list = [
+_services = [
 #    Service(""),
     Service("AERONAUTICAL MOBILE"),
     Service("AERONAUTICAL MOBILE-SATELLITE"),
@@ -63,5 +63,3 @@ _services_list = [
     Service("STANDARD FREQUENCY AND TIME SIGNAL", abbreviation="Time", science_support=True),
     Service("STANDARD FREQUENCY AND TIME SIGNAL-SATELLITE", abbreviation="Time", science_support=True),
 ]
-
-services = {service.name: service for service in _services_list}

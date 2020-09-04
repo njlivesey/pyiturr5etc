@@ -3,9 +3,9 @@
 import re
 import docx
 import fnmatch
+import numpy as np
 
 from .allocations import Allocation
-from .services import services
 from .utils import cell2text
 
 __all__ = [ "NotBoundsError", "Bounds", "NotBandError", "Band" ]
@@ -33,24 +33,47 @@ class Bounds:
     def __ne__(self, a):
         return not (self == a)
 
+    def __gt__(self, a):
+        return self.bounds[0] > a.bounds[0]
+
+    def __lt__(self, a):
+        return self.bounds[0] < a.bounds[0]
+
+    # For the >= or <= comparison operators, we'll mainly key off the
+    # lower bound, but if they are the same, the upper bound wil come
+    # into play.
+    def __ge__(self, a):
+        if self.bounds[0] >= a.bounds[0]:
+            return True
+        # if np.isclose(self.bounds[0], a.bounds[0]):
+        #     return self.bounds[1] > a.bounds[1]
+        return False
+
+    def __le__(self, a):
+        if self.bounds[0] <= a.bounds[0]:
+            return True
+        # if np.isclose(self.bounds[0], a.bounds[0]):
+        #     return self.bounds[1] > a.bounds[1]
+        return False
+
     @classmethod
     def parse(cls, text, unit):
         """Turn a string giving a frequency range into a bounds object"""
         re_float = r"[0-9]+(?:\.[0-9]+)?"
-        re_bounds = f"^({re_float})-({re_float})$"
+        re_bounds = f"^({re_float})-({re_float})[\w]*(\(Not allocated\))?$"
         match = re.match(re_bounds, text)
         if match is not None:
             return cls(
                 float(match.group(1))*unit,
                 float(match.group(2))*unit)
         # Perhaps this is the "below the bottom" case.
-        re_bottom = f"^Below ({re_float}) \(Not Allocated\)$"
+        re_bottom = f"^Below ({re_float}) \(Not Allocated\)$"        
         match = re.match(re_bottom, text)
-        if match is None:
-            raise NotBoundsError(f"Not a valid range: {text}")
-        return cls(
-            0.0*unit, float(match.group(1))*unit)
-
+        if match is not None:
+            return cls(0.0*unit, float(match.group(1))*unit)
+        # Otherwise, this is not a bound
+        raise NotBoundsError(f"Not a valid range: {text}")
+            
 # --------------------------------------------------------------------- Bands
 
 def _text2lines(text):
@@ -59,12 +82,10 @@ def _text2lines(text):
     lines = []
     line = None
     for t in text:
-        if len(t) == 0:
-            continue
-        # if len(t) != 0:
-        #     t0 = t[0]
-        # else:
-        #     t0 = ""
+        if len(t) != 0:
+            t0 = t[0]
+        else:
+            t0 = ""
         is_continuation = (t0 == " ")
         if line is None:
             is_continuation = False
@@ -92,7 +113,10 @@ class Band:
     """A frequency bounds and the allocations thereto (i.e., contents of a cell in the FCC tables)"""
     def __str__(self, separator="\n"):
         """Return a string representation of a Band"""
-        result = str(self.bounds) + separator
+        result = str(self._bounds)
+        if self.jurisdictions is not None:
+            result = result + ' [' + ','.join(self.jurisdictions) + ']'
+        result = result + separator
         for a in self.allocations:
             result = result + str(a) + separator
         if self.footnotes != "":
@@ -106,17 +130,42 @@ class Band:
 
     def __eq__(self,a):
         """Compare two sets of Band information"""
-        if self.bounds != a.bounds:
+        if self._bounds != a._bounds:
             return False
         if len(self.allocations) != len(a.allocations):
             return False
         for sa, aa in zip(self.allocations, a.allocations):
             if sa != aa:
                 return False
+        if (self.fcc_rules is None) != (a.fcc_rules is None):
+            return False
+        try:
+            if len(self.fcc_rules) != len(a.fcc_rules):
+                return False
+            for sr, ar in zip(self.fcc_rules, a.fcc_rules):
+                if sr !=ar:
+                    return False
+        except TypeError:
+            pass
         return self.footnotes == a.footnotes
         
     def __ne__(self, a):
         return not (self == a)
+
+    def __gt__(self, a):
+        return self.bounds > a.bounds
+
+    def __lt__(self, a):
+        return self.bounds < a.bounds
+
+    def __ge__(self, a):
+        return self.bounds >= a.bounds
+
+    def __le__(self, a):
+        return self.bounds <= a.bounds
+
+    def __add__(self, a):
+        return self.combine_bands(a)
 
     def all_footnotes(self):
         result = self.footnotes
@@ -124,6 +173,46 @@ class Band:
             result = result + a.footnotes
         return list(set(result))
 
+    def combine_bands(self, a, force=False):
+        """Merge the contents of two different bands"""
+
+        def _combine_elements(a,b):
+            result = []
+            if a is not None:
+                result += a
+            if b is not None:
+                result += b
+            if len(result) == 0:
+                return None
+            else:
+                return list(set(result))
+            
+        if ((not force) and
+            (not self.overlaps(a) and not self.is_adjacent(a))):
+            raise ValueError("Two bands not overlapping/adjacent, set force=True")
+        result = Band()
+        # Merge the bounds
+        result._bounds = Bounds(
+            min(self.bounds[0], a.bounds[0]),
+            max(self.bounds[1], a.bounds[1]))
+        # print(f"Merging: {self.range} and {a.range} into {result.range}")
+        # Merge the allocations
+        result.primary_allocations = list(set(
+            self.primary_allocations + a.primary_allocations))
+        result.primary_allocations.sort()
+        result.secondary_allocations = list(set(
+            self.secondary_allocations + a.secondary_allocations))
+        result.secondary_allocations.sort()
+        result.allocations = result.primary_allocations + result.secondary_allocations
+        # Merge the footnotes
+        result.footnotes = list(set(self.footnotes + a.footnotes))
+        # Merge the FCC rules and the jurisdictions
+        result.fcc_rules = _combine_elements(
+            self.fcc_rules, a.fcc_rules)
+        result.jurisdictions = _combine_elements(
+            self.jurisdictions, a.jurisdictions)
+        return result
+        
     def definitelyUSA(self):
         for f in self.all_footnotes():
             if f[0] != "5" and f[0] != "(":
@@ -140,6 +229,64 @@ class Band:
             if fnmatch.fnmatch(entry.lower(), fl):
                 return True
         return False
+
+    def has_allocation(
+            self, allocation,
+            primary=None, secondary=None,
+            co_primary=None, exclusive=None,
+            case_sensitive=False):
+        for a in self.allocations:
+            if a.matches(allocation, case_sensitive=case_sensitive):
+                if primary is not None:
+                    if a.primary != primary:
+                        return False
+                if secondary is not None:
+                    if (not a.primary) != secondary:
+                        return False
+                if co_primary is not None:
+                    if a.co_primary != co_primary:
+                        return False
+                if exclusive is not None:
+                    if a.exclusive != exclusive:
+                        return False
+                return True
+        return False
+
+    def applies_in(self, jurisdiction):
+        if self.jurisdictions is None:
+            return None
+        for j in self.jurisdictions:
+            if j == jurisdiction:
+                return True
+        return False
+
+    def covers(self, frequency):
+        return self.bounds[0] <= frequency and self.bounds[1] > frequency
+
+    def overlaps(self, a):
+        return (
+            max(a.bounds[0],self.bounds[0]) < min(a.bounds[1],self.bounds[1]))
+
+    def is_adjacent(self, a):
+        return (
+            np.allclose(a.bounds[1], self.bounds[0]) or
+            np.allclose(a.bounds[0], self.bounds[1]))
+
+    @property
+    def bounds(self):
+        return self._bounds.bounds
+
+    @property
+    def bandwidth(self):
+        return self._bounds.bandwidth
+
+    @property
+    def center(self):
+        return self._bounds.center
+
+    @property
+    def range(self):
+        return str(self._bounds)
 
     @classmethod
     def parse(cls, cell, unit, fcc_rules=None):
@@ -160,7 +307,6 @@ class Band:
         except NotBoundsError:
             raise NotBandError("Text doesn't start with bounds, so not a band")
         # Now the remainder will either be allocations, blanks or collections of footnotes
-        service_names = services.keys()
         footnotes = []
         allocations = []
         primary_allocations = []
@@ -192,14 +338,20 @@ class Band:
                 a.co_primary = False
             a.exclusive = len(allocations) == 1
             a.bounds = bounds
+        # Do the fcc rules
+        if fcc_rules is not None:
+            fcc_rules = [entry for entry in _text2lines(fcc_rules) if entry != ""]
+            if len(fcc_rules) == 0:
+                fcc_rules = None
         # Now create a Band to hold the result
         result = cls()
-        result.bounds = bounds
+        result._bounds = bounds
         result.allocations = allocations
         result.primary_allocations = primary_allocations
         result.secondary_allocations = secondary_allocations
         result.footnotes = footnotes
-        result.fcc_rules = _text2lines(fcc_rules)
+        result.fcc_rules = fcc_rules
+        result.jurisdictions = None
         result._lines = lines
         result._text = text
         return result

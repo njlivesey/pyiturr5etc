@@ -36,11 +36,26 @@ class Allocation:
     def __ne__(self, a):
         return not (self == a)
 
+    def __hash__(self):
+        return hash(str(self))
+
+    def __gt__(self, a):
+        return str(self) > str(a)
+    
+    def __lt__(self, a):
+        return str(self) < str(a)
+    
+    def __ge__(self, a):
+        return str(self) >= str(a)
+    
+    def __le__(self, a):
+        return str(self) <= str(a)
+
     def matches(self, line, case_sensitive=False):
         if case_sensitive:
             return fnmatch.fnmatchcase(str(self), line)
         else:
-            return fnmatch.fnmatchcase(str(self).lower, line.lower)
+            return fnmatch.fnmatchcase(str(self).lower(), line.lower())
 
     @classmethod
     def parse(cls, line):

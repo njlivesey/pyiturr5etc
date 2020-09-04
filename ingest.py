@@ -1,15 +1,17 @@
 """First attempt at Python code to handle FCC tables"""
 
+from IPython.display import display, HTML
+import astropy.units as units
+import bisect
+import copy
+import docx
 import docx
 import numpy as np
-import astropy.units as units
 import pandas as pd
-from IPython.display import display, HTML
-import docx
 
 from .bands import NotBandError, Band
 from .versions import Version
-from .utils import cell2text, first_line, last_line
+from .utils import cell2text, first_line, last_line, pretty_print
 
 class OtherTable(Exception):
     pass
@@ -206,7 +208,12 @@ def _digest_collection(entries, unit, fcc_rules=None):
             # there are circmstances in which this can simply be a
             # repeat of the previous one.
             if entry != previous and accumulator is not None:
-                output_collection.append(Band.parse(accumulator, unit, rules_accumulator))
+                new_band = Band.parse(accumulator, unit, rules_accumulator)
+                if len(output_collection) > 0:
+                    if new_band != output_collection[-1]:
+                        output_collection.append(new_band)
+                else:
+                    output_collection.append(new_band)
             accumulator = entry
             rules_accumulator = rule
         except NotBandError:
@@ -227,13 +234,18 @@ def _digest_collection(entries, unit, fcc_rules=None):
                 previous_rule = rule
     # OK, now we've got to the end, deal with the final entry
     try:
-        output_collection.append(Band.parse(accumulator, unit, rules_accumulator))
+        new_band = Band.parse(accumulator, unit, rules_accumulator)
+        if len(output_collection) > 0:
+            if new_band != output_collection[-1]:
+                output_collection.append(new_band)
+        else:
+            output_collection.append(new_band)
     except NotBandError:
         pass
         # raise DigestError("Unable to parse the final entry")
     return output_collection
 
-def parse_file(fccfile, table_range=range(0,65), **kwargs):
+def parse_all_tables(fccfile, table_range=range(0,65), **kwargs):
     """Go through tables in fcc file and parse them"""
 
     version = Version("20200818")
@@ -246,7 +258,7 @@ def parse_file(fccfile, table_range=range(0,65), **kwargs):
     for it in table_range:
         print (f"============================ Table {it}")
         table = tables[it]
-        these_itu_entries, these_fcc_entries, unit, diagnostics = parse_table(
+        these_itu_entries, these_fcc_entries, new_unit, diagnostics = parse_table(
             table, unit, version, **kwargs)
         # If this table has got a header, then dispatch the previously
         # collected table entries.
@@ -258,16 +270,60 @@ def parse_file(fccfile, table_range=range(0,65), **kwargs):
                 fcc_collections[i] += _digest_collection(
                     fcc_accumulators[i], unit, fcc_rules=fcc_accumulators[2])
             itu_accumulators, fcc_accumulators = _get_empty_collections()
+        unit = new_unit
         # Now add the new entries to the accumulators
         for i in range(3):
             itu_accumulators[i] += these_itu_entries[i]
             fcc_accumulators[i] += these_fcc_entries[i]
-    # Now displatch the final table
+    # Now dispatch the final table
     for i in range(3):
         itu_collections[i] += _digest_collection(
             itu_accumulators[i], unit)
     for i in range(2):
         fcc_collections[i] += _digest_collection(
             fcc_accumulators[i], unit, fcc_rules=fcc_accumulators[2])
-    return itu_collections, fcc_collections
+    itu = {
+        "R1": itu_collections[0],
+        "R2": itu_collections[1],
+        "R3": itu_collections[2]}
+    fcc = {
+        "F": fcc_collections[0],
+        "NF": fcc_collections[1]}
+    return itu, fcc
 
+def merge_band_lists(collections):
+    """Combine a set of lists of bands into one"""
+    interim = []
+    # Build the raw list
+    for tag, collection in collections.items():
+        for band in collection:
+            new_band = copy.deepcopy(band)
+            if new_band.jurisdictions is not None:
+                raise ValueError("Band seems to already have been merged")
+            new_band.jurisdictions = [tag]
+            interim.append(new_band)
+    # Now sort all these bands into order
+    interim.sort()
+    result = []
+    # Now go through and join bands together if they're the same in all but region.
+    for band in interim:
+        # This is the index of the first entry in the result that
+        # starts at this band's frequency
+        index = bisect.bisect_left(result, band)
+        # Now look for all the bands already stored after this one and
+        # see if they are basically the same as this band.
+        destination = -1
+        for i in range(index, len(result)):
+            # Here we take advantage of the fact that the = operator
+            # for bands does not pay attention to jurisdiction
+            # information.
+            if result[i] == band:
+                destination = i
+        if destination != -1:
+            result[destination].jurisdictions.append(band.jurisdictions[0])
+        else:
+            result.append(band)
+                
+    return result
+        
+        
