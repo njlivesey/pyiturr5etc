@@ -13,6 +13,12 @@ def cell2text(cell, munge=False):
                     entry = entry[1:]
             except IndexError:
                 pass
+        # Also possibly strip \n's off the end
+        try:
+            while entry[-1] == "\n":
+                entry = entry[:-1]
+        except IndexError:
+            pass
         result.append(entry)
     if munge:
         return "\n".join(result)

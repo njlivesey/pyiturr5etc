@@ -27,10 +27,6 @@ class Allocation:
             return False
         if self.footnotes != a.footnotes:
             return False
-        if self.co_primary != a.co_primary:
-            return False
-        if self.exclusive != a.exclusive:
-            return False
         return True
 
     def __ne__(self, a):

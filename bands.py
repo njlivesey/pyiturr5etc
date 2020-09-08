@@ -128,6 +128,23 @@ class Band:
     def compact_str(self):
         return self.__str__(separator="/")
 
+    def finalize(self):
+        """Make sure all the various pieces of information for a band are correct"""
+        self.allocations = []
+        n_allocations = len(self.primary_allocations) + len(self.secondary_allocations)
+        for a in self.primary_allocations:
+            assert a.primary, "A secondary allocation ended up in the primary list somehow"
+            a.co_primary = len(self.primary_allocations) > 1
+            a.exclusive = n_allocations == 1
+            a.bounds = self.bounds
+            self.allocations.append(a)
+        for a in self.secondary_allocations:
+            assert not a.primary, "A primary allocation ended up in the secondary list somehow"
+            a.co_primary = False
+            a.exclusive = n_allocations == 1
+            a.bounds = self.bounds
+            self.allocations.append(a)
+
     def __eq__(self,a):
         """Compare two sets of Band information"""
         if self._bounds != a._bounds:
@@ -308,7 +325,6 @@ class Band:
             raise NotBandError("Text doesn't start with bounds, so not a band")
         # Now the remainder will either be allocations, blanks or collections of footnotes
         footnotes = []
-        allocations = []
         primary_allocations = []
         secondary_allocations = []
         for l in lines[1:]:
@@ -325,19 +341,11 @@ class Band:
                     primary_allocations.append(allocation)
                 else:
                     secondary_allocations.append(allocation)
-                allocations.append(allocation)
             else:
                 footnotes += l.split()
         # Done looping over the lines, so tidy things up.
         if footnotes is None:
             footnotes = []
-        for a in allocations:
-            if a.primary:
-                a.co_primary = len(primary_allocations) > 1
-            else:
-                a.co_primary = False
-            a.exclusive = len(allocations) == 1
-            a.bounds = bounds
         # Do the fcc rules
         if fcc_rules is not None:
             fcc_rules = [entry for entry in _text2lines(fcc_rules) if entry != ""]
@@ -346,7 +354,6 @@ class Band:
         # Now create a Band to hold the result
         result = cls()
         result._bounds = bounds
-        result.allocations = allocations
         result.primary_allocations = primary_allocations
         result.secondary_allocations = secondary_allocations
         result.footnotes = footnotes
@@ -354,4 +361,5 @@ class Band:
         result.jurisdictions = None
         result._lines = lines
         result._text = text
+        result.finalize()
         return result

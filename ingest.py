@@ -36,16 +36,14 @@ def _get_empty_collections():
     itu_collections = []
     for i in range(3):
         itu_collections.append(list())
-    fcc_collections = []
+    usa_collections = []
     for i in range(3):
-        fcc_collections.append(list())
-    return itu_collections, fcc_collections
+        usa_collections.append(list())
+    return itu_collections, usa_collections
 
     
 def parse_table(table, unit, version=Version("20200818"), dump_raw=False, dump_ordered=False):
     """Go through one table in the document and return a guess as to its contents"""
-    # Check that this is the kind of table we can cope with
-    pass
     # First get the first row and work out if this is a table with headers or not
     header = first_line(table.rows[0].cells[0])
     n_rows = len(table.rows)
@@ -162,10 +160,11 @@ def parse_table(table, unit, version=Version("20200818"), dump_raw=False, dump_o
     n_rows = n_rows - first_useful_row
 
     # Create a pair of lists to hold the results
-    itu_collections, fcc_collections = _get_empty_collections()
+    itu_collections, usa_collections = _get_empty_collections()
     for ir, boxes in enumerate(ordered):
         # OK, get the layout for this page/row
         layout = version.get_layout(page, ir+first_useful_row)
+        print (f"Page {page}, row {ir} has layout {layout}")
         assert layout[6] == "/", f"Bad layout: {layout}"
         if int(layout[7:]) != max_boxes:
             raise ValueError("Supplied layout does not match table")
@@ -175,13 +174,13 @@ def parse_table(table, unit, version=Version("20200818"), dump_raw=False, dump_o
         for i in range(3):
             itu_collections[i].append(boxes[sources[i]])
         for i in range(3):
-            fcc_collections[i].append(boxes[sources[i+3]])
+            usa_collections[i].append(boxes[sources[i+3]])
 
     # Finish off
     diagnostics = {
         "page": page,
         "has_header": has_header}
-    return itu_collections, fcc_collections, unit, diagnostics
+    return itu_collections, usa_collections, unit, diagnostics
 
 class DigestError(Exception):
     """Error raised when collection can't be digested"""
@@ -198,8 +197,8 @@ def _digest_collection(entries, unit, fcc_rules=None):
         rules = [None]*len(entries)
     else:
         rules = fcc_rules
+    assert len(rules) == len(entries), "Mismatch between entries and rules"
     for entry, rule in zip(entries, rules):
-        # See if this one is at least the start of a band
         try:
             if entry is not None:
                 test = Band.parse(entry, unit)
@@ -216,7 +215,12 @@ def _digest_collection(entries, unit, fcc_rules=None):
                     output_collection.append(new_band)
             accumulator = entry
             rules_accumulator = rule
+            previous = entry
+            previous_rule = rule
         except NotBandError:
+            # First, there are some special cases
+            if entry == ["(See previous page)"]:
+                entry = previous
             # The current entry isn't a band, it must be finishing the
             # band in the accumulator.  Check it's not just a repeat.
             if entry != previous:
@@ -245,21 +249,27 @@ def _digest_collection(entries, unit, fcc_rules=None):
         # raise DigestError("Unable to parse the final entry")
     return output_collection
 
-def parse_all_tables(fccfile, table_range=range(0,65), **kwargs):
+def parse_all_tables(fccfile, table_range=None, **kwargs):
     """Go through tables in fcc file and parse them"""
-
+    
     version = Version("20200818")
     tables = fccfile.tables
     unit = units.dimensionless_unscaled
     # Setup empty result
-    itu_accumulators, fcc_accumulators = _get_empty_collections()
-    itu_collections, fcc_collections = _get_empty_collections()
+    itu_accumulators, usa_accumulators = _get_empty_collections()
+    itu_collections, usa_collections = _get_empty_collections()
 
+    if table_range is None:
+        table_range=range(0,65)
     for it in table_range:
         print (f"============================ Table {it}")
         table = tables[it]
-        these_itu_entries, these_fcc_entries, new_unit, diagnostics = parse_table(
+        these_itu_entries, these_usa_entries, new_unit, diagnostics = parse_table(
             table, unit, version, **kwargs)
+        print ("-------- Given")
+        for b in these_usa_entries[0]:
+            print ("----")
+            print (b)
         # If this table has got a header, then dispatch the previously
         # collected table entries.
         if diagnostics["has_header"]:
@@ -267,29 +277,37 @@ def parse_all_tables(fccfile, table_range=range(0,65), **kwargs):
                 itu_collections[i] += _digest_collection(
                     itu_accumulators[i], unit)
             for i in range(2):
-                fcc_collections[i] += _digest_collection(
-                    fcc_accumulators[i], unit, fcc_rules=fcc_accumulators[2])
-            itu_accumulators, fcc_accumulators = _get_empty_collections()
+                usa_collections[i] += _digest_collection(
+                    usa_accumulators[i], unit, fcc_rules=usa_accumulators[2])
+            itu_accumulators, usa_accumulators = _get_empty_collections()
         unit = new_unit
         # Now add the new entries to the accumulators
         for i in range(3):
             itu_accumulators[i] += these_itu_entries[i]
-            fcc_accumulators[i] += these_fcc_entries[i]
+            usa_accumulators[i] += these_usa_entries[i]
+        print ("--------------------- Accumulation")
+        for b in usa_accumulators[0]:
+            print ("----")
+            print (b)
     # Now dispatch the final table
     for i in range(3):
         itu_collections[i] += _digest_collection(
             itu_accumulators[i], unit)
     for i in range(2):
-        fcc_collections[i] += _digest_collection(
-            fcc_accumulators[i], unit, fcc_rules=fcc_accumulators[2])
+        usa_collections[i] += _digest_collection(
+            usa_accumulators[i], unit, fcc_rules=usa_accumulators[2])
     itu = {
         "R1": itu_collections[0],
         "R2": itu_collections[1],
         "R3": itu_collections[2]}
-    fcc = {
-        "F": fcc_collections[0],
-        "NF": fcc_collections[1]}
-    return itu, fcc
+    usa = {
+        "F": usa_collections[0],
+        "NF": usa_collections[1]}
+    print ("--------------------- Collection")
+    for b in usa["F"]:
+        print ("----")
+        print (b)
+    return itu, usa
 
 def merge_band_lists(collections):
     """Combine a set of lists of bands into one"""
@@ -325,5 +343,3 @@ def merge_band_lists(collections):
             result.append(band)
                 
     return result
-        
-        
