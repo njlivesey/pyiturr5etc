@@ -12,11 +12,14 @@ import pandas as pd
 from .bands import NotBandError, Band
 from .versions import Version
 from .utils import cell2text, first_line, last_line, pretty_print
+from .cells import FCCCell
 
 class OtherTable(Exception):
     pass
 class FCCTableError(Exception):
     pass
+
+n_logical_columns = 6
 
 def harvest_footnotes(fccfile, n_tables=64):
     """Go through the file and try to collect all the footnotes"""
@@ -118,11 +121,6 @@ def parse_table(table, unit, version=Version("20200818"), dump_raw=False, dump_o
                 bottom[ir, ic] = c._element.bottom
             except ValueError:
                 bottom[ir, ic] = top[ir, ic]+1
-    # print(left)
-    # print(right)
-    # print(top)
-    # print(bottom)
-    # print(np.max(bottom), n_rows)
     assert np.max(bottom)==n_rows, "Confused about the number of rows"
     
     # Build up a new data structure for the cells in the proper order
@@ -153,101 +151,116 @@ def parse_table(table, unit, version=Version("20200818"), dump_raw=False, dump_o
 
     # Now go through and cut out the header row
     ordered = ordered[first_useful_row:last_useful_row+1]
-    left = left[first_useful_row:last_useful_row+1,:]
-    right = right[first_useful_row:last_useful_row+1,:]
-    top = top[first_useful_row:last_useful_row+1,:]
-    bottom = bottom[first_useful_row:last_useful_row+1,:]
     n_rows = n_rows - first_useful_row
-
-    # Create a pair of lists to hold the results
-    itu_collections, usa_collections = _get_empty_collections()
+    # Create a list of lists to hold the result
+    collections = [list() for i in range(n_logical_columns)]
     for ir, boxes in enumerate(ordered):
         # OK, get the layout for this page/row
-        layout = version.get_layout(page, ir+first_useful_row)
-        print (f"Page {page}, row {ir} has layout {layout}")
-        assert layout[6] == "/", f"Bad layout: {layout}"
-        if int(layout[7:]) != max_boxes:
+        layout = version.get_layout(page, ir)
+        assert layout[n_logical_columns] == "/", f"Bad layout: {layout}"
+        if int(layout[n_logical_columns+1:]) != max_boxes:
             raise ValueError("Supplied layout does not match table")
-        sources = [int(l,16) for l in layout[0:6]]
-        # First the ITU entries
-        entries = []
-        for i in range(3):
-            itu_collections[i].append(boxes[sources[i]])
-        for i in range(3):
-            usa_collections[i].append(boxes[sources[i+3]])
-
+        sources = [int(l,16) for l in layout[0:n_logical_columns]]
+        for i in range(n_logical_columns):
+            collections[i].append(FCCCell(
+                boxes[sources[i]],
+                unit=unit, logical_column=i,
+                ordered_row=ir, ordered_column=sources[i],
+                page=page))
     # Finish off
     diagnostics = {
         "page": page,
         "has_header": has_header}
-    return itu_collections, usa_collections, unit, diagnostics
+    return collections, unit, diagnostics
 
 class DigestError(Exception):
     """Error raised when collection can't be digested"""
     pass
 
-def _digest_collection(entries, unit, fcc_rules=None):
-    """Go through a collection column, merge what needs to be merged and parse into bands"""
-    output_collection = []
+def _digest_collection(cells, fcc_rules_cells=None, debug=False):
+    """Go through a collection column of cells, merge what needs to be merged and parse into bands"""
+    # Set up some defaults
+    if fcc_rules_cells is None:
+        rules = [None]*len(cells)
+    else:
+        rules = fcc_rules_cells
+    assert len(rules) == len(cells), "Mismatch between entries and rules"
+    # Generate iterators for the cells and the rules
+    iter_cells = iter(cells)
+    iter_rules = iter(rules)
+    # Set up defaults
+    result = []
     accumulator = None
     rules_accumulator = None
     previous = None
     previous_rule = None
-    if fcc_rules is None:
-        rules = [None]*len(entries)
-    else:
-        rules = fcc_rules
-    assert len(rules) == len(entries), "Mismatch between entries and rules"
-    for entry, rule in zip(entries, rules):
+    exhausted = False
+    while not exhausted:
+        # Get the next cell and rule
         try:
-            if entry is not None:
-                test = Band.parse(entry, unit)
-            # OK, it worked (or it's not none), so dispatch the one
-            # we've been working on thus far.  However, be careful,
-            # there are circmstances in which this can simply be a
-            # repeat of the previous one.
-            if entry != previous and accumulator is not None:
-                new_band = Band.parse(accumulator, unit, rules_accumulator)
-                if len(output_collection) > 0:
-                    if new_band != output_collection[-1]:
-                        output_collection.append(new_band)
+            cell = next(iter_cells)
+            rule = next(iter_rules)
+            finished_accumulating = cell.is_band_start()
+        except StopIteration:
+            cell = None
+            rule = None
+            finished_accumulating = True
+            exhausted = True
+        if debug:
+            print (f"---------------- finished_accumulating: {finished_accumulating}, exhausted: {exhausted}")
+            diagnostics = {
+                "cell": cell,
+                "rule": rule,
+                "accumulator": accumulator,
+                "rules_accumulator": rules_accumulator}
+            for key, item in diagnostics.items():
+                try:
+                    print (f"{key}={'/'.join(item.lines)}")
+                except (AttributeError,TypeError):
+                    print (f"{key} is None (or {key}.lines is None)")
+        if finished_accumulating and accumulator is not None:
+            # We've got to the start of a new band (or the end of the
+            # list).  Convert the accumulator into a band.
+            if debug:
+                print (f"Parsing {'/'.join(accumulator.lines)}")
+            new_band = Band.parse(accumulator, rules_accumulator)
+            if debug:
+                print (f"Gives: {new_band.compact_str()}")
+            # OK, this might genuinely be a new band, or it might be
+            # the same band with additional information.
+            try:
+                previous_band = result[-1]
+                if new_band.bounds != previous_band.bounds:
+                    genuinely_new = True
                 else:
-                    output_collection.append(new_band)
-            accumulator = entry
-            rules_accumulator = rule
-            previous = entry
-            previous_rule = rule
-        except NotBandError:
-            # First, there are some special cases
-            if entry == ["(See previous page)"]:
-                entry = previous
-            # The current entry isn't a band, it must be finishing the
-            # band in the accumulator.  Check it's not just a repeat.
-            if entry != previous:
-                if accumulator is None:
-                    accumulator = entry
-                else:
-                    if entry is not None:
-                        accumulator = accumulator + entry
-                if rules_accumulator is None:
-                    rules_accumulator = rule
-                else:
-                    if rule is not None:
-                        rules_accumulator = rules_accumulator + rule
-                previous = entry
-                previous_rule = rule
-    # OK, now we've got to the end, deal with the final entry
-    try:
-        new_band = Band.parse(accumulator, unit, rules_accumulator)
-        if len(output_collection) > 0:
-            if new_band != output_collection[-1]:
-                output_collection.append(new_band)
+                    genuinely_new = False
+            except IndexError:
+                genuinely_new = True
+            if debug:
+                print (f"genuinely_new={genuinely_new}")
+            if genuinely_new:
+                # If it's genuinely new (new frequency range) then append it
+                if debug:
+                    print (f"Appending {new_band.compact_str()}")
+                result.append(new_band)
+            # If it's not genuinely new, we'll finish it off on later iterations
+            # else:
+            #     # Otherwise, it must be an update to the previously
+            #     # recorded one, so update the record.
+            #     if debug:
+            #         print (f"Replacing {previous_band.compact_str()}")
+            #         print (f"with {new_band.compact_str()}")
+        if finished_accumulating or accumulator is None:
+            # Either the accumulator is empty (first iteration) or
+            # needs to be reset, do so.
+            accumulator = copy.deepcopy(cell)
+            rules_accumulator = copy.deepcopy(rule)
         else:
-            output_collection.append(new_band)
-    except NotBandError:
-        pass
-        # raise DigestError("Unable to parse the final entry")
-    return output_collection
+            if not cell.is_empty():
+                accumulator.append(cell)
+                if rule is not None:
+                    rules_accumulator.append(rule)
+    return result
 
 def parse_all_tables(fccfile, table_range=None, **kwargs):
     """Go through tables in fcc file and parse them"""
@@ -255,60 +268,27 @@ def parse_all_tables(fccfile, table_range=None, **kwargs):
     version = Version("20200818")
     tables = fccfile.tables
     unit = units.dimensionless_unscaled
-    # Setup empty result
-    itu_accumulators, usa_accumulators = _get_empty_collections()
-    itu_collections, usa_collections = _get_empty_collections()
-
+    collections_list = [list() for i in range(n_logical_columns)]
     if table_range is None:
         table_range=range(0,65)
     for it in table_range:
         print (f"============================ Table {it}")
         table = tables[it]
-        these_itu_entries, these_usa_entries, new_unit, diagnostics = parse_table(
+        new_columns, new_unit, diagnostics = parse_table(
             table, unit, version, **kwargs)
-        print ("-------- Given")
-        for b in these_usa_entries[0]:
-            print ("----")
-            print (b)
-        # If this table has got a header, then dispatch the previously
-        # collected table entries.
-        if diagnostics["has_header"]:
-            for i in range(3):
-                itu_collections[i] += _digest_collection(
-                    itu_accumulators[i], unit)
-            for i in range(2):
-                usa_collections[i] += _digest_collection(
-                    usa_accumulators[i], unit, fcc_rules=usa_accumulators[2])
-            itu_accumulators, usa_accumulators = _get_empty_collections()
         unit = new_unit
-        # Now add the new entries to the accumulators
-        for i in range(3):
-            itu_accumulators[i] += these_itu_entries[i]
-            usa_accumulators[i] += these_usa_entries[i]
-        print ("--------------------- Accumulation")
-        for b in usa_accumulators[0]:
-            print ("----")
-            print (b)
-    # Now dispatch the final table
-    for i in range(3):
-        itu_collections[i] += _digest_collection(
-            itu_accumulators[i], unit)
-    for i in range(2):
-        usa_collections[i] += _digest_collection(
-            usa_accumulators[i], unit, fcc_rules=usa_accumulators[2])
-    itu = {
-        "R1": itu_collections[0],
-        "R2": itu_collections[1],
-        "R3": itu_collections[2]}
-    usa = {
-        "F": usa_collections[0],
-        "NF": usa_collections[1]}
-    print ("--------------------- Collection")
-    for b in usa["F"]:
-        print ("----")
-        print (b)
-    return itu, usa
-
+        for collection, new_entries in zip(collections_list, new_columns):
+            collection += new_entries
+    # Now go through and convert these into band collections
+    collections = dict()
+    for name, i in zip(["R1","R2","R3"], range(3)):
+        print (f"Digesting {name}")
+        collections[name] = _digest_collection(collections_list[i])
+    for name, i in zip(["F","NF"], range(3,5)):
+        print (f"Digesting {name}")
+        collections[name] = _digest_collection(collections_list[i], collections_list[5])
+    return collections
+            
 def merge_band_lists(collections):
     """Combine a set of lists of bands into one"""
     interim = []

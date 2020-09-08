@@ -4,9 +4,10 @@ import re
 import docx
 import fnmatch
 import numpy as np
+import astropy.units as units
 
 from .allocations import Allocation
-from .utils import cell2text
+from .utils import cell2text, text2lines
 
 __all__ = [ "NotBoundsError", "Bounds", "NotBandError", "Band" ]
 
@@ -76,35 +77,6 @@ class Bounds:
             
 # --------------------------------------------------------------------- Bands
 
-def _text2lines(text):
-    if text is None:
-        return None
-    lines = []
-    line = None
-    for t in text:
-        if len(t) != 0:
-            t0 = t[0]
-        else:
-            t0 = ""
-        is_continuation = (t0 == " ")
-        if line is None:
-            is_continuation = False
-        else:
-            if len(line) == 0:
-                is_continuation = False
-        if is_continuation:
-            if line[-1] != '-':
-                line = line + " " + t.strip()
-            else:
-                line = line + t.strip()
-        else:
-            if line is not None:
-                lines.append(line)
-            line = t.strip()
-    if line is not None:
-        lines.append(line.strip())
-    return lines
-
 class NotBandError(Exception):
     """Exception used to indicate failed parse of band"""
     pass
@@ -147,6 +119,8 @@ class Band:
 
     def __eq__(self,a):
         """Compare two sets of Band information"""
+        if a is None:
+            return False
         if self._bounds != a._bounds:
             return False
         if len(self.allocations) != len(a.allocations):
@@ -306,28 +280,24 @@ class Band:
         return str(self._bounds)
 
     @classmethod
-    def parse(cls, cell, unit, fcc_rules=None):
+    def parse(cls, cell, fcc_rules=None):
         """Parse a table cell into a Band"""
+        # Now the first line should be a frequency range
         if cell is None:
             raise NotBandError("Cell is None")
-        if type(cell) == docx.table._Cell:
-            text = cell2text(cell)
-        else:
-            text = cell
-        # Now work out which lines are continuations of other lines and string them together
-        lines = _text2lines(text)
-        # Now the first line should be a frequency range
-        if len(lines) == 0:
-            return None
+        if cell.lines is None:
+            raise NotBandError("Cell.lines is None")
+        if len(cell.lines) == 0:
+            raise NotBandError("Cell has no useful text")
         try:
-            bounds = Bounds.parse(lines[0], unit)
+            bounds = Bounds.parse(cell.lines[0], cell.unit)
         except NotBoundsError:
             raise NotBandError("Text doesn't start with bounds, so not a band")
         # Now the remainder will either be allocations, blanks or collections of footnotes
         footnotes = []
         primary_allocations = []
         secondary_allocations = []
-        for l in lines[1:]:
+        for l in cell.lines[1:]:
             if l.strip() == "":
                 continue
             # if footnotes is not None:
@@ -347,10 +317,10 @@ class Band:
         if footnotes is None:
             footnotes = []
         # Do the fcc rules
-        if fcc_rules is not None:
-            fcc_rules = [entry for entry in _text2lines(fcc_rules) if entry != ""]
-            if len(fcc_rules) == 0:
-                fcc_rules = None
+        try:
+            fcc_rules = [entry for entry in fcc_rules.lines if entry != ""]
+        except (TypeError, AttributeError):
+            fcc_rules = None
         # Now create a Band to hold the result
         result = cls()
         result._bounds = bounds
@@ -359,7 +329,11 @@ class Band:
         result.footnotes = footnotes
         result.fcc_rules = fcc_rules
         result.jurisdictions = None
-        result._lines = lines
-        result._text = text
+        result._lines = cell.lines
+        result._text = cell.text
+        result._page = cell.page
+        result._logical_column = cell.logical_column
+        result._ordered_row = cell.ordered_row
+        result._ordered_column = cell.ordered_row
         result.finalize()
         return result

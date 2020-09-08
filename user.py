@@ -15,29 +15,19 @@ class BandIndex(object):
 
     def find_bands(self, r0, r1=None, adjacent=False):
         """Find bands that fall in a range, possibly adjacent bands also"""
-        # First work out what we've been asked for
-        if len(r0) == 1:
-            pass
-        elif len(r0) == 2:
-            if r1 is not None:
-                raise ValueError("Conflicting arguments")
-            r1 = r0[1]
-            r0 = r0[0]
-        else:
-            raise ValueError("In appropriate range argument for band search")
         # Now find the bands.
         if not adjacent:
             # If adjacent is not set, then we look for those that
             # start and end within our range.
             first = np.searchsorted(self.bounds[:,0], r0, side="left")
             if r1 is not None:
-                last = np.value_locate(self.bounds[self.upper_order,1], r1, side="right")
+                last = np.searchsorted(self.bounds[self.upper_order,0], r1, side="right")
             else:
                 last = first
         else:
             # If adjacent bands do count, then search a different way
             first = np.searchsorted(self.bounds[self.upper_order,1], r0, side="right")
-            last = np.searchsorted(self.bounds[:,0], r1, side="left")
+            last = np.searchsorted(self.bounds[:,0], r1, side="left") + 1
         return first, last
     
     @classmethod
@@ -79,6 +69,10 @@ class BandIndex(object):
 
 class FCCTables(object):
     """Class that holds all information in the FCC tables document"""
+
+    def find_bands(self, name, r0, r1, adjacent=False):
+        first, last = self.indices[name].find_bands(r0, r1, adjacent)
+        return self.collections[name][first:last]
     
     @classmethod
     def import_docx_file(cls, filename, **kwargs):
@@ -87,13 +81,12 @@ class FCCTables(object):
         # Open the FCC file
         docx_data = docx.Document(filename)
         # Read all the tables
-        itu, usa = parse_all_tables(docx_data, **kwargs)
-        print (usa["F"]
+        collections = parse_all_tables(docx_data, **kwargs)
         # Generate merged tables
-        itu_all = merge_band_lists(itu)
-        usa_all = merge_band_lists(usa)
+        itu_all = merge_band_lists({tag: collections[tag] for tag in ["R1","R2","R3"]})
+        usa_all = merge_band_lists({tag: collections[tag] for tag in ["F","NF"]})
         # Now generate all the bands
-        collections = {**itu, **usa, "ITU":itu_all, "USA":usa_all}
+        collections = {**collections, "ITU":itu_all, "USA":usa_all}
         # Now generate all the indices
         indices = {}
         for jurisdiction, bands in collections.items():

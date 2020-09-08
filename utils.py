@@ -31,6 +31,35 @@ def first_line(cell):
 def last_line(cell):
     return cell2text(cell)[-1].strip()
 
+def text2lines(text):
+    if text is None:
+        return None
+    lines = []
+    line = None
+    for t in text:
+        if len(t) != 0:
+            t0 = t[0]
+        else:
+            t0 = ""
+        is_continuation = (t0 == " ")
+        if line is None:
+            is_continuation = False
+        else:
+            if len(line) == 0:
+                is_continuation = False
+        if is_continuation:
+            if line[-1] != '-':
+                line = line + " " + t.strip()
+            else:
+                line = line + t.strip()
+        else:
+            if line is not None:
+                lines.append(line)
+            line = t.strip()
+    if line is not None:
+        lines.append(line.strip())
+    return lines
+
 def dump_cells(cells):
     for i, c in enumerate(cells):
         print (f"-------------- Cell {c}")
