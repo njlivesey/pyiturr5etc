@@ -3,6 +3,7 @@
 import astropy.units as units
 import numpy as np
 import docx
+from intervaltree import Interval, IntervalTree
 
 from .ingest import parse_all_tables, merge_band_lists
 
@@ -15,20 +16,30 @@ class BandIndex(object):
 
     def find_bands(self, r0, r1=None, adjacent=False):
         """Find bands that fall in a range, possibly adjacent bands also"""
-        # Now find the bands.
-        if not adjacent:
-            # If adjacent is not set, then we look for those that
-            # start and end within our range.
-            first = np.searchsorted(self.bounds[:,0], r0, side="left")
+        try:
+            n0 = len(r0)
+        except TypeError:
+            n0 = 1
+        if n0 < 1 or n0 > 2:
+            raise ValueError("Inappropriate size for range")
+        if n0 == 2:
             if r1 is not None:
-                last = np.searchsorted(self.bounds[self.upper_order,0], r1, side="right")
-            else:
-                last = first
+                raise ValueError("Conflicting requests for range")
+            r1 = r0[1]
+            r0 = r0[0]
+        # Now find the bands.
+        if r1 is None:
+            intervals = self.tree.at(r0)
+            if adjacent:
+                raise ValueError("Cannot set adjacent for single valued searches")
         else:
-            # If adjacent bands do count, then search a different way
-            first = np.searchsorted(self.bounds[self.upper_order,1], r0, side="right")
-            last = np.searchsorted(self.bounds[:,0], r1, side="left") + 1
-        return first, last
+            if adjacent:
+                epsilon = 1e-10
+            else:
+                epslion = 0.0
+            intervals = self.tree.overlap(r0*(1-epsilon), r1*(1+epsilon))
+            
+        return [i.data for i in intervals]
     
     @classmethod
     def generate(cls, collection, allow_overlaps=False):
@@ -59,20 +70,22 @@ class BandIndex(object):
                     print (collection[i+1])
             if not np.all(np.isclose(gap, 0.0*units.Hz)):
                 raise ValueError("One or more bands have gaps between them")
-        # Generate an index for the upper bounds (which might be out of order)
-        upper_order = np.argsort(bounds[:,1])
-        # OK, now set this up as an index and return it
+        # Now store things in an intervaltree
+        tree = IntervalTree()
+        for i in range(len(collection)):
+            tree.addi(bounds[i,0], bounds[i,1], i)
         result = cls()
         result.bounds = bounds
-        result.upper_order = upper_order
+        result.bandwidth = bandwidth
+        result.tree = tree
         return result
 
 class FCCTables(object):
     """Class that holds all information in the FCC tables document"""
 
-    def find_bands(self, name, r0, r1, adjacent=False):
-        first, last = self.indices[name].find_bands(r0, r1, adjacent)
-        return self.collections[name][first:last]
+    def find_bands(self, name, r0, r1=None, adjacent=False):
+        band_indices = self.indices[name].find_bands(r0, r1, adjacent)
+        return [self.collections[name][i] for i in band_indices]
     
     @classmethod
     def import_docx_file(cls, filename, **kwargs):
@@ -85,12 +98,13 @@ class FCCTables(object):
         # Generate merged tables
         itu_all = merge_band_lists({tag: collections[tag] for tag in ["R1","R2","R3"]})
         usa_all = merge_band_lists({tag: collections[tag] for tag in ["F","NF"]})
+        full = merge_band_lists({tag: collections[tag] for tag in ["R1","R2","R3","F","NF"]})
         # Now generate all the bands
-        collections = {**collections, "ITU":itu_all, "USA":usa_all}
+        collections = {**collections, "ITU":itu_all, "USA":usa_all, "ALL": full}
         # Now generate all the indices
         indices = {}
         for jurisdiction, bands in collections.items():
-            allow_overlaps = jurisdiction in ["ITU", "USA"]
+            allow_overlaps = jurisdiction in ["ITU", "USA", "ALL"]
             print (f"for {jurisdiction} allow_overlaps is {allow_overlaps}")
             indices[jurisdiction] = BandIndex.generate(bands, allow_overlaps)
         # Generate the result
