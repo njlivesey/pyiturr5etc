@@ -177,7 +177,7 @@ class DigestError(Exception):
     """Error raised when collection can't be digested"""
     pass
 
-def _digest_collection(cells, fcc_rules_cells=None, debug=False):
+def _digest_collection(cells, fcc_rules_cells=None, jurisdictions=None, debug=False):
     """Go through a collection column of cells, merge what needs to be merged and parse into bands"""
     # Set up some defaults
     if fcc_rules_cells is None:
@@ -223,7 +223,9 @@ def _digest_collection(cells, fcc_rules_cells=None, debug=False):
             # list).  Convert the accumulator into a band.
             if debug:
                 print (f"Parsing {'/'.join(accumulator.lines)}")
-            new_band = Band.parse(accumulator, rules_accumulator)
+            new_band = Band.parse(
+                accumulator, fcc_rules=rules_accumulator,
+                jurisdictions=jurisdictions)
             if debug:
                 print (f"Gives: {new_band.compact_str()}")
             # OK, this might genuinely be a new band, or it might be
@@ -283,10 +285,15 @@ def parse_all_tables(fccfile, table_range=None, **kwargs):
     collections = dict()
     for name, i in zip(["R1","R2","R3"], range(3)):
         print (f"Digesting {name}")
-        collections[name] = _digest_collection(collections_list[i])
+        collections[name] = _digest_collection(
+            collections_list[i], jurisdictions=[name])
     for name, i in zip(["F","NF"], range(3,5)):
         print (f"Digesting {name}")
-        collections[name] = _digest_collection(collections_list[i], collections_list[5])
+        collections[name] = _digest_collection(
+            collections_list[i], collections_list[5],
+            jurisdictions=[name])
+        # Do a sort (shouldn't be needed)
+        collections[name].sort()
     return collections
             
 def merge_band_lists(collections):
@@ -296,9 +303,6 @@ def merge_band_lists(collections):
     for tag, collection in collections.items():
         for band in collection:
             new_band = copy.deepcopy(band)
-            if new_band.jurisdictions is not None:
-                raise ValueError("Band seems to already have been merged")
-            new_band.jurisdictions = [tag]
             interim.append(new_band)
     # Now sort all these bands into order
     interim.sort()
@@ -319,6 +323,8 @@ def merge_band_lists(collections):
                 destination = i
         if destination != -1:
             result[destination].jurisdictions.append(band.jurisdictions[0])
+            result[destination].jurisdictions = list(set(result[destination].jurisdictions))
+            result[destination].jurisdictions.sort()
         else:
             result.append(band)
                 
