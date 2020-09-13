@@ -5,6 +5,7 @@ import astropy.units as units
 import copy
 import docx
 import numpy as np
+import pickle
 
 from .ingest import parse_all_tables, merge_band_lists
 from .additional_allocations import all_additions
@@ -74,12 +75,18 @@ class BandIndex(object):
         for i in range(len(collection)):
             tree.addi(bounds[i, 0], bounds[i, 1], i)
         result = cls()
-        result.bounds = bounds
-        result.bandwidth = bandwidth
         result.tree = tree
         return result
 
+    # def add(self, new_band, i):
+    #     self.tree.addi(new_band.bounds[0], new_band.bounds[1], i):
 
+    # def remove(self, band, i):
+    #     check = self.find_bands(band.bounds[0], band.bounds[1])
+    #     assert len(check) != 1, "Other then one band found to delete"
+    #     assert check[0].data == i, "Found the wrong band"
+    #     self.tree.removei(band.bounds[0], band.bounds[1], i)
+    
 class FCCTables(object):
     """Class that holds all information in the FCC tables document"""
 
@@ -99,8 +106,16 @@ class FCCTables(object):
         affected_band_indices = self.indices[name].find_bands(
             new_band.bounds)
         working_new_band = copy.deepcopy(new_band)
+        ## print (f"================================== Merging in: {new_band.range_str()}")
         for ai in affected_band_indices:
             affected_band = copy.deepcopy(self.collections[name][ai])
+            # Check that this isn't just rounding error
+            ## print (f"------ Considering: {affected_band.range_str()}")
+            if np.isclose(affected_band.bounds[1], new_band.bounds[0]):
+                continue
+            if np.isclose(affected_band.bounds[0], new_band.bounds[1]):
+                continue
+            ## print ("Not just rounding error")
             if affected_band.bounds[0] < new_band.bounds[0]:
                 # We need to split the affected band because it starts
                 # before the new band does.  Create the lower part and
@@ -111,9 +126,9 @@ class FCCTables(object):
                 # Tweak the working copy of the affected band such
                 # that it starts at the same place as the new band
                 # does.
-                print (f"Here: {affected_band.range} -> {new_band.range}")
+                ## print (f"Lower: {affected_band.range_str()} -> {new_band.range_str()}")
                 affected_band.bounds[0] = new_band.bounds[0]
-                print (f"Gives: {affected_band.range}")
+                ## print (f"Gives: {affected_band.range_str()}")
             if affected_band.bounds[1] > new_band.bounds[1]:
                 # We need to split the affected band because it ends
                 # after the new band does.  Create an upper part and
@@ -124,15 +139,17 @@ class FCCTables(object):
                 # Tweak the working copy of the affected band such
                 # that it finishes at the same place as the new band
                 # does.
-                print (f"Here: {affected_band.range} -> {new_band.range}")
+                ## print (f"Upper: {affected_band.range_str()} -> {new_band.range_str()}")
                 affected_band.bounds[1] = new_band.bounds[1]
-                print (f"Gives: {affected_band.range}")
+                ## print (f"Gives: {affected_band.range_str()}")
             # Now, while there may well be other bands affected by the
             # new band, at this point we don't care about them, all we
             # need to do is add the allocations/footnotes/etc. from
             # the new band to a working copy of the affected one.
+            ## print (f"Now have {affected_band.range_str()}")
             affected_band = affected_band.combine_with(
                 new_band, skip_bounds=True)
+            ## print (f"Combined to {affected_band.range_str()}")
             bands_to_add.append(affected_band)
             # Mark the old copy of the affected band for deletion.
             indices_to_delete.append(ai)
@@ -142,12 +159,12 @@ class FCCTables(object):
         # Now the additions.
         self.collections[name] += bands_to_add
         self.collections[name].sort()
-        # Now make a new index for this collection
-        self.indices[name] = BandIndex.generate(
-            self.collections[name])
-         
+        # Now re-index (very slow)
+        self.indices[name] = BandIndex.generate(self.collections[name])
 
-def read(filename="/users/livesey/corf/fcctable.docx",
+default_path = "/users/livesey/corf/"
+
+def read(filename=default_path+"fcctable.docx",
          skip_additionals=False, **kwargs):
     """Reader routine for FCC tables file"""
     
@@ -159,32 +176,59 @@ def read(filename="/users/livesey/corf/fcctable.docx",
     result.collections = collections
     # Index the collections thus far
     result.indices = {}
+    print ("Preliminarily indexing: ", end="")
     for jurisdiction, bands in result.collections.items():
+        print (f"{jurisdiction}, ", end="")
         result.indices[jurisdiction] = BandIndex.generate(bands)
+    print ("done.")
     # Now possibly insert the additional bands.
     if not skip_additionals:
         # We'll create an interim result for the collections we have.
+        print (f"Injecting additions in:")
         for jurisdiction, collection in result.collections.items():
+            print(f"{jurisdiction}: ", end="")
             for new_band in all_additions:
+                print (f".", end="")
                 if jurisdiction in new_band.jurisdictions:
+                    new_band = copy.deepcopy(new_band)
+                    new_band.jurisdictions = [jurisdiction]
                     result.inject_band(jurisdiction, new_band)
+            print ("done.")
     # Now we'll merge everything we have
     itu_regions = ["R1", "R2", "R3"]
     usa_regions = ["F", "NF"]
     all_regions = itu_regions + usa_regions
+    print ("Merging: ITU, ", end="")
     itu_all = merge_band_lists(
         {tag: result.collections[tag] for tag in itu_regions})
+    print ("USA, ", end="")
     usa_all = merge_band_lists(
         {tag: result.collections[tag] for tag in usa_regions})
-    full = merge_band_lists(
-        {tag: result.collections[tag] for tag in all_regions})
+    print ("done.")
     # Now add these merges to the results
     result.collections = {**result.collections, "ITU": itu_all,
-                   "USA": usa_all, "ALL": full}
+                   "USA": usa_all}
     # Now generate all the indices
     indices = {}
+    print ("Indexing: ", end="")
     for jurisdiction, bands in result.collections.items():
+        print (f"{jurisdiction}, ", end="")
         result.indices[jurisdiction] = BandIndex.generate(
             bands, allow_overlaps = jurisdiction not in all_regions)
-
+    print ("done.")
     return result
+
+def save(tables, filename=default_path+"fcctables.pickle"):
+    """Write tables to a pickle file"""
+    outfile = open(filename, 'wb')
+    pickle.dump(tables, outfile)
+    outfile.close()
+
+def load(filename=default_path+"fcctables.pickle"):
+    """Read tables from a pickle file"""
+    infile = open(filename, 'rb')
+    result = pickle.load(infile)
+    infile.close()
+    return result
+
+    

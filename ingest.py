@@ -273,8 +273,9 @@ def parse_all_tables(fccfile, table_range=None, **kwargs):
     collections_list = [list() for i in range(n_logical_columns)]
     if table_range is None:
         table_range=range(0,65)
+    print ("Reading tables: ", end="")
     for it in table_range:
-        print (f"============================ Table {it}")
+        print (f"{it}, ", end="")
         table = tables[it]
         new_columns, new_unit, diagnostics = parse_table(
             table, unit, version, **kwargs)
@@ -282,18 +283,19 @@ def parse_all_tables(fccfile, table_range=None, **kwargs):
         for collection, new_entries in zip(collections_list, new_columns):
             collection += new_entries
     # Now go through and convert these into band collections
+    print ("done.")
     collections = dict()
+    print ("Digesting: ", end="")
     for name, i in zip(["R1","R2","R3"], range(3)):
-        print (f"Digesting {name}")
+        print (f"{name}, ", end="")
         collections[name] = _digest_collection(
             collections_list[i], jurisdictions=[name])
     for name, i in zip(["F","NF"], range(3,5)):
-        print (f"Digesting {name}")
+        print (f"{name}, ", end="")
         collections[name] = _digest_collection(
             collections_list[i], collections_list[5],
             jurisdictions=[name])
-        # Do a sort (shouldn't be needed)
-        collections[name].sort()
+    print ("done.")
     return collections
             
 def merge_band_lists(collections):

@@ -5,8 +5,6 @@ import docx
 import fnmatch
 import numpy as np
 import astropy.units as units
-from indexedproperty import indexedproperty
-
 
 from .allocations import Allocation
 from .utils import cell2text, text2lines
@@ -19,69 +17,25 @@ class NotBoundsError(Exception):
     """Exception used to flag failed parse of Bounds"""
     pass
 
-class Bounds:
-    """A frequeny bounds"""
-    def __init__(self, low, high):
-        self.frequency_range = (low, high)
-        self.bandwidth = self.frequency_range[1] - self.frequency_range[0]
-        self.center = 0.5*(self.frequency_range[0] + self.frequency_range[1])
-
-    def __getitem__(self, spec):
-        return self.frequency_range[spec]
-
-    def __setitem__(self, spec, value):
-        self.frequency_range[spec] = value
-        self.bandwidth = self.frequency_range[1] - self.frequency_range[0]
-        self.center = 0.5*(self.frequency_range[0] + self.frequency_range[1])
-
-    def __str__(self):
-        result = f"{self.frequency_range[0]}-{self.frequency_range[1]}"
-        return result
-
-    def __repr__(self):
-        return self.compact_str()
-
-    def __eq__(self, a):
-        return self.frequency_range == a.frequency_range
-
-    def __ne__(self, a):
-        return not (self == a)
-
-    def __gt__(self, a):
-        return self.frequency_range[0] > a.frequency_range[0]
-
-    def __lt__(self, a):
-        return self.frequency_range[0] < a.frequency_range[0]
-
-    def __ge__(self, a):
-        if self.frequency_range[0] >= a.frequency_range[0]:
-            return True
-        return False
-
-    def __le__(self, a):
-        if self.frequency_range[0] <= a.frequency_range[0]:
-            return True
-        return False
-
-    @classmethod
-    def parse(cls, text, unit):
-        """Turn a string giving a frequency range into a bounds object"""
-        re_float = r"[0-9_]+(?:\.[0-9_]+)?"
-        re_bounds = f"^({re_float})-({re_float})[\w]*(\(Not allocated\))?$"
-        match = re.match(re_bounds, text)
-        if match is not None:
-            return cls(
-                float(match.group(1))*unit,
-                float(match.group(2))*unit)
-        # Perhaps this is the "below the bottom" case.
-        re_bottom = f"^Below ({re_float}) \(Not Allocated\)$"        
-        match = re.match(re_bottom, text)
-        if match is not None:
-            return cls(0.0*unit, float(match.group(1))*unit)
-        # Otherwise, this is not a bound
-        raise NotBoundsError(f"Not a valid range: {text}")
+def _parse_bounds(text, unit):
+    """Turn a string giving a frequency range into a bounds object"""
+    re_float = r"[0-9_]+(?:\.[0-9_]+)?"
+    re_bounds = f"^({re_float})-({re_float})[\w]*(\(Not allocated\))?$"
+    match = re.match(re_bounds, text)
+    if match is not None:
+        return [
+            float(match.group(1))*unit,
+            float(match.group(2))*unit,
+            ]
+    # Perhaps this is the "below the bottom" case.
+    re_bottom = f"^Below ({re_float}) \(Not Allocated\)$"        
+    match = re.match(re_bottom, text)
+    if match is not None:
+        return [0.0*unit, float(match.group(1))*unit]
+    # Otherwise, this is not a bound
+    raise NotBoundsError(f"Not a valid range: {text}")
             
-# --------------------------------------------------------------------- Bands
+# --------------------------------------------------------------------- Band
 
 class NotBandError(Exception):
     """Exception used to indicate failed parse of band"""
@@ -89,22 +43,40 @@ class NotBandError(Exception):
 
 class Band:
     """A frequency bounds and the allocations thereto (i.e., contents of a table cell)"""
-    def __str__(self, separator="\n"):
+    def __str__(self, separator="\n", skip_footnotes=False, specific_allocations=None, skip_rules=False):
         """Return a string representation of a Band"""
-        result = str(self.bounds)
-        result = result + ' ' + self.jurisdictions_str()
-        result = result + ' ' + self.annotations_str()
+        # Do the frequency range
+        result = self.range_str()
+        # Add jurisdiction information and annotation information if any
+        for extra in [self.jurisdictions_str(), self.annotations_str()]:
+            if extra != "":
+                result = result + ' ' + extra
+        # Next line
         result = result + separator
-        for a in self.allocations:
-            result = result + str(a) + separator
-        if self.footnotes != "":
+        # Do allocations
+        if specific_allocations is None:
+            clauses = [str(a) for a in self.allocations]
+        else:
+            clauses = []
+            for a in self.allocations:
+                for sa in specific_allocations:
+                    if a.matches(sa):
+                        clauses.append(str(a))
+        result = result + separator.join(clauses)
+        # Do footnotes
+        if not skip_footnotes and self.footnotes != "":
             result = result + separator + " ".join(self.footnotes)
-        if self.fcc_rules is not None:
-            result = result + separator + '[' + '; '.join(self.fcc_rules) + ']'
+        # Do rules
+        rules_str = self.fcc_rules_str()
+        if rules_str != "" and not skip_rules:
+            result = result + separator + rules_str
         return (result)
 
-    def compact_str(self):
-        return self.__str__(separator="/")
+    def range_str(self):
+        return f"{self.bounds[0]}-{self.bounds[1]}"
+        
+    def compact_str(self, **kwargs):
+        return self.__str__(separator="/", **kwargs)
 
     def jurisdictions_str(self):
         if self.jurisdictions is not None:
@@ -113,16 +85,28 @@ class Band:
             result = ""
         return result
 
+    def fcc_rules_str(self):
+        result = ""
+        if self.fcc_rules is not None:
+            if len(self.fcc_rules) > 0:
+                result = '{' + '; '.join(self.fcc_rules) + '}'
+        return result
+
     def annotations_str(self):
-        if self.annotations is not None:
-            result =  '<' + ','.join(self.annotations) + '>'
-        else:
-            result = ""
+        result = ""
+        try:
+            if len(self.annotations) > 0:
+                result = '<' + ','.join(self.annotations) + '>'
+        except TypeError:
+            pass
         return result
 
     def finalize(self):
         """Make sure all the various pieces of information for a band are correct"""
         self.allocations = []
+        self.bandwidth = self.bounds[1] - self.bounds[0]
+        assert self.bandwidth>0.0, f"Non-positive bandwidth for {self}"
+        self.center = self.bounds[0] + 0.5*self.bandwidth
         n_allocations = len(self.primary_allocations) + len(self.secondary_allocations)
         for a in self.primary_allocations:
             assert a.primary, "A secondary allocation ended up in the primary list somehow"
@@ -162,16 +146,16 @@ class Band:
         return not (self == a)
 
     def __gt__(self, a):
-        return self.bounds > a.bounds
+        return self.bounds[0] > a.bounds[0]
 
     def __lt__(self, a):
-        return self.bounds < a.bounds
+        return self.bounds[0] < a.bounds[0]
 
     def __ge__(self, a):
-        return self.bounds >= a.bounds
+        return self.bounds[0] >= a.bounds[0]
 
     def __le__(self, a):
-        return self.bounds <= a.bounds
+        return self.bounds[0] <= a.bounds[0]
 
     def __add__(self, a):
         return self.combine_with(a)
@@ -199,9 +183,10 @@ class Band:
         result = Band()
         # Merge the bounds
         if not skip_bounds:
-            result.bounds = Bounds(
+            result.bounds = [
                 min(self.bounds[0], a.bounds[0]),
-                max(self.bounds[1], a.bounds[1]))
+                max(self.bounds[1], a.bounds[1]),
+                ]
         else:
             result.bounds = self.bounds
         # Merge the allocations
@@ -285,14 +270,6 @@ class Band:
             np.allclose(a.bounds[1], self.bounds[0]) or
             np.allclose(a.bounds[0], self.bounds[1]))
 
-    @indexedproperty
-    def bounds(self, key):
-        return self._bounds.frequency_range[key]
-
-    @bounds.setter
-    def bounds(self, key, value):
-        self._bounds.frequency_range.__setitem__(key, value)
-
     @classmethod
     def parse(cls, cell, fcc_rules=None, unit=None, jurisdictions=None, annotations=None):
         """Parse a table cell into a Band"""
@@ -313,7 +290,7 @@ class Band:
         else:
             lines = cell
         try:
-            bounds = Bounds.parse(lines[0], unit)
+            bounds = _parse_bounds(lines[0], unit)
         except NotBoundsError:
             raise NotBandError("Text doesn't start with bounds, so not a band")
         # Now the remainder will either be allocations, blanks or collections of footnotes
