@@ -119,8 +119,8 @@ class Band:
             a.exclusive = n_allocations == 1
             self.allocations.append(a)
 
-    def __eq__(self,a):
-        """Compare two sets of Band information"""
+    def equal(self, a, ignore_jurisdictions=False, ignore_annotations=False):
+        """Compare two sets of band information"""
         if a is None:
             return False
         if self.bounds != a.bounds:
@@ -140,16 +140,32 @@ class Band:
                     return False
         except TypeError:
             pass
-        return self.footnotes == a.footnotes
+        if self.footnotes != a.footnotes:
+            return False
+        if not ignore_jurisdictions and self.jurisdictions != a.jurisdictions:
+            return False
+        if not ignore_annotations and self.annotations != a.annotations:
+            return False
+        return True
+
+    def __eq__(self,a):
+        """Compare two sets of Band information"""
+        return self.equal(a)
         
     def __ne__(self, a):
         return not (self == a)
 
     def __gt__(self, a):
-        return self.bounds[0] > a.bounds[0]
+        if self.bounds[0] != a.bounds[0]:
+            return self.bounds[0] > a.bounds[0]
+        else:
+            return self.jurisdictions > a.jurisdictions
 
     def __lt__(self, a):
-        return self.bounds[0] < a.bounds[0]
+        if self.bounds[0] != a.bounds[0]:
+            return self.bounds[0] < a.bounds[0]
+        else:
+            return self.jurisdictions < a.jurisdictions
 
     def __ge__(self, a):
         return self.bounds[0] >= a.bounds[0]

@@ -13,6 +13,7 @@ from .bands import NotBandError, Band
 from .versions import Version
 from .utils import cell2text, first_line, last_line, pretty_print
 from .cells import FCCCell
+from .band_collections import BandCollection
 
 class OtherTable(Exception):
     pass
@@ -21,31 +22,7 @@ class FCCTableError(Exception):
 
 n_logical_columns = 6
 
-def harvest_footnotes(fccfile, n_tables=64):
-    """Go through the file and try to collect all the footnotes"""
-    footnotes = []
-    for table in fccfile.tables[0:n_tables]:
-        for row in table.rows:
-            for cell in row.cells:
-                try:
-                    band = Band.parse(cell, units.kHz)
-                    footnotes += band.all_footnotes()
-                except NotBandError:
-                    pass
-    return list(set(footnotes))
-
-def _get_empty_collections():
-    """Return a pair of lists each containing three empty lists"""
-    itu_collections = []
-    for i in range(3):
-        itu_collections.append(list())
-    usa_collections = []
-    for i in range(3):
-        usa_collections.append(list())
-    return itu_collections, usa_collections
-
-    
-def parse_table(table, unit, version=Version("20200818"), dump_raw=False, dump_ordered=False):
+def _parse_table(table, unit, version=Version("20200818"), dump_raw=False, dump_ordered=False):
     """Go through one table in the document and return a guess as to its contents"""
     # First get the first row and work out if this is a table with headers or not
     header = first_line(table.rows[0].cells[0])
@@ -178,7 +155,7 @@ class DigestError(Exception):
     pass
 
 def _digest_collection(cells, fcc_rules_cells=None, jurisdictions=None, debug=False):
-    """Go through a collection column of cells, merge what needs to be merged and parse into bands"""
+    """Go through a column of cells, merge what needs to be merged and parse into bands"""
     # Set up some defaults
     if fcc_rules_cells is None:
         rules = [None]*len(cells)
@@ -189,11 +166,10 @@ def _digest_collection(cells, fcc_rules_cells=None, jurisdictions=None, debug=Fa
     iter_cells = iter(cells)
     iter_rules = iter(rules)
     # Set up defaults
-    result = []
+    result = BandCollection()
     accumulator = None
     rules_accumulator = None
-    previous = None
-    previous_rule = None
+    previous_band = None
     exhausted = False
     while not exhausted:
         # Get the next cell and rule
@@ -231,12 +207,11 @@ def _digest_collection(cells, fcc_rules_cells=None, jurisdictions=None, debug=Fa
             # OK, this might genuinely be a new band, or it might be
             # the same band with additional information.
             try:
-                previous_band = result[-1]
                 if new_band.bounds != previous_band.bounds:
                     genuinely_new = True
                 else:
                     genuinely_new = False
-            except IndexError:
+            except AttributeError:
                 genuinely_new = True
             if debug:
                 print (f"genuinely_new={genuinely_new}")
@@ -245,6 +220,7 @@ def _digest_collection(cells, fcc_rules_cells=None, jurisdictions=None, debug=Fa
                 if debug:
                     print (f"Appending {new_band.compact_str()}")
                 result.append(new_band)
+                previous_band = new_band
             # If it's not genuinely new, we'll finish it off on later iterations
             # else:
             #     # Otherwise, it must be an update to the previously
@@ -277,7 +253,7 @@ def parse_all_tables(fccfile, table_range=None, **kwargs):
     for it in table_range:
         print (f"{it}, ", end="")
         table = tables[it]
-        new_columns, new_unit, diagnostics = parse_table(
+        new_columns, new_unit, diagnostics = _parse_table(
             table, unit, version, **kwargs)
         unit = new_unit
         for collection, new_entries in zip(collections_list, new_columns):
@@ -298,36 +274,3 @@ def parse_all_tables(fccfile, table_range=None, **kwargs):
     print ("done.")
     return collections
             
-def merge_band_lists(collections):
-    """Combine a set of lists of bands into one"""
-    interim = []
-    # Build the raw list
-    for tag, collection in collections.items():
-        for band in collection:
-            new_band = copy.deepcopy(band)
-            interim.append(new_band)
-    # Now sort all these bands into order
-    interim.sort()
-    result = []
-    # Now go through and join bands together if they're the same in all but region.
-    for band in interim:
-        # This is the index of the first entry in the result that
-        # starts at this band's frequency
-        index = bisect.bisect_left(result, band)
-        # Now look for all the bands already stored after this one and
-        # see if they are basically the same as this band.
-        destination = -1
-        for i in range(index, len(result)):
-            # Here we take advantage of the fact that the = operator
-            # for bands does not pay attention to jurisdiction
-            # information.
-            if result[i] == band:
-                destination = i
-        if destination != -1:
-            result[destination].jurisdictions.append(band.jurisdictions[0])
-            result[destination].jurisdictions = list(set(result[destination].jurisdictions))
-            result[destination].jurisdictions.sort()
-        else:
-            result.append(band)
-                
-    return result
