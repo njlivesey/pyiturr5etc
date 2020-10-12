@@ -74,9 +74,12 @@ class Band:
 
     def range_str(self):
         return f"{self.bounds[0]}-{self.bounds[1]}"
-        
+
     def compact_str(self, **kwargs):
         return self.__str__(separator="/", **kwargs)
+
+    def __hash__(self):
+        return hash(str(self))
 
     def jurisdictions_str(self):
         if self.jurisdictions is not None:
@@ -285,6 +288,9 @@ class Band:
         return (
             np.allclose(a.bounds[1], self.bounds[0]) or
             np.allclose(a.bounds[0], self.bounds[1]))
+    @property
+    def frequency_range(self):
+        return units.Quantity([self.bounds[0], self.bounds[1].to(self.bounds[0].unit)])
 
     @classmethod
     def parse(cls, cell, fcc_rules=None, unit=None, jurisdictions=None, annotations=None):
