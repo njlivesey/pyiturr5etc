@@ -7,7 +7,7 @@ import docx
 import numpy as np
 import pickle
 
-from .ingest import parse_all_tables
+from .ingest_tables import parse_all_tables
 from .additional_allocations import all_additions
 from .band_collections import BandCollection
     

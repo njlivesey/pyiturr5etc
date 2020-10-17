@@ -99,13 +99,24 @@ def footnote_5_479():
         ["9975-10025", "Earth exploration-satellite (active) 5.479#"],
         unit=units.MHz, jurisdictions=["R1", "R2", "R3"])]
 
+def footnote_5_458():
+    added_ranges = [
+        "6425-7075",
+        "7075-7250",
+    ]
+    bands = []
+    for r in added_ranges:
+        bands.append(
+            Band.parse([r,
+                        "Earth exploration-satellite (passive) 5.458#"],
+                       unit=units.MHz, jurisdictions=["R1", "R2", "R3"]))
+    return bands
 
 def footnote_5_543():
     return [Band.parse(
         ["29.95-30",
             "Earth exploration-satellite (space-to-space, comms.) 5.543#"],
         unit=units.GHz, jurisdictions=["R1", "R2", "R3"])]
-
 
 def footnote_5_555():
     return [Band.parse(
@@ -231,16 +242,11 @@ routines = [
     footnote_5_149,
     footnote_5_225, footnote_5_250, footnote_5_304, footnote_5_305, footnote_5_306,
     footnote_5_307, footnote_5_339, footnote_5_385, footnote_5_437, footnote_5_443,
-    footnote_5_479, footnote_5_543, footnote_5_555, footnote_5_556, footnote_5_562D ]
+    footnote_5_479, footnote_5_543, footnote_5_458, footnote_5_555, footnote_5_556,
+    footnote_5_562D ]
 for r in routines:
     all_additions += r()
 
-    
-
-
 notes="""
-5.149 adds RAS at 6650-6675.2 MHz (se 5.458A), possibly others
-5.458 implies additional 6425-7075 MHZ and 7075-7250 MHz for EESS passive
-
-
+5.149 adds RAS at 6650-6675.2 MHz (see 5.458A), possibly others
 """

@@ -5,6 +5,7 @@ import docx
 import fnmatch
 import numpy as np
 import astropy.units as units
+from termcolor import colored
 
 from .allocations import Allocation
 from .utils import cell2text, text2lines
@@ -43,8 +44,16 @@ class NotBandError(Exception):
 
 class Band:
     """A frequency bounds and the allocations thereto (i.e., contents of a table cell)"""
-    def __str__(self, separator="\n", skip_footnotes=False, specific_allocations=None, skip_rules=False):
+    def __str__(self):
         """Return a string representation of a Band"""
+        return self.to_str()
+    
+    def to_str(self, separator="\n", skip_footnotes=False, specific_allocations=None, skip_rules=False,
+                highlight_allocations=None):
+        """Return a string representation of a Band"""
+        highlight_colors = [ "red", "green", "blue", "orange" ]
+        if highlight_allocations == True:
+            highlight_allocations = ["Earth Exploration-Satellite*", "Radio Astronomy*"]
         # Do the frequency range
         result = self.range_str()
         # Add jurisdiction information and annotation information if any
@@ -55,13 +64,24 @@ class Band:
         result = result + separator
         # Do allocations
         if specific_allocations is None:
-            clauses = [str(a) for a in self.allocations]
+            allocations = [a for a in self.allocations]
         else:
-            clauses = []
+            allocations = []
             for a in self.allocations:
                 for sa in specific_allocations:
                     if a.matches(sa):
-                        clauses.append(str(a))
+                        allocations.append(a)
+        clauses = []
+        if highlight_allocations is not None:
+            for a in allocations:
+                try:
+                    i = [a.matches(ha) for ha in highlight_allocations].index(True)
+                    clauses.append(colored(str(a), highlight_colors[i % len(highlight_colors)]))
+                except ValueError:
+                    clauses.append(str(a))
+        else:
+            for a in allocations:
+                clauses.append(str(a))
         result = result + separator.join(clauses)
         # Do footnotes
         if not skip_footnotes and self.footnotes != "":
@@ -338,6 +358,9 @@ class Band:
         # Done looping over the lines, so tidy things up.
         if footnotes is None:
             footnotes = []
+        # Make sure the footnotes are unique (and sort them)
+        footnotes = list(set(footnotes))
+        footnotes.sort()
         # Do the fcc rules
         try:
             fcc_rules = [entry for entry in fcc_rules.lines if entry != ""]

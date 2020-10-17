@@ -2,6 +2,7 @@
 
 import astropy.units as units
 from intervaltree import IntervalTree
+import copy
 
 __all__ = [ "Collection" ]
 
@@ -61,7 +62,10 @@ class BandCollection:
                     recorded_band.jurisdictions.sort()
                     isunique = False
             if isunique:
-                result.append(new_band)
+                # Do a deep copy because today's new_band becomes
+                # tomorrow's recorded_band, so if we don't the input
+                # lists will get trampled on.
+                result.append(copy.deepcopy(new_band))
         return result
 
     def get_bands(self, f0, f1=None, adjacent=False, margin=None, oobe=False):
