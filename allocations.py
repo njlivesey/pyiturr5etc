@@ -5,11 +5,12 @@ import fnmatch
 __all__ = [ "Allocation" ]
 
 from .services import Service
+from .footnotes import footnote2html
 
 class Allocation:
     """An entry allocating a service to a band"""
-    def __str__(self):
-        """Return a string representation of an Allocation"""
+    def to_str(self, html=False, footnote_definitions=None):
+        """Return a string representation of an Allocation, possibly with HTML and tooltips"""
         if self.primary:
             result = self.service.name.upper()
         else:
@@ -17,8 +18,16 @@ class Allocation:
         if len(self.modifiers) != 0:
             result += " " + " ".join([f"({m})" for m in self.modifiers])
         if len(self.footnotes) != 0:
-            result += " " + " ".join(self.footnotes)
+            if html:
+                result = result + " " + " ".join(
+                    [footnote2html(f, footnote_definitions) for f in self.footnotes])
+            else:
+                result = result + " " + " ".join(self.footnotes)
         return (result)
+
+    def __str__(self):
+        """Return a string representation of an allocations"""
+        return self.to_str()
 
     def __eq__(self,a):
         if self.primary != a.primary:

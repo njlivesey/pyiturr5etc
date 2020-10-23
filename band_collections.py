@@ -10,8 +10,12 @@ class BandCollection:
     """A collection of bands corresponding to one or more jurisdictions"""
     # This is basically a wrapper around IntervalTree, but not a subclass
 
-    def __init__(self):
+    def __init__(self, *args):
+        """Create a band collection and possibly fill it with bands supplied"""
         self.data = IntervalTree()
+        for a in args:
+            for b in a:
+                self.append(b)
     
     def __getitem__(self, key):
         """Get a specific item/range from the collection"""
@@ -27,8 +31,9 @@ class BandCollection:
 
     def __iter__(self):
         """Generate an iterable over the collected bands"""
-        for interval in self.data:
-            yield interval.data
+        bands = self.tolist()
+        for b in bands:
+            yield b
         
     def append(self, band):
         """Append a band to the collection"""
@@ -124,3 +129,8 @@ class BandCollection:
         result.sort()
         return result
 
+    def tolist(self):
+        """Convert band collection to sorted list"""
+        result = [b.data for b in self.data]
+        result.sort()
+        return result

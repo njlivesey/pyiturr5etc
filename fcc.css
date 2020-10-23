@@ -1,0 +1,50 @@
+div.output_scroll {
+    height: 44em;
+}
+
+#fcc {
+  font-size: 9pt;
+  line-height: 10pt;
+  padding: 0pt 0pt 0pt 0pt;
+}
+
+#fcc-highlight {
+  color: red;
+}
+
+#fcc-table {
+}
+
+#fcc-td {
+    border: 1px solid black;
+    background: white;
+    text-align: left;
+    vertical-align: top;
+    padding: 0pt 5pt 0pt 5pt;
+}
+
+.tooltip {
+ position: relative;
+ display: inline-block;
+}
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 50em;
+  font-size: 9pt;
+  line-height: 11pt;
+  border: 1px solid black;
+  background-color: whitesmoke;
+  color: black;
+  text-align: left;
+  border-radius: 3pt;
+  padding: 4pt 5pt;
+
+  /* Position the tooltip */
+  position: absolute;
+  z-index: 1;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+}

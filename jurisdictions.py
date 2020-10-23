@@ -28,9 +28,6 @@ _jurisdictions = [
     Jurisdiction("ITU-R1", ["ITU Region 1", "ITU R1", "R1", "Region 1"], international=True)
     Jurisdiction("ITU-R2", ["ITU Region 2", "ITU R2", "R2", "Region 2"], international=True)
     Jurisdiction("ITU-R3", ["ITU Region 3", "ITU R3", "R3", "Region 3"], international=True)
-    Jurisdiction("F", ["Federal", "Fed"]),
-    Jurisdiction("NF", ["Non-Federal", "Non-Fed"]),
+    Jurisdiction("F", ["USA Federal", "Fed"]),
+    Jurisdiction("NF", ["USA Non-Federal", "Non-Fed"]),
     ]
-
-
-                 

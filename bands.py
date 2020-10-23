@@ -9,6 +9,7 @@ from termcolor import colored
 
 from .allocations import Allocation
 from .utils import cell2text, text2lines
+from .footnotes import footnote2html
 
 __all__ = [ "NotBoundsError", "Bounds", "NotBandError", "Band" ]
 
@@ -48,18 +49,30 @@ class Band:
         """Return a string representation of a Band"""
         return self.to_str()
     
-    def to_str(self, separator="\n", skip_footnotes=False, specific_allocations=None, skip_rules=False,
-                highlight_allocations=None):
+    def to_str(self, separator=None, skip_footnotes=False, specific_allocations=None, skip_rules=False,
+               skip_jurisdictions=False, skip_annotations=False,
+               highlight_allocations=None, html=False):
         """Return a string representation of a Band"""
+        # Deal with setting defaults etc.
+        if html:
+            if separator is not None:
+                raise ValueError("Cannot select HTML and supply separator")
+            separator = "<br>"
+        if separator is None:
+            separator = "\n"
         highlight_colors = [ "red", "green", "blue", "orange" ]
         if highlight_allocations == True:
-            highlight_allocations = ["Earth Exploration-Satellite*", "Radio Astronomy*"]
+            highlight_allocations = ["Earth Exploration-Satellite*", "Radio Astronomy*", "Space Research*"]
         # Do the frequency range
-        result = self.range_str()
+        if html:
+            result = r'<p id="fcc"><b>' + self.range_str(html=True) + "</b>"
+        else:
+            result = self.range_str()
         # Add jurisdiction information and annotation information if any
-        for extra in [self.jurisdictions_str(), self.annotations_str()]:
-            if extra != "":
-                result = result + ' ' + extra
+        if not skip_jurisdictions:
+            result = result + ' ' + self.jurisdictions_str()
+        if not skip_annotations:
+            result = result + ' ' + self.annotations_str()
         # Next line
         result = result + separator
         # Do allocations
@@ -74,26 +87,49 @@ class Band:
         clauses = []
         if highlight_allocations is not None:
             for a in allocations:
+                a_str = a.to_str(html=html, footnote_definitions=self._footnote_definitions)
                 try:
                     i = [a.matches(ha) for ha in highlight_allocations].index(True)
-                    clauses.append(colored(str(a), highlight_colors[i % len(highlight_colors)]))
                 except ValueError:
-                    clauses.append(str(a))
+                    i = None
+                if i is None:
+                    clauses.append(a_str)
+                else:
+                    if html:
+                        clauses.append(
+                            '<span id="fcc-highlight">' + a_str +
+                            '</span>')
+                    else:
+                        clauses.append(colored(a_str, highlight_colors[i % len(highlight_colors)]))
         else:
             for a in allocations:
                 clauses.append(str(a))
         result = result + separator.join(clauses)
         # Do footnotes
         if not skip_footnotes and self.footnotes != "":
-            result = result + separator + " ".join(self.footnotes)
+            if html:
+                result = result + separator + separator + " ".join(
+                    [footnote2html(f, self._footnote_definitions) for f in self.footnotes])
+            else:
+                result = result + separator +  separator + " ".join(self.footnotes)
         # Do rules
         rules_str = self.fcc_rules_str()
         if rules_str != "" and not skip_rules:
             result = result + separator + rules_str
+        if html:
+            result = result + r"</p>"
         return (result)
 
-    def range_str(self):
-        return f"{self.bounds[0]}-{self.bounds[1]}"
+    def to_html(self, **kwargs):
+        """Produce html representation of a band"""
+        result = r"<p><fcc>" + self.to_str(html=True, **kwargs) + r"</fcc></p>"
+        return result
+    
+    def range_str(self, html=False):
+        if html:
+            return f"{self.bounds[0]} &ndash; {self.bounds[1]}"
+        else:
+            return f"{self.bounds[0]}-{self.bounds[1]}"
 
     def compact_str(self, **kwargs):
         return self.__str__(separator="/", **kwargs)
@@ -205,6 +241,12 @@ class Band:
             result = result + a.footnotes
         return list(set(result))
 
+    def footnote_definition(self, footnote):
+        """Return text defining a given footnote"""
+        if footnote[-1] == r"#":
+            footnote = foonote[0:-1]
+        return self._footnote_definitions[footnote]
+        
     def combine_with(self, a, force=False, skip_bounds=False):
         """Merge the contents of two different bands"""
 
