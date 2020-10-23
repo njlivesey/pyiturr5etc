@@ -222,12 +222,12 @@ def _digest_collection(cells, fcc_rules_cells=None, jurisdictions=None, debug=Fa
                 result.append(new_band)
                 previous_band = new_band
             # If it's not genuinely new, we'll finish it off on later iterations
-            # else:
+            else:
             #     # Otherwise, it must be an update to the previously
             #     # recorded one, so update the record.
-            #     if debug:
-            #         print (f"Replacing {previous_band.compact_str()}")
-            #         print (f"with {new_band.compact_str()}")
+                if debug:
+                    print (f"Replacing {previous_band.compact_str()}")
+                    print (f"with {new_band.compact_str()}")
         if finished_accumulating or accumulator is None:
             # Either the accumulator is empty (first iteration) or
             # needs to be reset, do so.
@@ -265,7 +265,7 @@ def parse_all_tables(fccfile, table_range=None, **kwargs):
     for name, i in zip(["R1","R2","R3"], range(3)):
         print (f"{name}, ", end="")
         collections[name] = _digest_collection(
-            collections_list[i], jurisdictions=[name])
+            collections_list[i], jurisdictions=[name], debug=name=="R1")
     for name, i in zip(["F","NF"], range(3,5)):
         print (f"{name}, ", end="")
         collections[name] = _digest_collection(

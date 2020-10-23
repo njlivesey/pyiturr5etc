@@ -49,9 +49,13 @@ class Band:
         """Return a string representation of a Band"""
         return self.to_str()
     
+    def __repr__(self):
+        """Return a string representation of a Band"""
+        return self.to_str(separator=";")
+    
     def to_str(self, separator=None, skip_footnotes=False, specific_allocations=None, skip_rules=False,
                skip_jurisdictions=False, skip_annotations=False,
-               highlight_allocations=None, html=False):
+               highlight_allocations=None, html=False, tooltips=True):
         """Return a string representation of a Band"""
         # Deal with setting defaults etc.
         if html:
@@ -87,7 +91,7 @@ class Band:
         clauses = []
         if highlight_allocations is not None:
             for a in allocations:
-                a_str = a.to_str(html=html, footnote_definitions=self._footnote_definitions)
+                a_str = a.to_str(html=html, footnote_definitions=self._footnote_definitions, tooltips=tooltips)
                 try:
                     i = [a.matches(ha) for ha in highlight_allocations].index(True)
                 except ValueError:
@@ -109,7 +113,7 @@ class Band:
         if not skip_footnotes and self.footnotes != "":
             if html:
                 result = result + separator + separator + " ".join(
-                    [footnote2html(f, self._footnote_definitions) for f in self.footnotes])
+                    [footnote2html(f, self._footnote_definitions, tooltips=tooltips) for f in self.footnotes])
             else:
                 result = result + separator +  separator + " ".join(self.footnotes)
         # Do rules
@@ -132,7 +136,7 @@ class Band:
             return f"{self.bounds[0]}-{self.bounds[1]}"
 
     def compact_str(self, **kwargs):
-        return self.__str__(separator="/", **kwargs)
+        return self.to_str(separator="/", **kwargs)
 
     def __hash__(self):
         return hash(str(self))
@@ -180,7 +184,7 @@ class Band:
 
     def equal(self, a, ignore_jurisdictions=False, ignore_annotations=False):
         """Compare two sets of band information"""
-        if a is None:
+        if type(self) != type(a):
             return False
         if self.bounds != a.bounds:
             return False

@@ -23,9 +23,26 @@ div.output_scroll {
     padding: 0pt 5pt 0pt 5pt;
 }
 
+#fcc-th {
+    border: 1px solid black;
+    background: white;
+    text-align: left;
+    vertical-align: top;
+    padding: 0pt 5pt 0pt 5pt;
+    font-weight: bold;
+}
+
+#fcc-allocation {
+    padding-left: 5em;
+    text-indent: -5em;
+    padding: 0pt 0pt 0pt 0pt;
+    margin-bottom: 0pt;
+    line-height: 0pt;
+}
+
 .tooltip {
- position: relative;
- display: inline-block;
+    position: relative;
+    display: inline-block;
 }
 
 .tooltip .tooltiptext {

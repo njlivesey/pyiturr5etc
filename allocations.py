@@ -9,7 +9,7 @@ from .footnotes import footnote2html
 
 class Allocation:
     """An entry allocating a service to a band"""
-    def to_str(self, html=False, footnote_definitions=None):
+    def to_str(self, html=False, footnote_definitions=None, tooltips=True):
         """Return a string representation of an Allocation, possibly with HTML and tooltips"""
         if self.primary:
             result = self.service.name.upper()
@@ -20,9 +20,11 @@ class Allocation:
         if len(self.footnotes) != 0:
             if html:
                 result = result + " " + " ".join(
-                    [footnote2html(f, footnote_definitions) for f in self.footnotes])
+                    [footnote2html(f, footnote_definitions, tooltips=tooltips) for f in self.footnotes])
             else:
                 result = result + " " + " ".join(self.footnotes)
+        # if html:
+        #     result = '<p><span id="fcc-allocation">' + result + '</span></p>'
         return (result)
 
     def __str__(self):

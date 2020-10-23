@@ -51,7 +51,7 @@ class FCCTables(object):
 default_path = "/users/livesey/corf/"
 
 def read(filename=default_path+"fcctable.docx",
-         skip_additionals=False, **kwargs):
+         skip_additionals=False, skip_footnote_definitions=False, **kwargs):
     """Reader routine for FCC tables file"""
     
     # Open the FCC file
@@ -97,20 +97,21 @@ def read(filename=default_path+"fcctable.docx",
     # Now go through all the bands we have and add the relevant
     # footnote definitions to them.  First read the footnote
     # definitions, and store them in the result
-    print ("Footnote definitions: reading, ", end="")
-    footnote_definitions = ingest_footnote_definitions(docx_data)
-    result.footnote_definitions = footnote_definitions
-    print ("appending, ", end="")
-    for collection in result.collections.values():
-        for b in collection:
-            footnotes = b.all_footnotes()
-            b._footnote_definitions = {}
-            for f in footnotes:
-                if f[-1] == "#":
-                    f = f[:-1]
-                if f in footnote_definitions:
-                    b._footnote_definitions[f] = footnote_definitions[f]
-    print ("done.")
+    if not skip_footnote_definitions:
+        print ("Footnote definitions: reading, ", end="")
+        footnote_definitions = ingest_footnote_definitions(docx_data)
+        result.footnote_definitions = footnote_definitions
+        print ("appending, ", end="")
+        for collection in result.collections.values():
+            for b in collection:
+                footnotes = b.all_footnotes()
+                b._footnote_definitions = {}
+                for f in footnotes:
+                    if f[-1] == "#":
+                        f = f[:-1]
+                    if f in footnote_definitions:
+                        b._footnote_definitions[f] = footnote_definitions[f]
+        print ("done.")
     return result
 
 def save(tables, filename=default_path+"fcctable.pickle"):
@@ -155,28 +156,116 @@ def htmlcolumn(bands, append_footnotes=False):
     display(HTML(text))
     return text
 
-def htmltable(bands, append_footnotes=False):
+def htmltable(bands, append_footnotes=False, tooltips=True):
     """Produce an HTML table corresponding to a set of bands"""
-    # First loop over the bands and work out how many rows and columns
-    # we'll need
+    # First loop over the bands and work out how many rows (frequency
+    # spans) and columns (jurisdictions) we'll need.
     jurisdictions = []
     edges = []
+    # Build up data
     for b in bands:
         jurisdictions += b.jurisdictions
         edges += b.bounds
+    # Make this information unique and sorted
     edges = list(set(edges))
     edges.sort()
     edges = units.Quantity(edges)
     jurisdictions = list(set(jurisdictions))
-    print (edges)
+    jurisdictions.sort()
+    # OK, so how many rows and columns?
+    nColumns = len(jurisdictions)
+    nRows = len(edges)-1
 
+    # Now set up some data structures to define the table.  First its
+    # contents (None initially)
+    table = list()
+    for r in range(nRows):
+        table.append([None for c in range(nColumns)])
+    # Now some arrays that define the span of each cell, 1x1 to start with
+    rSpan = np.ones(shape=[nRows, nColumns], dtype=np.int_)
+    cSpan = np.ones(shape=[nRows, nColumns], dtype=np.int_)
+
+    # Now loop over the bands and put them in cells
+    for b in bands:
+        # Identify which rows this band spans.
+        row_span = np.searchsorted(edges, b.bounds)
+        # Identify which columns this band should be listed in
+        column_flags = [j in b.jurisdictions for j in jurisdictions]
+        for r in range(row_span[0], row_span[1]):
+            for c in range(nColumns):
+                if column_flags[c]:
+                    if table[r][c] is not None:
+                        raise ValueError(f"Overlapping bands for {r}, {c}")
+                    else:
+                        table[r][c] = b
+    # Now go through the cells and work out which ones should be aggolomorated
+    Overlapped = "overlapped"
+    for r in range(nRows):
+        for c in range(nColumns):
+            band = table[r][c]
+            if band is None or band is Overlapped:
+                continue
+            # Now search forward in columns and see how many bands are the same
+            column_flags = [band.equal(other_band, ignore_jurisdictions=True)
+                            for other_band in table[r][c:]]
+            try:
+                column_span = column_flags.index(False)
+            except (ValueError, AttributeError):
+                column_span = len(column_flags)
+            # Now search forward in rows and see how many bands are the same
+            row_flags = [band.equal(other_row[c], ignore_jurisdictions=True)
+                         for other_row in table[r:]]
+            try:
+                row_span = row_flags.index(False)
+            except ValueError:
+                row_span = len(row_flags)
+            # Now make our data structures reflect that. First blow away the entire rectangle
+            for rr in range(r,r+row_span):
+                table[rr][c:c+column_span] = [Overlapped]*column_span
+            cSpan[r:r+row_span, c:c+column_span] = 0
+            rSpan[r:r+row_span, c:c+column_span] = 0
+            # Now put the top left corner back
+            table[r][c] = band
+            cSpan[r,c] = column_span
+            rSpan[r,c] = row_span
+
+    # print (f"cSpan:\n{cSpan}")
+    # print (f"rSpan:\n{rSpan}")
+    # for row in table:
+    #     for cell in row:
+    #         if cell is None:
+    #             word = "None"
+    #         elif cell is Overlapped:
+    #             word = "Ovlp"
+    #         else:
+    #             word = "Band"
+    #         print (word+" ", end="")
+    #     print ()
+
+    # Start the HTML for the table
     text = '<link rel="stylesheet" href="fcc.css">'
     text += '<table id="fcc-table">'
-    for b in bands:
-        text += '<tr><td id="fcc-td">'
-        text += b.to_html(highlight_allocations=True, skip_jurisdictions=False)
-        text += '</td></tr>\n'
-    text += '</table>'
+    text += '<tr>'
+    # Add the header row
+    for j in jurisdictions:
+        text += '<th id="fcc-th">'
+        text += j
+        text += '</th>'
+    text += '</tr>\n'
+    # Go through our arrays populate the HTML table
+    for r, row in enumerate(table):
+        text += '<tr>'
+        for c, cell in enumerate(row):
+            if cell is not Overlapped and cell is not None:
+                text += f'<td id="fcc-td"; colspan="{cSpan[r,c]}"; rowspan="{rSpan[r,c]}">'
+                text += cell.to_html(highlight_allocations=True, tooltips=tooltips, skip_jurisdictions=True)
+                text += '</td>'
+            if cell is None:
+                text += f'<td id="fcc-td"; colspan="{cSpan[r,c]}"; rowspan="{rSpan[r,c]}">'
+                text += "&nbsp;"
+                text += '</td>'
+        text += '</tr>\n'
+    text += '</table>\n'
 
     # Now possibly append a description of all the footnotes
     if append_footnotes:

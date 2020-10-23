@@ -97,10 +97,10 @@ def sanitize_footnote_name(footnote):
     else:
         return footnote[:-1]
 
-def footnote2html(footnote, definitions=None):
+def footnote2html(footnote, definitions=None, tooltips=True):
     """Convert a footnote to html text, possibly including tooltips"""
     key = sanitize_footnote_name(footnote)
-    if definitions is None:
+    if definitions is None or tooltips==False:
         return footnote
     if key not in definitions:
         return footnote
