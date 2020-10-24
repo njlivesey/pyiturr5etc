@@ -46,7 +46,7 @@ def _parse_table(table, unit, version=Version("20200818"), dump_raw=False, dump_
     footer_prefix = "Page"
     has_footer = footer[0:len(footer_prefix)] == footer_prefix
     if has_footer:
-        last_useful_row = n_rows-2
+        last_useful_row = n_rows-1
     else:
         last_useful_row = n_rows-1
     # Also, get the page number if it's in the last row/column (or thereabouts)
@@ -148,6 +148,8 @@ def _parse_table(table, unit, version=Version("20200818"), dump_raw=False, dump_
     diagnostics = {
         "page": page,
         "has_header": has_header}
+    # for c in collections[0]:
+    #     print (c.lines)
     return collections, unit, diagnostics
 
 class DigestError(Exception):
@@ -162,82 +164,93 @@ def _digest_collection(cells, fcc_rules_cells=None, jurisdictions=None, debug=Fa
     else:
         rules = fcc_rules_cells
     assert len(rules) == len(cells), "Mismatch between entries and rules"
-    # Generate iterators for the cells and the rules
-    iter_cells = iter(cells)
-    iter_rules = iter(rules)
     # Set up defaults
     result = BandCollection()
-    accumulator = None
-    rules_accumulator = None
-    previous_band = None
-    exhausted = False
-    while not exhausted:
-        # Get the next cell and rule
-        try:
-            cell = next(iter_cells)
-            rule = next(iter_rules)
-            finished_accumulating = cell.is_band_start()
-        except StopIteration:
-            cell = None
-            rule = None
-            finished_accumulating = True
-            exhausted = True
+    accumulator = []
+    rules_accumulator = []
+    accumulator_as_band = None
+    for cell, rule in zip(cells, rules):
+        # See if this cell marks the start of band
         if debug:
-            print (f"---------------- finished_accumulating: {finished_accumulating}, exhausted: {exhausted}")
-            diagnostics = {
-                "cell": cell,
-                "rule": rule,
-                "accumulator": accumulator,
-                "rules_accumulator": rules_accumulator}
-            for key, item in diagnostics.items():
-                try:
-                    print (f"{key}={'/'.join(item.lines)}")
-                except (AttributeError,TypeError):
-                    print (f"{key} is None (or {key}.lines is None)")
-        if finished_accumulating and accumulator is not None:
-            # We've got to the start of a new band (or the end of the
-            # list).  Convert the accumulator into a band.
-            if debug:
-                print (f"Parsing {'/'.join(accumulator.lines)}")
-            new_band = Band.parse(
-                accumulator, fcc_rules=rules_accumulator,
-                jurisdictions=jurisdictions)
-            if debug:
-                print (f"Gives: {new_band.compact_str()}")
-            # OK, this might genuinely be a new band, or it might be
-            # the same band with additional information.
+            print ("-----------------------------------------------------")
+            print (f"Cell is: {cell.lines}")
+        try:
+            cell_as_band = Band.parse(cell, fcc_rules=rule, jurisdictions=jurisdictions)
+            cell_is_band_start = True
+        except NotBandError:
+            cell_is_band_start = False
+            cell_as_band = None
+        # If this cell is the start of a band, see if it's the start of a new band
+        if cell_is_band_start:
             try:
-                if new_band.bounds != previous_band.bounds:
-                    genuinely_new = True
-                else:
-                    genuinely_new = False
+                cell_is_new_band = accumulator_as_band.bounds != cell_as_band.bounds
             except AttributeError:
-                genuinely_new = True
-            if debug:
-                print (f"genuinely_new={genuinely_new}")
-            if genuinely_new:
-                # If it's genuinely new (new frequency range) then append it
-                if debug:
-                    print (f"Appending {new_band.compact_str()}")
-                result.append(new_band)
-                previous_band = new_band
-            # If it's not genuinely new, we'll finish it off on later iterations
-            else:
-            #     # Otherwise, it must be an update to the previously
-            #     # recorded one, so update the record.
-                if debug:
-                    print (f"Replacing {previous_band.compact_str()}")
-                    print (f"with {new_band.compact_str()}")
-        if finished_accumulating or accumulator is None:
-            # Either the accumulator is empty (first iteration) or
-            # needs to be reset, do so.
-            accumulator = copy.deepcopy(cell)
-            rules_accumulator = copy.deepcopy(rule)
+                cell_is_new_band = True
+            pass # End try/except
         else:
-            if not cell.is_empty():
-                accumulator.append(cell)
-                if rule is not None:
-                    rules_accumulator.append(rule)
+            cell_is_new_band = False
+        if debug:
+            print (f"    cell_is_band_start={cell_is_band_start}, cell_is_new_band={cell_is_new_band}")
+            print (f"    cell_as_band=", end="")
+            try:
+                print (cell_as_band.compact_str())
+            except AttributeError:
+                print (cell_as_band)
+
+        accumulate_cell = True
+        if cell_is_new_band:
+            # If the cell is a new band, then store the accumulated
+            # band, and start a new accumulator
+            if accumulator_as_band is not None:
+                if debug:
+                    print (f"*** Storing: {accumulator_as_band.compact_str()}")
+                result.append(accumulator_as_band)
+            else:
+                if debug:
+                    print (f"    nothing in accumulator to store.")
+            accumulator = []
+            rules_accumulator = []
+        elif cell_is_band_start:
+            # If the cell is the start of a band, but not the
+            # start of a new band, then presumably it's a repeat
+            # of the information we have thus far.  Check that
+            # that's the case, and mark it as not to be accumulated
+            accumulate_cell = False
+            try:
+                if not cell_as_band.equal(accumulator_as_band, ignore_fcc_rules=True):
+                    print (cell_as_band.compact_str())
+                    print ("----------")
+                    print (accumulator_as_band.compact_str())
+                    raise ValueError ("Confused about bands")
+            except AttributeError:
+                pass
+        # Now accumulate the cell contents if appropriate
+        if accumulate_cell:
+            try:
+                if cell.lines is not None:
+                    accumulator += cell.lines
+            except AttributeError:
+                pass
+            try:
+                if rule.lines is not None:
+                    rules_accumulator += rule.lines
+            except AttributeError:
+                pass
+            try:
+                accumulator_as_band = Band.parse(
+                    accumulator, fcc_rules=rules_accumulator, unit=cell.unit, jurisdictions=jurisdictions)
+            except NotBandError:
+                accumulator_as_band = None
+        if debug:
+            print (f"    accumulator={accumulator}")
+            if accumulator_as_band is not None:
+                print (f"    accumulator_as_band={accumulator_as_band.compact_str()}")
+            else:
+                print (f"    accumulator_as_band=None")
+        pass # End of loop over cells
+    # Once we're done with the loop, add the final band
+    if accumulator_as_band is not None:
+        result.append(accumulator_as_band)
     return result
 
 def parse_all_tables(fccfile, table_range=None, **kwargs):
@@ -265,7 +278,7 @@ def parse_all_tables(fccfile, table_range=None, **kwargs):
     for name, i in zip(["R1","R2","R3"], range(3)):
         print (f"{name}, ", end="")
         collections[name] = _digest_collection(
-            collections_list[i], jurisdictions=[name], debug=name=="R1")
+            collections_list[i], jurisdictions=[name], debug=False)
     for name, i in zip(["F","NF"], range(3,5)):
         print (f"{name}, ", end="")
         collections[name] = _digest_collection(

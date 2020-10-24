@@ -1,18 +1,26 @@
+p {
+    font-family: Sans-Serif;
+}
+
 div.output_scroll {
     height: 44em;
 }
 
 #fcc {
-  font-size: 9pt;
-  line-height: 10pt;
-  padding: 0pt 0pt 0pt 0pt;
+    font-size: 9pt;
+    line-height: 10pt;
+    padding: 0pt 0pt 0pt 0pt;
 }
 
 #fcc-highlight {
-  color: red;
+    color: red;
 }
 
 #fcc-table {
+    font-family: Sans-Serif;
+    border: none;
+    border-collapse: collapse;
+    border-spacing: 0;
 }
 
 #fcc-td {
@@ -24,6 +32,7 @@ div.output_scroll {
 }
 
 #fcc-th {
+    font-size: 9pt;
     border: 1px solid black;
     background: white;
     text-align: left;

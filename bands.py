@@ -23,6 +23,7 @@ def _parse_bounds(text, unit):
     """Turn a string giving a frequency range into a bounds object"""
     re_float = r"[0-9_]+(?:\.[0-9_]+)?"
     re_bounds = f"^({re_float})-({re_float})[\w]*(\(Not allocated\))?$"
+    # print (f"Matching {re_bounds} to {text}")
     match = re.match(re_bounds, text)
     if match is not None:
         return [
@@ -182,7 +183,7 @@ class Band:
             a.exclusive = n_allocations == 1
             self.allocations.append(a)
 
-    def equal(self, a, ignore_jurisdictions=False, ignore_annotations=False):
+    def equal(self, a, ignore_jurisdictions=False, ignore_annotations=False, ignore_fcc_rules=False):
         """Compare two sets of band information"""
         if type(self) != type(a):
             return False
@@ -193,16 +194,17 @@ class Band:
         for sa, aa in zip(self.allocations, a.allocations):
             if sa != aa:
                 return False
-        if (self.fcc_rules is None) != (a.fcc_rules is None):
-            return False
-        try:
-            if len(self.fcc_rules) != len(a.fcc_rules):
+        if not ignore_fcc_rules:
+            if (self.fcc_rules is None) != (a.fcc_rules is None):
                 return False
-            for sr, ar in zip(self.fcc_rules, a.fcc_rules):
-                if sr !=ar:
+            try:
+                if len(self.fcc_rules) != len(a.fcc_rules):
                     return False
-        except TypeError:
-            pass
+                for sr, ar in zip(self.fcc_rules, a.fcc_rules):
+                    if sr !=ar:
+                        return False
+            except TypeError:
+                pass
         if self.footnotes != a.footnotes:
             return False
         if not ignore_jurisdictions and self.jurisdictions != a.jurisdictions:
@@ -361,8 +363,9 @@ class Band:
     @classmethod
     def parse(cls, cell, fcc_rules=None, unit=None, jurisdictions=None, annotations=None):
         """Parse a table cell into a Band"""
+        # Work out what type of input we've been give, an FCCCell type
+        # or just a set of strings.
         from .cells import FCCCell
-        # Now the first line should be a frequency range
         if cell is None:
             raise NotBandError("Cell is None")
         proper_cell = isinstance(cell, FCCCell)
@@ -377,10 +380,13 @@ class Band:
             unit = cell.unit
         else:
             lines = cell
+
+        # Now the first line should be a frequency range
         try:
             bounds = _parse_bounds(lines[0], unit)
         except NotBoundsError:
             raise NotBandError("Text doesn't start with bounds, so not a band")
+        
         # Now the remainder will either be allocations, blanks or collections of footnotes
         footnotes = []
         primary_allocations = []
