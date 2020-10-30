@@ -56,7 +56,7 @@ div.output_scroll {
 
 .tooltip .tooltiptext {
   visibility: hidden;
-  width: 50em;
+  width: 25em;
   font-size: 9pt;
   line-height: 11pt;
   border: 1px solid black;

@@ -2,6 +2,7 @@
 
 import astropy.units as units
 import copy
+import re
 
 from .utils import cell2text, text2lines
 
@@ -59,5 +60,26 @@ class FCCCell(object):
         if self.lines == [""]:
             return True
         return False
-        
+
+    def clean(self):
+        """Remove specific detritis from the cells"""
+        if self.lines is None:
+            return self
+        new_lines = []
+        re_page = r"^Page +[0-9]+$"
+        omissions = [
+            "(See previous page)",
+            ]
+        for line in self.lines:
+            # Skip page numbers
+            if re.search(re_page, line):
+                continue
+            if "Page" in line:
+                raise ValueError(f"Missed <{line}>")
+            if any([line==omission for omission in omissions]):
+                continue
+            new_lines.append(line)
+        result = copy.copy(self)
+        result.lines = new_lines
+        return result
         

@@ -14,7 +14,6 @@ def _document_iterator(source):
             yield Table(e, source)
         elif isinstance(e, docx.oxml.table.CT_Tc):
             yield "Cell"
-
             
 def ingest_footnote_definitions(source):
     # Create a dictionary to store all the footnote definitions
@@ -42,7 +41,7 @@ def ingest_footnote_definitions(source):
         eoe = False
         # This one will flag when we're at the end of the block
         eob = False
-        # Now try to get the net
+        # Now try to get the next element
         try:
             element = next(element_iterator)
         except StopIteration:
@@ -50,11 +49,13 @@ def ingest_footnote_definitions(source):
             eoe = True
             eob = True
         if isinstance(element, Table):
-            
             accumulator += ['[TABLE]\n']
             pass
+        # if type(element) is type("xx"):
+        #     print(f"Element is string: {element}")
         if element == "Cell":
             accumulator += ['[Cell:]']
+        # print (f"Read: {type(element)}")
         if isinstance(element, docx.text.paragraph.Paragraph):
             # If this is the first part of a block, move on to that
             # block
@@ -106,7 +107,7 @@ def footnote2html(footnote, definitions=None, tooltips=True):
         return footnote
     return r'<span id="fcc"><span class="tooltip">' + footnote + \
         '<span class="tooltiptext">' + \
-        '<b>' + key + ':</b>&nbsp' + definitions[key] + '</span></span>'
+        '<b>' + key + ':</b>&nbsp' + definitions[key] + '</span></span></span>'
 
 def footnotedef2html(footnote, definitions):
     """Convert footnote definition to html text"""

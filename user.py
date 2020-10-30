@@ -12,6 +12,7 @@ from .ingest_tables import parse_all_tables
 from .additional_allocations import all_additions
 from .band_collections import BandCollection
 from .footnotes import ingest_footnote_definitions, footnotedef2html
+from .jurisdictions import Jurisdiction
     
 class FCCTables(object):
     """Class that holds all information in the FCC tables document"""
@@ -64,13 +65,15 @@ def read(filename=default_path+"fcctable.docx",
     if not skip_additionals:
         # We'll create an interim result for the collections we have.
         print (f"Injecting additions in: ", end="")
-        for jurisdiction, collection in result.collections.items():
-            print(f"{jurisdiction}, ", end="")
+        for jname in result.collections.keys():
+            jurisdiction = Jurisdiction.parse(jname)
+            print(f"{jurisdiction.name}, ", end="")
             for new_band in all_additions:
                 if jurisdiction in new_band.jurisdictions:
-                    new_band = copy.deepcopy(new_band)
-                    new_band.jurisdictions = [jurisdiction]
-                    result.collections[jurisdiction].append(new_band)
+                    inserted_band = copy.deepcopy(new_band)
+                    inserted_band.jurisdictions = [jurisdiction]
+                    result.collections[jname].append(inserted_band)
+            result.collections[jname] = result.collections[jname].flatten()
         print ("done.")
     # Now we'll merge everything we have
     itu_regions = ["R1", "R2", "R3"]
@@ -249,7 +252,7 @@ def htmltable(bands, append_footnotes=False, tooltips=True):
     # Add the header row
     for j in jurisdictions:
         text += '<th id="fcc-th">'
-        text += j
+        text += str(j)
         text += '</th>'
     text += '</tr>\n'
     # Go through our arrays populate the HTML table

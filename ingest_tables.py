@@ -169,8 +169,16 @@ def _digest_collection(cells, fcc_rules_cells=None, jurisdictions=None, debug=Fa
     accumulator = []
     rules_accumulator = []
     accumulator_as_band = None
-    for cell, rule in zip(cells, rules):
+    for cell_orig, rule_orig in zip(cells, rules):
         # See if this cell marks the start of band
+        if cell_orig is not None:
+            cell = cell_orig.clean()
+        else:
+            cell = None
+        if rule_orig is not None:
+            rule = rule_orig.clean()
+        else:
+            rule = None
         if debug:
             print ("-----------------------------------------------------")
             print (f"Cell is: {cell.lines}")
