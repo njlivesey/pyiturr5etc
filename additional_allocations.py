@@ -127,7 +127,7 @@ def footnote_5_556():
     bands = []
     for r in added_ranges:
         bands.append(
-            Band.parse([r, "RADIO ASTRONOMY 5.556# (On a nation-by-nation basis)"],
+            Band.parse([r, "Radio astronomy 5.556# (On a nation-by-nation basis)"],
                        unit=units.GHz, jurisdictions=["R1","R2","R3"]))                       
     return bands
     

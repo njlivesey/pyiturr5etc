@@ -341,19 +341,19 @@ class Band:
             if a.matches(allocation, case_sensitive=case_sensitive):
                 if primary is not None:
                     if a.primary != primary:
-                        return False
+                        continue
                 if secondary is not None:
                     if (not a.primary) != secondary:
-                        return False
+                        continue
                 if co_primary is not None:
                     if a.co_primary != co_primary:
-                        return False
+                        continue
                 if exclusive is not None:
                     if a.exclusive != exclusive:
-                        return False
+                        continue
                 if but_not is not None:
                     if a.matches(but_not, case_sensitive=case_sensitive):
-                        return False
+                        continue
                 return True
         return False
 

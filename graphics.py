@@ -62,4 +62,4 @@ def plot_bands(*args):
                 patches = PatchCollection(boxes,color=f"C{tier}")
                 axes[panel].add_collection(patches)
         ax.set_yticklabels(yticklabels)
-    plt.show()
+    # plt.show()
