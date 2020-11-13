@@ -9,7 +9,7 @@ import matplotlib.ticker as ticker
 import matplotlib
 from astropy.visualization import quantity_support
 
-def plot_bands(*args):
+def plot_bands(*args, skip_empty=False):
     """Do the iconic frequncy plot"""
 
     spans = [
@@ -22,7 +22,19 @@ def plot_bands(*args):
         [30*units.GHz, 300*units.GHz],
         ]
 
-    fig, axes = plt.subplots(len(spans), figsize=(14,12))
+    if skip_empty:
+        relevant_spans = []
+        for span in spans:
+            span_flag = False
+            for collection in args:
+                bands = collection[span[0]:span[1]]
+                if len(bands) != 0:
+                    span_flag = True
+            if span_flag:
+                relevant_spans.append(span)
+        spans = relevant_spans
+
+    fig, axes = plt.subplots(len(spans), figsize=(14,12.0*len(spans)/7.0))
     plt.subplots_adjust(hspace=0.4)
     quantity_support()
 
