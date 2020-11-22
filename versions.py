@@ -1,22 +1,24 @@
 """Handles keeping track of changes to the FCC tables document"""
 
+
 class Version(object):
     """A store for version-specific information on the FCC tables"""
+
     def __init__(self, date):
         """Initialize the Version information from the database"""
         self.page_patches = database["page_patches_" + date]
         self.layouts = database["layouts_" + date]
-        
+
     def patch_page(self, page):
         """Provide a correct page number for a page where the right answer is hard to find"""
         return self.page_patches.get(page, page)
 
     def get_layout(self, page, row=0):
         entry = self.layouts[page]
-        clauses = entry.split(',')
+        clauses = entry.split(",")
         layouts = []
         for c in clauses:
-            words = c.strip().split('*')
+            words = c.strip().split("*")
             if len(words) == 1:
                 count = 1
             elif len(words) == 2:
@@ -25,7 +27,8 @@ class Version(object):
                 raise ValueError(f"Badly formatted layout {entry}")
             for i in range(count):
                 layouts.append(words[0])
-        return layouts[min(row, len(layouts)-1)]
+        return layouts[min(row, len(layouts) - 1)]
+
 
 database = dict()
 
@@ -36,15 +39,15 @@ database["page_patches_20200818"] = {
 }
 
 database["layouts_20200818"] = {
-    "Page 1" : "012357/9",
-    "Page 2" : "023467/8",
-    "Page 3" : "012345/6",
-    "Page 4" : "012345/6",
-    "Page 5" : "012356/7", # Messy
-    "Page 6" : "011234/5",
-    "Page 7" : "013467/8", # Messy
-    "Page 8" : "013456/7",
-    "Page 9" : "023467/8",
+    "Page 1": "012357/9",
+    "Page 2": "023467/8",
+    "Page 3": "012345/6",
+    "Page 4": "012345/6",
+    "Page 5": "012356/7",  # Messy
+    "Page 6": "011234/5",
+    "Page 7": "013467/8",  # Messy
+    "Page 8": "013456/7",
+    "Page 9": "023467/8",
     "Page 10": "012345/6",
     "Page 11": "012356/7",
     "Page 12": "011234/5",

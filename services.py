@@ -1,10 +1,14 @@
 """Details of ITU Radio services"""
 
-__all__ = [ "Service" ]
+__all__ = ["Service"]
+
 
 class Service:
     """A service that can be allocated to a band"""
-    def __init__(self, name, abbreviation=None, science=False, science_support=False, aliases=[]):
+
+    def __init__(
+        self, name, abbreviation=None, science=False, science_support=False, aliases=[]
+    ):
         self.name = name.lower().strip()
         if abbreviation is None:
             self.abbreviation = self.name
@@ -17,10 +21,10 @@ class Service:
         result = None
         ll = line.lower()
         for service in _services:
-            candidates = [ service.name ] + service.aliases
+            candidates = [service.name] + service.aliases
             for candidate in candidates:
                 cl = candidate.lower()
-                if ll[0:len(cl)] == cl:
+                if ll[0 : len(cl)] == cl:
                     if result is None:
                         result = service
                     else:
@@ -28,8 +32,9 @@ class Service:
                             result = service
         return result
 
+
 _services = [
-#    Service(""),
+    #    Service(""),
     Service("AERONAUTICAL MOBILE"),
     Service("AERONAUTICAL MOBILE-SATELLITE"),
     Service("AERONAUTICAL RADIONAVIGATION", aliases=["AERONAUTICAL RADIONAVI-GATION"]),
@@ -60,6 +65,12 @@ _services = [
     Service("RADIONAVIGATION-SATELLITE"),
     Service("SPACE OPERATION"),
     Service("SPACE RESEARCH", science_support=True),
-    Service("STANDARD FREQUENCY AND TIME SIGNAL", abbreviation="Time", science_support=True),
-    Service("STANDARD FREQUENCY AND TIME SIGNAL-SATELLITE", abbreviation="Time", science_support=True),
+    Service(
+        "STANDARD FREQUENCY AND TIME SIGNAL", abbreviation="Time", science_support=True
+    ),
+    Service(
+        "STANDARD FREQUENCY AND TIME SIGNAL-SATELLITE",
+        abbreviation="Time",
+        science_support=True,
+    ),
 ]

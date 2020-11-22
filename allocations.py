@@ -2,15 +2,17 @@
 
 import fnmatch
 
-__all__ = [ "Allocation" ]
+__all__ = ["Allocation"]
 
 from .services import Service
 from .footnotes import footnote2html
 
+
 class Allocation:
     """An entry allocating a service to a band"""
+
     def to_str(self, html=False, footnote_definitions=None, tooltips=True):
-        """Return a string representation of an Allocation, possibly with HTML and tooltips"""
+        """String representation of Allocation, possibly with HTML/tooltips"""
         if self.primary:
             result = self.service.name.upper()
         else:
@@ -19,19 +21,27 @@ class Allocation:
             result += " " + " ".join([f"({m})" for m in self.modifiers])
         if len(self.footnotes) != 0:
             if html:
-                result = result + " " + " ".join(
-                    [footnote2html(f, footnote_definitions, tooltips=tooltips) for f in self.footnotes])
+                result = (
+                    result
+                    + " "
+                    + " ".join(
+                        [
+                            footnote2html(f, footnote_definitions, tooltips=tooltips)
+                            for f in self.footnotes
+                        ]
+                    )
+                )
             else:
                 result = result + " " + " ".join(self.footnotes)
         # if html:
         #     result = '<p><span id="fcc-allocation">' + result + '</span></p>'
-        return (result)
+        return result
 
     def __str__(self):
         """Return a string representation of an allocations"""
         return self.to_str()
 
-    def __eq__(self,a):
+    def __eq__(self, a):
         if self.primary != a.primary:
             return False
         if self.modifiers != a.modifiers:
@@ -48,13 +58,13 @@ class Allocation:
 
     def __gt__(self, a):
         return str(self) > str(a)
-    
+
     def __lt__(self, a):
         return str(self) < str(a)
-    
+
     def __ge__(self, a):
         return str(self) >= str(a)
-    
+
     def __le__(self, a):
         return str(self) <= str(a)
 
@@ -73,27 +83,27 @@ class Allocation:
         if service is None:
             return None
         # Look at the remainder of the line
-        invocation = line[0:len(service.name)]
+        invocation = line[0 : len(service.name)]
         if len(invocation) > 0:
             first_word = invocation.split()[0]
         else:
             first_word = invocation
         primary = first_word.isupper()
-        remainder = line[len(service.name):].strip()
+        remainder = line[len(service.name) :].strip()
         # Anyting in parentheses becomes a modifiers
         modifiers = []
         while len(remainder) > 0:
             if remainder[0] == r"(":
-                modifier = remainder[1:remainder.index(r")")]
+                modifier = remainder[1 : remainder.index(r")")]
                 modifiers.append(modifier)
-                remainder = remainder[len(modifier)+2:].strip()
+                remainder = remainder[len(modifier) + 2 :].strip()
             else:
                 break
         # Now the remainder (if anything) must be footnotes
         footnotes = remainder.split()
         # Create the result
         result = cls()
-        result.service = service #.strip()
+        result.service = service  # .strip()
         result.modifiers = modifiers
         result.footnotes = footnotes
         result.primary = primary

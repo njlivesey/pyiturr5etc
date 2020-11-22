@@ -1,10 +1,6 @@
 """First attempt at Python code to handle FCC tables"""
 
-from IPython.display import display, HTML
 import astropy.units as units
-import bisect
-import copy
-import docx
 import docx
 import numpy as np
 import pandas as pd
@@ -15,27 +11,34 @@ from .utils import cell2text, first_line, last_line, pretty_print
 from .cells import FCCCell
 from .band_collections import BandCollection
 
+
 class OtherTable(Exception):
     pass
+
+
 class FCCTableError(Exception):
     pass
 
+
 n_logical_columns = 6
 
-def _parse_table(table, unit, version=Version("20200818"), dump_raw=False, dump_ordered=False):
+
+def _parse_table(
+    table, unit, version=Version("20200818"), dump_raw=False, dump_ordered=False
+):
     """Go through one table in the document and return a guess as to its contents"""
     # First get the first row and work out if this is a table with headers or not
     header = first_line(table.rows[0].cells[0])
     n_rows = len(table.rows)
     header_prefix = "Table of Frequency Allocations"
-    has_header = header[0:len(header_prefix)] == header_prefix
+    has_header = header[0 : len(header_prefix)] == header_prefix
     page = None
     if has_header:
         page = last_line(table.rows[0].cells[-1])
         first_useful_row = 3
         # Get the units from the remainder of the header
-        words = header[len(header_prefix):].split()
-        unit = units.Unit(words[1])        
+        words = header[len(header_prefix) :].split()
+        unit = units.Unit(words[1])
     else:
         first_useful_row = 0
     # Get the last row and check it's not just full of page numbers
@@ -44,26 +47,21 @@ def _parse_table(table, unit, version=Version("20200818"), dump_raw=False, dump_
     except IndexError:
         footer = ""
     footer_prefix = "Page"
-    has_footer = footer[0:len(footer_prefix)] == footer_prefix
+    has_footer = footer[0 : len(footer_prefix)] == footer_prefix
     if has_footer:
-        last_useful_row = n_rows-1
+        last_useful_row = n_rows - 1
     else:
-        last_useful_row = n_rows-1
+        last_useful_row = n_rows - 1
     # Also, get the page number if it's in the last row/column (or thereabouts)
-    last_working_row = -1
     if not has_header:
-        for ir in [-1,-2,-3]:
+        for ir in [-1, -2, -3]:
             try:
                 page = last_line(table.rows[ir].cells[-1])
-                last_working_row = ir
                 break
             except IndexError:
                 pass
     # Some page numbers are hard to deduce, these we patch
     page = version.patch_page(page)
-    # Check to see if the table ends with a page number
-    entry = first_line(table.rows[last_working_row].cells[-1])
-    ends_with_page_number = entry[0:len(footer_prefix)] == footer_prefix
 
     # Possibly dump the raw table
     if dump_raw:
@@ -76,8 +74,10 @@ def _parse_table(table, unit, version=Version("20200818"), dump_raw=False, dump_
                 except (ValueError):
                     this_bottom = None
                 entries.append(
-                    c.text +
-                    f"<{c._element.left},{c._element.right}>, <{c._element.top},{this_bottom}>")
+                    c.text
+                    + f"<{c._element.left},{c._element.right}>, "
+                    + f"<{c._element.top},{this_bottom}>"
+                )
             frame = frame.append(pd.Series(entries), ignore_index=True)
         print(page)
         pretty_print(frame)
@@ -87,8 +87,8 @@ def _parse_table(table, unit, version=Version("20200818"), dump_raw=False, dump_
 
     # Look at how each cell spans the grid (left and right information)
     left, right, top, bottom = [
-        np.zeros(shape=[n_rows, max_cols], dtype=int)
-        for i in range(4)]
+        np.zeros(shape=[n_rows, max_cols], dtype=int) for i in range(4)
+    ]
     for ir, r in enumerate(table.rows):
         for ic, c in enumerate(r.cells):
             left[ir, ic] = c._element.left
@@ -97,24 +97,25 @@ def _parse_table(table, unit, version=Version("20200818"), dump_raw=False, dump_
             try:
                 bottom[ir, ic] = c._element.bottom
             except ValueError:
-                bottom[ir, ic] = top[ir, ic]+1
-    assert np.max(bottom)==n_rows, "Confused about the number of rows"
-    
+                bottom[ir, ic] = top[ir, ic] + 1
+    assert np.max(bottom) == n_rows, "Confused about the number of rows"
+
     # Build up a new data structure for the cells in the proper order
     max_boxes = np.max(right)
-    n_boxes_per_row = np.max(right, axis=1)
     ordered = []
     for ir in range(n_rows):
-        boxes = [None]*max_boxes
+        boxes = [None] * max_boxes
         ordered.append(boxes)
     for rIn, r in enumerate(table.rows):
         for cIn, c in enumerate(r.cells):
-            for rOut in range(top[rIn,cIn], bottom[rIn,cIn]):
-                for cOut in range(left[rIn,cIn], right[rIn,cIn]):
+            for rOut in range(top[rIn, cIn], bottom[rIn, cIn]):
+                for cOut in range(left[rIn, cIn], right[rIn, cIn]):
                     new_value = cell2text(c)
-                    current_value =  ordered[rOut][cOut]
-                    if current_value != None and current_value != new_value:
-                        raise FCCTableError(f"Trampled unexpectedly {rOut},{cOut} from {rIn},{cIn}")
+                    current_value = ordered[rOut][cOut]
+                    if current_value is not None and current_value != new_value:
+                        raise FCCTableError(
+                            f"Trampled unexpectedly {rOut},{cOut} from {rIn},{cIn}"
+                        )
                     else:
                         ordered[rOut][cOut] = new_value
 
@@ -127,7 +128,7 @@ def _parse_table(table, unit, version=Version("20200818"), dump_raw=False, dump_
         pretty_print(frame)
 
     # Now go through and cut out the header row
-    ordered = ordered[first_useful_row:last_useful_row+1]
+    ordered = ordered[first_useful_row : last_useful_row + 1]
     n_rows = n_rows - first_useful_row
     # Create a list of lists to hold the result
     collections = [list() for i in range(n_logical_columns)]
@@ -135,32 +136,38 @@ def _parse_table(table, unit, version=Version("20200818"), dump_raw=False, dump_
         # OK, get the layout for this page/row
         layout = version.get_layout(page, ir)
         assert layout[n_logical_columns] == "/", f"Bad layout: {layout}"
-        if int(layout[n_logical_columns+1:]) != max_boxes:
+        if int(layout[n_logical_columns + 1 :]) != max_boxes:
             raise ValueError("Supplied layout does not match table")
-        sources = [int(l,16) for l in layout[0:n_logical_columns]]
+        sources = [int(l, 16) for l in layout[0:n_logical_columns]]
         for i in range(n_logical_columns):
-            collections[i].append(FCCCell(
-                boxes[sources[i]],
-                unit=unit, logical_column=i,
-                ordered_row=ir, ordered_column=sources[i],
-                page=page))
+            collections[i].append(
+                FCCCell(
+                    boxes[sources[i]],
+                    unit=unit,
+                    logical_column=i,
+                    ordered_row=ir,
+                    ordered_column=sources[i],
+                    page=page,
+                )
+            )
     # Finish off
-    diagnostics = {
-        "page": page,
-        "has_header": has_header}
+    diagnostics = {"page": page, "has_header": has_header}
     # for c in collections[0]:
     #     print (c.lines)
     return collections, unit, diagnostics
 
+
 class DigestError(Exception):
     """Error raised when collection can't be digested"""
+
     pass
 
+
 def _digest_collection(cells, fcc_rules_cells=None, jurisdictions=None, debug=False):
-    """Go through a column of cells, merge what needs to be merged and parse into bands"""
+    """Go through column of cells, merge and parse as needed"""
     # Set up some defaults
     if fcc_rules_cells is None:
-        rules = [None]*len(cells)
+        rules = [None] * len(cells)
     else:
         rules = fcc_rules_cells
     assert len(rules) == len(cells), "Mismatch between entries and rules"
@@ -180,8 +187,8 @@ def _digest_collection(cells, fcc_rules_cells=None, jurisdictions=None, debug=Fa
         else:
             rule = None
         if debug:
-            print ("-----------------------------------------------------")
-            print (f"Cell is: {cell.lines}")
+            print("-----------------------------------------------------")
+            print(f"Cell is: {cell.lines}")
         try:
             cell_as_band = Band.parse(cell, fcc_rules=rule, jurisdictions=jurisdictions)
             cell_is_band_start = True
@@ -194,16 +201,19 @@ def _digest_collection(cells, fcc_rules_cells=None, jurisdictions=None, debug=Fa
                 cell_is_new_band = accumulator_as_band.bounds != cell_as_band.bounds
             except AttributeError:
                 cell_is_new_band = True
-            pass # End try/except
+            pass  # End try/except
         else:
             cell_is_new_band = False
         if debug:
-            print (f"    cell_is_band_start={cell_is_band_start}, cell_is_new_band={cell_is_new_band}")
-            print (f"    cell_as_band=", end="")
+            print(
+                f"    cell_is_band_start={cell_is_band_start}, "
+                + f"cell_is_new_band={cell_is_new_band}"
+            )
+            print(f"    cell_as_band=", end="")
             try:
-                print (cell_as_band.compact_str())
+                print(cell_as_band.compact_str())
             except AttributeError:
-                print (cell_as_band)
+                print(cell_as_band)
 
         accumulate_cell = True
         if cell_is_new_band:
@@ -211,11 +221,11 @@ def _digest_collection(cells, fcc_rules_cells=None, jurisdictions=None, debug=Fa
             # band, and start a new accumulator
             if accumulator_as_band is not None:
                 if debug:
-                    print (f"*** Storing: {accumulator_as_band.compact_str()}")
+                    print(f"*** Storing: {accumulator_as_band.compact_str()}")
                 result.append(accumulator_as_band)
             else:
                 if debug:
-                    print (f"    nothing in accumulator to store.")
+                    print(f"    nothing in accumulator to store.")
             accumulator = []
             rules_accumulator = []
         elif cell_is_band_start:
@@ -226,10 +236,10 @@ def _digest_collection(cells, fcc_rules_cells=None, jurisdictions=None, debug=Fa
             accumulate_cell = False
             try:
                 if not cell_as_band.equal(accumulator_as_band, ignore_fcc_rules=True):
-                    print (cell_as_band.compact_str())
-                    print ("----------")
-                    print (accumulator_as_band.compact_str())
-                    raise ValueError ("Confused about bands")
+                    print(cell_as_band.compact_str())
+                    print("----------")
+                    print(accumulator_as_band.compact_str())
+                    raise ValueError("Confused about bands")
             except AttributeError:
                 pass
         # Now accumulate the cell contents if appropriate
@@ -246,52 +256,58 @@ def _digest_collection(cells, fcc_rules_cells=None, jurisdictions=None, debug=Fa
                 pass
             try:
                 accumulator_as_band = Band.parse(
-                    accumulator, fcc_rules=rules_accumulator, unit=cell.unit, jurisdictions=jurisdictions)
+                    accumulator,
+                    fcc_rules=rules_accumulator,
+                    unit=cell.unit,
+                    jurisdictions=jurisdictions,
+                )
             except NotBandError:
                 accumulator_as_band = None
         if debug:
-            print (f"    accumulator={accumulator}")
+            print(f"    accumulator={accumulator}")
             if accumulator_as_band is not None:
-                print (f"    accumulator_as_band={accumulator_as_band.compact_str()}")
+                print(f"    accumulator_as_band={accumulator_as_band.compact_str()}")
             else:
-                print (f"    accumulator_as_band=None")
-        pass # End of loop over cells
+                print(f"    accumulator_as_band=None")
+        pass  # End of loop over cells
     # Once we're done with the loop, add the final band
     if accumulator_as_band is not None:
         result.append(accumulator_as_band)
     return result
 
+
 def parse_all_tables(fccfile, table_range=None, **kwargs):
     """Go through tables in fcc file and parse them"""
-    
+
     version = Version("20200818")
     tables = fccfile.tables
     unit = units.dimensionless_unscaled
     collections_list = [list() for i in range(n_logical_columns)]
     if table_range is None:
-        table_range=range(0,65)
-    print ("Reading tables: ", end="")
+        table_range = range(0, 65)
+    print("Reading tables: ", end="")
     for it in table_range:
-        print (f"{it}, ", end="")
+        print(f"{it}, ", end="")
         table = tables[it]
         new_columns, new_unit, diagnostics = _parse_table(
-            table, unit, version, **kwargs)
+            table, unit, version, **kwargs
+        )
         unit = new_unit
         for collection, new_entries in zip(collections_list, new_columns):
             collection += new_entries
     # Now go through and convert these into band collections
-    print ("done.")
+    print("done.")
     collections = dict()
-    print ("Digesting: ", end="")
-    for name, i in zip(["R1","R2","R3"], range(3)):
-        print (f"{name}, ", end="")
+    print("Digesting: ", end="")
+    for name, i in zip(["R1", "R2", "R3"], range(3)):
+        print(f"{name}, ", end="")
         collections[name] = _digest_collection(
-            collections_list[i], jurisdictions=[name], debug=False)
-    for name, i in zip(["F","NF"], range(3,5)):
-        print (f"{name}, ", end="")
+            collections_list[i], jurisdictions=[name], debug=False
+        )
+    for name, i in zip(["F", "NF"], range(3, 5)):
+        print(f"{name}, ", end="")
         collections[name] = _digest_collection(
-            collections_list[i], collections_list[5],
-            jurisdictions=[name])
-    print ("done.")
+            collections_list[i], collections_list[5], jurisdictions=[name]
+        )
+    print("done.")
     return collections
-            

@@ -26,7 +26,7 @@ class NotBoundsError(Exception):
 def _parse_bounds(text, unit):
     """Turn a string giving a frequency range into a bounds object"""
     re_float = r"[0-9_]+(?:\.[0-9_]+)?"
-    re_bounds = f"^({re_float})-({re_float})[\w]*(\(Not allocated\))?$"
+    re_bounds = f"^({re_float})-({re_float})[\\w]*(\\(Not allocated\\))?$"
     # print (f"Matching {re_bounds} to {text}")
     match = re.match(re_bounds, text)
     if match is not None:
@@ -35,7 +35,7 @@ def _parse_bounds(text, unit):
             float(match.group(2)) * unit,
         ]
     # Perhaps this is the "below the bottom" case.
-    re_bottom = f"^Below ({re_float}) \(Not Allocated\)$"
+    re_bottom = f"^Below ({re_float}) \\(Not Allocated\\)$"
     match = re.match(re_bottom, text)
     if match is not None:
         return [0.0 * unit, float(match.group(1)) * unit]
@@ -53,7 +53,7 @@ class NotBandError(Exception):
 
 
 class Band:
-    """A frequency bounds and the allocations thereto (i.e., contents of a table cell)"""
+    """A frequency bound and allocations thereto (i.e., contents of a table cell)"""
 
     def __str__(self):
         """Return a string representation of a Band"""
@@ -84,7 +84,7 @@ class Band:
         if separator is None:
             separator = "\n"
         highlight_colors = ["red", "green", "blue", "orange"]
-        if highlight_allocations == True:
+        if highlight_allocations is True:
             highlight_allocations = [
                 "Earth Exploration-Satellite*",
                 "Radio Astronomy*",
