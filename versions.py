@@ -10,7 +10,7 @@ class Version(object):
         self.layouts = database["layouts_" + date]
 
     def patch_page(self, page):
-        """Provide a correct page number for a page where the right answer is hard to find"""
+        """Correct page number when correct answer hard to find"""
         return self.page_patches.get(page, page)
 
     def get_layout(self, page, row=0):

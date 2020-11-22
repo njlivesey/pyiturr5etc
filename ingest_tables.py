@@ -1,7 +1,6 @@
 """First attempt at Python code to handle FCC tables"""
 
 import astropy.units as units
-import docx
 import numpy as np
 import pandas as pd
 
