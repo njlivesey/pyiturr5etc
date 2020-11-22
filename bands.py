@@ -46,7 +46,6 @@ def _parse_bounds(text, unit):
 # --------------------------------------------------------------------- Band
 
 
-
 class NotBandError(Exception):
     """Exception used to indicate failed parse of band"""
 
