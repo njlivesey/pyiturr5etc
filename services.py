@@ -34,7 +34,6 @@ class Service:
 
 
 _services = [
-    #    Service(""),
     Service("AERONAUTICAL MOBILE"),
     Service("AERONAUTICAL MOBILE-SATELLITE"),
     Service("AERONAUTICAL RADIONAVIGATION", aliases=["AERONAUTICAL RADIONAVI-GATION"]),

@@ -197,9 +197,14 @@ class BandCollection:
         # Now add any adjacent bands
         if adjacent:
             deltaF = 1.0*units.kHz
-            adjacent_bands = []
+            # Identify all the bands that are truely adjacent
+            truly_adjacent_bands = []
             for f in [core_min-deltaF, core_max+deltaF]:
-                adjacent_bands += self[f]
+                truly_adjacent_bands += self[f]
+            # Now make the span of this collection the span of what we're after.
+            adjacent_min = min(b.bounds[0] for b in truly_adjacent_bands)
+            adjacent_max = max(b.bounds[1] for b in truly_adjacent_bands)
+            adjacent_bands = self[adjacent_min:adjacent_max]
         else:
             adjacent_bands = []
         # Apply condition to the adjacent bands if supplied
