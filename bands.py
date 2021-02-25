@@ -271,7 +271,7 @@ class Band:
             return self.bounds[0] > a.bounds[0]
         else:
             return self.jurisdictions > a.jurisdictions
-       
+
     def __lt__(self, a):
         if self.bounds[0] != a.bounds[0]:
             return self.bounds[0] < a.bounds[0]

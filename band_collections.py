@@ -5,10 +5,12 @@ from intervaltree import IntervalTree
 import copy
 import numpy as np
 
-__all__ = [ "Collection" ]
+__all__ = ["Collection"]
+
 
 class BandCollection:
     """A collection of bands corresponding to one or more jurisdictions"""
+
     # This is basically a wrapper around IntervalTree, but not a subclass
 
     def __init__(self, *args):
@@ -18,7 +20,7 @@ class BandCollection:
         for a in args:
             for b in a:
                 self.append(b)
-    
+
     def __getitem__(self, key):
         """Get a specific item/range from the collection"""
         # Something of a wrapper around IntervalTree.__getitem__.
@@ -28,8 +30,8 @@ class BandCollection:
             key = round(key.to(units.Hz).value)
         except AttributeError:
             key = slice(
-                round(key.start.to(units.Hz).value),
-                round(key.stop.to(units.Hz).value))
+                round(key.start.to(units.Hz).value), round(key.stop.to(units.Hz).value)
+            )
         intervals = self.data.__getitem__(key)
         result = []
         for i in intervals:
@@ -45,7 +47,7 @@ class BandCollection:
     def __len__(self):
         """Return number of bands"""
         return len(self.data)
-        
+
     def append(self, band):
         """Append a band to the collection"""
         # This just invokes the addi method from IntervalTree.  Use
@@ -54,14 +56,15 @@ class BandCollection:
         self.data.addi(
             round(band.bounds[0].to(units.Hz).value),
             round(band.bounds[1].to(units.Hz).value),
-            band)
+            band,
+        )
 
     def union(self, other):
         """Merge two sets of band collections without regard to their content"""
         result = BandCollection()
         result.data = self.data | other.data
         return result
-        
+
     def merge(self, other, single_jurisdiction=None):
         """Merge band collections, paying attention to quasi-duplicates (i.e., jurisdictions)"""
         # Build a raw lists that is the brain-dead merge of both
@@ -74,7 +77,7 @@ class BandCollection:
             # Do a deep copy because today's new_band becomes
             # tomorrow's recorded_band, so if we don't the input lists
             # will get trampled on.  Don't deep copy footnote
-            # definitions though.            
+            # definitions though.
             new_band = interim_band.deepcopy()
             add_band = True
             if single_jurisdiction:
@@ -86,13 +89,17 @@ class BandCollection:
                 # all but the jurisdiction.  If so, just note the
                 # additional jurisdiction, in the already-recorded
                 # band, if not, add this one.
-                recorded_bands = result[new_band.bounds[0]:new_band.bounds[1]]
+                recorded_bands = result[new_band.bounds[0] : new_band.bounds[1]]
                 add_band = True
                 for recorded_band in recorded_bands:
                     if recorded_band.equal(new_band, ignore_jurisdictions=True):
-                        recorded_band.jurisdictions = sorted(list(
-                            set(recorded_band.jurisdictions +
-                                new_band.jurisdictions)))
+                        recorded_band.jurisdictions = sorted(
+                            list(
+                                set(
+                                    recorded_band.jurisdictions + new_band.jurisdictions
+                                )
+                            )
+                        )
                         add_band = False
             if add_band:
                 result.append(new_band)
@@ -100,7 +107,7 @@ class BandCollection:
 
     def get_boundaries(self):
         """Return an array that gives all the band edges, in order"""
-        return sorted(self.data.boundary_table)*units.Hz
+        return sorted(self.data.boundary_table) * units.Hz
 
     def flatten(self):
         """Where bands overlap, split them, then merge contents of bands with same spans"""
@@ -111,9 +118,11 @@ class BandCollection:
         bounds = self.get_boundaries()
         interim = BandCollection()
         for lbound, ubound in zip(bounds[:-1], bounds[1:]):
-            if ubound-lbound < 10*units.Hz:
-                raise ValueError(f"Tiny or negative band: {lbound} to {ubound} ({ubound-lbound})")
-            relevant_bands = self[0.5*(lbound+ubound)]
+            if ubound - lbound < 10 * units.Hz:
+                raise ValueError(
+                    f"Tiny or negative band: {lbound} to {ubound} ({ubound-lbound})"
+                )
+            relevant_bands = self[0.5 * (lbound + ubound)]
             for band in relevant_bands:
                 new_band = band.deepcopy()
                 new_band.bounds[0] = np.around(lbound.to(band.bounds[0].unit), 5)
@@ -135,15 +144,19 @@ class BandCollection:
                     if overlapping_band is band:
                         continue
                     if not overlapping_band.has_same_bounds_as(merged_band):
-                        print (merged_band.compact_str())
-                        print (overlapping_band.compact_str())
+                        print(merged_band.compact_str())
+                        print(overlapping_band.compact_str())
                         raise ValueError(f"Inappropriate overlap")
-                    merged_band = merged_band.combine_with(overlapping_band, skip_bounds=True)
+                    merged_band = merged_band.combine_with(
+                        overlapping_band, skip_bounds=True
+                    )
                 result.append(merged_band)
             pass
         return result
 
-    def get_bands(self, f0, f1=None, condition=None, adjacent=False, margin=None, oobe=False):
+    def get_bands(
+        self, f0, f1=None, condition=None, adjacent=False, margin=None, oobe=False
+    ):
         """Return the bands within f0-f1 (or enclosing f0).  Optionally return from a wider range"""
         # Do some error checking
         if oobe:
@@ -170,7 +183,7 @@ class BandCollection:
             # Can supply as fraction of bandwidth or in frequency
             margin_fraction = None
             # Think about cases where margin has units of some kind
-            if hasattr(margin,"to"):
+            if hasattr(margin, "to"):
                 try:
                     margin_frequency = margin.to(units.Hz)
                 except units.UnitConversionError:
@@ -182,9 +195,9 @@ class BandCollection:
                     pass
             else:
                 # If margin is unitless, it must be fractional
-                margin_fraction = margin    
+                margin_fraction = margin
             if margin_fraction is not None:
-                margin_frequency = (margin_fraction-0.5)*core_bandwidth
+                margin_frequency = (margin_fraction - 0.5) * core_bandwidth
             full_min = core_min - margin_frequency
             full_max = core_max + margin_frequency
             marginal_bands = self[full_min:full_max]
@@ -196,10 +209,10 @@ class BandCollection:
 
         # Now add any adjacent bands
         if adjacent:
-            deltaF = 1.0*units.kHz
+            deltaF = 1.0 * units.kHz
             # Identify all the bands that are truely adjacent
             truly_adjacent_bands = []
-            for f in [core_min-deltaF, core_max+deltaF]:
+            for f in [core_min - deltaF, core_max + deltaF]:
                 truly_adjacent_bands += self[f]
             # Now make the span of this collection the span of what we're after.
             adjacent_min = min(b.bounds[0] for b in truly_adjacent_bands)
@@ -211,7 +224,7 @@ class BandCollection:
         if condition:
             adjacent_bands = [band for band in adjacent_bands if condition(band)]
         # Now combine all the bands found, remove duplicates and sort
-        combined = core+marginal_bands+adjacent_bands
+        combined = core + marginal_bands + adjacent_bands
         return sorted(list(set(combined)))
 
     def tolist(self):
@@ -231,7 +244,7 @@ class BandCollection:
         # Loop over all the intervals
         for lbound, ubound in zip(bounds[:-1], bounds[1:]):
             # Find all the bands that overlap the midpoint of this little span
-            center = 0.5*(lbound+ubound)
+            center = 0.5 * (lbound + ubound)
             bands = self.get_bands(center)
             # Keep track of whether we added bands to the accumulator
             accumulator_updated = False
@@ -247,8 +260,9 @@ class BandCollection:
                 # OK, so this is a new band that meets our condition
                 if accumulator is not None:
                     # If we're accumulating a band, add to it
-                    assert accumulator.overlaps(band) or accumulator.is_adjacent(band), \
-                        "Confused aboue band adjecency/overlap"
+                    assert accumulator.overlaps(band) or accumulator.is_adjacent(
+                        band
+                    ), "Confused aboue band adjecency/overlap"
                     accumulator = accumulator.combine_with(band)
                     accumulator_updated = True
                 else:
