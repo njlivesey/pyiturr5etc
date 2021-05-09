@@ -6,6 +6,7 @@ class Version(object):
 
     def __init__(self, date):
         """Initialize the Version information from the database"""
+        self.date = date
         self.page_patches = database["page_patches_" + date]
         self.layouts = database["layouts_" + date]
 

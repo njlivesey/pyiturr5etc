@@ -64,8 +64,9 @@ def read(
     # Open the FCC file
     docx_data = docx.Document(filename)
     # Read all the tables
-    collections = parse_all_tables(docx_data, **kwargs)
+    collections, version = parse_all_tables(docx_data, **kwargs)
     result = FCCTables()
+    result.version = version
     result.collections = collections
     # Now possibly insert the additional bands.
     if not skip_additionals:
@@ -142,8 +143,8 @@ def htmlcolumn(bands, append_footnotes=False):
     """Produce an HTML table corresponding to a set of bands"""
     # First loop over the bands and work out how many rows and columns
     # we'll need
-    text = '<link rel="stylesheet" href="fcc.css">'
-    text += '<table id="fcc-table">'
+    # text = '<link rel="stylesheet" href="fcc.css">'
+    text = '<table id="fcc-table">'
     for b in bands:
         text += '<tr><td id="fcc-td">'
         text += b.to_html(highlight_allocations=True, skip_jurisdictions=True)
@@ -168,7 +169,7 @@ def htmlcolumn(bands, append_footnotes=False):
     return text
 
 
-def htmltable(bands, append_footnotes=False, tooltips=True):
+def htmltable(bands, append_footnotes=False, tooltips=True, filename=None):
     """Produce an HTML table corresponding to a set of bands"""
     # First loop over the bands and work out how many rows (frequency
     # spans) and columns (jurisdictions) we'll need.
@@ -259,37 +260,36 @@ def htmltable(bands, append_footnotes=False, tooltips=True):
     #     print ()
 
     # Start the HTML for the table
-    text = '<link rel="stylesheet" href="fcc.css">'
-    text += '<table id="fcc-table">'
-    text += "<tr>"
+    text = ['<-- HTML output from pyfcctab package by Nathaniel.J.Livesey@jpl.nasa.gov-->']
+    text += ['<link rel="stylesheet" href="fcc.css">']
+    # with open("fcc.css", "r") as css_file:
+    #    text = css_file.readlines()
+    text += ['<table id="fcc-table">']
+    text += ["<tr>"]
     # Add the header row
     for j in jurisdictions:
-        text += '<th id="fcc-th">'
-        text += str(j)
-        text += "</th>"
-    text += "</tr>\n"
+        text += ['<th id="fcc-th">' + str(j) + "</th>"]
+    text += ["</tr>"]
     # Go through our arrays populate the HTML table
     for r, row in enumerate(table):
-        text += "<tr>"
+        text += ["<tr>"]
         for c, cell in enumerate(row):
             if cell is not Overlapped and cell is not None:
-                text += (
+                text += [
                     f'<td id="fcc-td"; colspan="{cSpan[r,c]}"; rowspan="{rSpan[r,c]}">'
-                )
-                text += cell.to_html(
+                ]
+                text += [cell.to_html(
                     highlight_allocations=True,
                     tooltips=tooltips,
                     skip_jurisdictions=True,
-                )
-                text += "</td>"
+                )]
+                text += ["</td>"]
             if cell is None:
-                text += (
+                text += [
                     f'<td id="fcc-td"; colspan="{cSpan[r,c]}"; rowspan="{rSpan[r,c]}">'
-                )
-                text += "&nbsp;"
-                text += "</td>"
-        text += "</tr>\n"
-    text += "</table>\n"
+                    + "&nbsp;" + "</td>"]
+        text += ["</tr>"]
+    text += ["</table>"]
 
     # Now possibly append a description of all the footnotes
     if append_footnotes:
@@ -302,8 +302,13 @@ def htmltable(bands, append_footnotes=False, tooltips=True):
         footnotes.sort()
 
         for f in footnotes:
-            text += footnotedef2html(f, definitions)
+            text += [footnotedef2html(f, definitions)]
 
     # Now output the HTML
-    display(HTML(text))
+    return text
+    if filename is None:
+        display(HTML("\n".join(text)))
+    else:
+        with open(filename, "w") as file:
+            file.writelines(text)
     return text

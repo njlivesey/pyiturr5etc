@@ -309,4 +309,4 @@ def parse_all_tables(fccfile, table_range=None, **kwargs):
             collections_list[i], collections_list[5], jurisdictions=[name]
         )
     print("done.")
-    return collections
+    return collections, version
