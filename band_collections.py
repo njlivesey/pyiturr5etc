@@ -5,7 +5,7 @@ from intervaltree import IntervalTree
 import copy
 import numpy as np
 
-__all__ = ["Collection"]
+__all__ = ["BandCollection"]
 
 
 class BandCollection:
