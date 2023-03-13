@@ -1,7 +1,7 @@
 """Some graphics routines to visualize spectra"""
 
 import numpy as np
-import astropy.units as units
+import pint
 import matplotlib.pyplot as plt
 from matplotlib.collections import PatchCollection
 from matplotlib.patches import Rectangle
@@ -9,18 +9,19 @@ import matplotlib.ticker as ticker
 import matplotlib
 from astropy.visualization import quantity_support
 
+ureg = pint.unitRegistry()
 
 def plot_bands(*args, skip_empty=False):
     """Do the iconic frequncy plot"""
 
     spans = [
-        [30 * units.kHz, 300 * units.kHz],
-        [0.3 * units.MHz, 3 * units.MHz],
-        [3 * units.MHz, 30 * units.MHz],
-        [30 * units.MHz, 300 * units.MHz],
-        [0.3 * units.GHz, 3 * units.GHz],
-        [3 * units.GHz, 30 * units.GHz],
-        [30 * units.GHz, 300 * units.GHz],
+        [30 * ureg.kHz, 300 * ureg.kHz],
+        [0.3 * ureg.MHz, 3 * ureg.MHz],
+        [3 * ureg.MHz, 30 * ureg.MHz],
+        [30 * ureg.MHz, 300 * ureg.MHz],
+        [0.3 * ureg.GHz, 3 * ureg.GHz],
+        [3 * ureg.GHz, 30 * ureg.GHz],
+        [30 * ureg.GHz, 300 * ureg.GHz],
     ]
 
     if skip_empty:
@@ -48,12 +49,12 @@ def plot_bands(*args, skip_empty=False):
         ax.set_xlim([span[0], span[1]])
         ax.set_xscale("log")
         # Do x ticks
-        suffix = str(span[0].unit)
+        suffix = str(span[0].units)
         xticks = (
             np.array([3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30]) / 3.0 * span[0].value
         )
         xticklabels = [
-            str(t) + " " + str(span[0].unit) for t in np.around(xticks, 1).tolist()
+            str(t) + " " + str(span[0].units) for t in np.around(xticks, 1).tolist()
         ]
         for i in [3, 5, 6]:
             xticklabels[i] = ""
@@ -71,7 +72,7 @@ def plot_bands(*args, skip_empty=False):
                 yticklabels.append(f"Row {tier}")
             boxes = []
             for b in these_bands:
-                x = [v.to(span[0].unit).value for v in b.bounds]
+                x = [v.to(span[0].units).value for v in b.bounds]
                 y = tier + 0.1
                 rect = Rectangle((x[0], y), x[1] - x[0], 0.8)
                 boxes.append(rect)

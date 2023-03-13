@@ -4,13 +4,14 @@ import copy
 import re
 import fnmatch
 import numpy as np
-import astropy.units as units
+import pint
 from termcolor import colored
 
 from .allocations import Allocation
 from .footnotes import footnote2html
 from .jurisdictions import Jurisdiction
 
+ureg = pint.unitsRegistry()
 __all__ = ["NotBoundsError", "NotBandError", "Band"]
 
 # First a supporting class
@@ -428,7 +429,7 @@ class Band:
 
     def has_same_bounds_as(self, a):
         for s, a in zip(self.bounds, a.bounds):
-            if round(s.to(units.Hz).value) != round(a.to(units.Hz).value):
+            if round(s.to(ureg.Hz).value) != round(a.to(ureg.Hz).value):
                 return False
         return True
 
@@ -439,7 +440,7 @@ class Band:
 
     @property
     def frequency_range(self):
-        return units.Quantity([self.bounds[0], self.bounds[1].to(self.bounds[0].unit)])
+        return pint.Quantity([self.bounds[0], self.bounds[1].to(self.bounds[0].units)])
 
     @property
     def bandwidth(self):
@@ -469,7 +470,7 @@ class Band:
             lines = cell.lines
             if unit is not None:
                 raise ValueError("Potentially conflicting unit information")
-            unit = cell.unit
+            unit = cell.units
         else:
             lines = cell
 

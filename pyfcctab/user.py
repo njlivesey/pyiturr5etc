@@ -1,10 +1,10 @@
 """User level routines for the pyfcctab suite, including main table class"""
 
-import astropy.units as units
 import copy
 import docx
 import numpy as np
 import pickle
+import pint
 
 from IPython.display import display, HTML
 from .ingest_tables import parse_all_tables
@@ -13,6 +13,7 @@ from .band_collections import BandCollection
 from .footnotes import ingest_footnote_definitions, footnotedef2html
 from .jurisdictions import Jurisdiction
 
+ureg = pint.UnitRegistry()
 
 class FCCTables(object):
     """Class that holds all information in the FCC tables document"""
@@ -182,7 +183,7 @@ def htmltable(bands, append_footnotes=False, tooltips=True, filename=None):
     # Make this information unique and sorted
     edges = list(set(edges))
     edges.sort()
-    edges = units.Quantity(edges)
+    edges = pint.Quantity(edges)
     jurisdictions = list(set(jurisdictions))
     jurisdictions.sort()
     # OK, so how many rows and columns?

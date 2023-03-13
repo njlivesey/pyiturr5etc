@@ -1,6 +1,6 @@
 """First attempt at Python code to handle FCC tables"""
 
-import astropy.units as units
+import pint
 import numpy as np
 import pandas as pd
 
@@ -10,6 +10,7 @@ from .utils import cell2text, first_line, last_line, pretty_print
 from .cells import FCCCell
 from .band_collections import BandCollection
 
+ureg = pint.UnitRegistry()
 
 class OtherTable(Exception):
     pass
@@ -37,7 +38,7 @@ def _parse_table(
         first_useful_row = 3
         # Get the units from the remainder of the header
         words = header[len(header_prefix) :].split()
-        unit = units.Unit(words[1])
+        unit = pint.Unit(words[1])
     else:
         first_useful_row = 0
     # Get the last row and check it's not just full of page numbers
@@ -280,7 +281,7 @@ def parse_all_tables(fccfile, table_range=None, **kwargs):
 
     version = Version("20200818")
     tables = fccfile.tables
-    unit = units.dimensionless_unscaled
+    unit = ureg.dimensionless
     collections_list = [list() for i in range(n_logical_columns)]
     if table_range is None:
         table_range = range(0, 65)

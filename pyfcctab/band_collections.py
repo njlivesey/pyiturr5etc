@@ -1,9 +1,11 @@
 """Code for handling collections of bands"""
 
-import astropy.units as units
+import pint
 from intervaltree import IntervalTree
 import copy
 import numpy as np
+
+ureg = pint.unitsRegistry()
 
 __all__ = ["BandCollection"]
 
@@ -27,10 +29,10 @@ class BandCollection:
         # However, while the former returns a set of Intervals, we
         # want to return a list of bands.
         try:
-            key = round(key.to(units.Hz).value)
+            key = round(key.to(ureg.Hz).value)
         except AttributeError:
             key = slice(
-                round(key.start.to(units.Hz).value), round(key.stop.to(units.Hz).value)
+                round(key.start.to(ureg.Hz).value), round(key.stop.to(ureg.Hz).value)
             )
         intervals = self.data.__getitem__(key)
         result = []
@@ -54,8 +56,8 @@ class BandCollection:
         # integer Hertz as the indexing.  This is to avoid rounding
         # issues and lack of clarity when mixing MHz, GHz, etc.
         self.data.addi(
-            round(band.bounds[0].to(units.Hz).value),
-            round(band.bounds[1].to(units.Hz).value),
+            round(band.bounds[0].to(ureg.Hz).value),
+            round(band.bounds[1].to(ureg.Hz).value),
             band,
         )
 
@@ -107,7 +109,7 @@ class BandCollection:
 
     def get_boundaries(self):
         """Return an array that gives all the band edges, in order"""
-        return sorted(self.data.boundary_table) * units.Hz
+        return sorted(self.data.boundary_table) * ureg.Hz
 
     def flatten(self):
         """Where bands overlap, split them, then merge contents of bands with same spans"""
@@ -118,15 +120,15 @@ class BandCollection:
         bounds = self.get_boundaries()
         interim = BandCollection()
         for lbound, ubound in zip(bounds[:-1], bounds[1:]):
-            if ubound - lbound < 10 * units.Hz:
+            if ubound - lbound < 10 * ureg.Hz:
                 raise ValueError(
                     f"Tiny or negative band: {lbound} to {ubound} ({ubound-lbound})"
                 )
             relevant_bands = self[0.5 * (lbound + ubound)]
             for band in relevant_bands:
                 new_band = band.deepcopy()
-                new_band.bounds[0] = np.around(lbound.to(band.bounds[0].unit), 5)
-                new_band.bounds[1] = np.around(ubound.to(band.bounds[0].unit), 5)
+                new_band.bounds[0] = np.around(lbound.to(band.bounds[0].units), 5)
+                new_band.bounds[1] = np.around(ubound.to(band.bounds[0].units), 5)
                 interim.append(new_band)
         # Now find the exactly overlapping bands that have resulted and merge them.
         result = BandCollection()
@@ -185,13 +187,13 @@ class BandCollection:
             # Think about cases where margin has units of some kind
             if hasattr(margin, "to"):
                 try:
-                    margin_frequency = margin.to(units.Hz)
-                except units.UnitConversionError:
+                    margin_frequency = margin.to(ureg.Hz)
+                except ureg.unitsConversionError:
                     pass
                 # Now the case where margin is a fraction
                 try:
-                    margin_fraction = margin.to(units.dimensionless_unscaled)
-                except units.UnitConversionError:
+                    margin_fraction = margin.to(ureg.dimensionless_unscaled)
+                except ureg.unitsConversionError:
                     pass
             else:
                 # If margin is unitless, it must be fractional
@@ -209,7 +211,7 @@ class BandCollection:
 
         # Now add any adjacent bands
         if adjacent:
-            deltaF = 1.0 * units.kHz
+            deltaF = 1.0 * ureg.kHz
             # Identify all the bands that are truely adjacent
             truly_adjacent_bands = []
             for f in [core_min - deltaF, core_max + deltaF]:
