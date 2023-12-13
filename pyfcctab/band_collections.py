@@ -1,11 +1,11 @@
 """Code for handling collections of bands"""
 
-import pint
+from .fccpint import ureg
 from intervaltree import IntervalTree
 import copy
 import numpy as np
 
-ureg = pint.unitsRegistry()
+
 
 __all__ = ["BandCollection"]
 
@@ -29,10 +29,10 @@ class BandCollection:
         # However, while the former returns a set of Intervals, we
         # want to return a list of bands.
         try:
-            key = round(key.to(ureg.Hz).value)
+            key = round(key.to(ureg.Hz).magnitude)
         except AttributeError:
             key = slice(
-                round(key.start.to(ureg.Hz).value), round(key.stop.to(ureg.Hz).value)
+                round(key.start.to(ureg.Hz).magnitude), round(key.stop.to(ureg.Hz).magnitude)
             )
         intervals = self.data.__getitem__(key)
         result = []
@@ -56,8 +56,8 @@ class BandCollection:
         # integer Hertz as the indexing.  This is to avoid rounding
         # issues and lack of clarity when mixing MHz, GHz, etc.
         self.data.addi(
-            round(band.bounds[0].to(ureg.Hz).value),
-            round(band.bounds[1].to(ureg.Hz).value),
+            round(band.bounds[0].to(ureg.Hz).magnitude),
+            round(band.bounds[1].to(ureg.Hz).magnitude),
             band,
         )
 

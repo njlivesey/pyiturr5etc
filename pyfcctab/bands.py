@@ -4,14 +4,14 @@ import copy
 import re
 import fnmatch
 import numpy as np
-import pint
+from .fccpint import ureg
 from termcolor import colored
 
 from .allocations import Allocation
 from .footnotes import footnote2html
 from .jurisdictions import Jurisdiction
 
-ureg = pint.unitsRegistry()
+
 __all__ = ["NotBoundsError", "NotBandError", "Band"]
 
 # First a supporting class
@@ -24,7 +24,7 @@ class NotBoundsError(Exception):
     pass
 
 
-def _parse_bounds(text, unit):
+def _parse_bounds(text, units):
     """Turn a string giving a frequency range into a bounds object"""
     re_float = r"[0-9_]+(?:\.[0-9_]+)?"
     re_bounds = f"^({re_float})-({re_float})[\\w]*(\\(Not allocated\\))?$"
@@ -32,14 +32,14 @@ def _parse_bounds(text, unit):
     match = re.match(re_bounds, text)
     if match is not None:
         return [
-            float(match.group(1)) * unit,
-            float(match.group(2)) * unit,
+            float(match.group(1)) * units,
+            float(match.group(2)) * units,
         ]
     # Perhaps this is the "below the bottom" case.
     re_bottom = f"^Below ({re_float}) \\(Not Allocated\\)$"
     match = re.match(re_bottom, text)
     if match is not None:
-        return [0.0 * unit, float(match.group(1)) * unit]
+        return [0.0 * units, float(match.group(1)) * units]
     # Otherwise, this is not a bound
     raise NotBoundsError(f"Not a valid range: {text}")
 
@@ -169,7 +169,7 @@ class Band:
         return result
 
     def range_str(self, html=False):
-        values = [f"{np.around(value,5)}" for value in self.bounds]
+        values = [f"{np.around(value,5):~H}" for value in self.bounds]
         if html:
             return "&ndash;".join(values)
         else:
@@ -429,7 +429,7 @@ class Band:
 
     def has_same_bounds_as(self, a):
         for s, a in zip(self.bounds, a.bounds):
-            if round(s.to(ureg.Hz).value) != round(a.to(ureg.Hz).value):
+            if round(s.to(ureg.Hz).magnitude) != round(a.to(ureg.Hz).magnitude):
                 return False
         return True
 
@@ -452,7 +452,7 @@ class Band:
 
     @classmethod
     def parse(
-        cls, cell, fcc_rules=None, unit=None, jurisdictions=None, annotations=None
+        cls, cell, fcc_rules=None, units=None, jurisdictions=None, annotations=None
     ):
         """Parse a table cell into a Band"""
         # Work out what type of input we've been give, an FCCCell type
@@ -468,15 +468,15 @@ class Band:
             if len(cell.lines) == 0:
                 raise NotBandError("Cell has no useful text")
             lines = cell.lines
-            if unit is not None:
+            if units is not None:
                 raise ValueError("Potentially conflicting unit information")
-            unit = cell.units
+            units = cell.units
         else:
             lines = cell
 
         # Now the first line should be a frequency range
         try:
-            bounds = _parse_bounds(lines[0], unit)
+            bounds = _parse_bounds(lines[0], units)
         except NotBoundsError:
             raise NotBandError("Text doesn't start with bounds, so not a band")
 

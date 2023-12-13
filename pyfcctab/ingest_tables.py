@@ -1,16 +1,18 @@
 """First attempt at Python code to handle FCC tables"""
 
-import pint
 import numpy as np
 import pandas as pd
+import pint
 
 from .bands import NotBandError, Band
 from .versions import Version
 from .utils import cell2text, first_line, last_line, pretty_print
 from .cells import FCCCell
 from .band_collections import BandCollection
+from .fccpint import ureg
 
-ureg = pint.UnitRegistry()
+
+
 
 class OtherTable(Exception):
     pass
@@ -24,7 +26,7 @@ n_logical_columns = 6
 
 
 def _parse_table(
-    table, unit, version=Version("20200818"), dump_raw=False, dump_ordered=False
+    table, units, version=Version("20200818"), dump_raw=False, dump_ordered=False
 ):
     """Go through one table in the document and return a guess as to its contents"""
     # First get the first row and work out if this is a table with headers or not
@@ -38,7 +40,7 @@ def _parse_table(
         first_useful_row = 3
         # Get the units from the remainder of the header
         words = header[len(header_prefix) :].split()
-        unit = pint.Unit(words[1])
+        units = pint.Unit(words[1])
     else:
         first_useful_row = 0
     # Get the last row and check it's not just full of page numbers
@@ -143,7 +145,7 @@ def _parse_table(
             collections[i].append(
                 FCCCell(
                     boxes[sources[i]],
-                    unit=unit,
+                    units=units,
                     logical_column=i,
                     ordered_row=ir,
                     ordered_column=sources[i],
@@ -154,7 +156,7 @@ def _parse_table(
     diagnostics = {"page": page, "has_header": has_header}
     # for c in collections[0]:
     #     print (c.lines)
-    return collections, unit, diagnostics
+    return collections, units, diagnostics
 
 
 class DigestError(Exception):
@@ -258,7 +260,7 @@ def _digest_collection(cells, fcc_rules_cells=None, jurisdictions=None, debug=Fa
                 accumulator_as_band = Band.parse(
                     accumulator,
                     fcc_rules=rules_accumulator,
-                    unit=cell.unit,
+                    units=cell.units,
                     jurisdictions=jurisdictions,
                 )
             except NotBandError:

@@ -1,16 +1,16 @@
 """Code to provide additional alocations"""
 
-import pint
+from .fccpint import ureg
 from .bands import Band
 from .band_collections import BandCollection
 
-ureg = pint.UnitRegistry()
+
 
 def footnote_5_225():
     return [
         Band.parse(
             ["150.05-153", "Radio astronomy 5.225# (Australia and India only)"],
-            unit=ureg.MHz,
+            units=ureg.MHz,
             jurisdictions=["R3"],
             annotations=[""],
         )
@@ -21,7 +21,7 @@ def footnote_5_250():
     return [
         Band.parse(
             ["225-235", "Radio astronomy 5.250# (China only)"],
-            unit=ureg.MHz,
+            units=ureg.MHz,
             jurisdictions=["R3"],
         )
     ]
@@ -31,7 +31,7 @@ def footnote_5_304():
     return [
         Band.parse(
             ["606-614", "RADIO ASTRONOMY 5.304# (African broadcasting area)"],
-            unit=ureg.MHz,
+            units=ureg.MHz,
             jurisdictions=["R1"],
         )
     ]
@@ -41,7 +41,7 @@ def footnote_5_305():
     return [
         Band.parse(
             ["606-614", "RADIO ASTRONOMY 5.305# (China)"],
-            unit=ureg.MHz,
+            units=ureg.MHz,
             jurisdictions=["R3"],
         )
     ]
@@ -51,7 +51,7 @@ def footnote_5_306():
     return [
         Band.parse(
             ["608-614", "Radio astronomy 5.306# (Not Africa)"],
-            unit=ureg.MHz,
+            units=ureg.MHz,
             jurisdictions=["R1"],
         )
     ]
@@ -61,7 +61,7 @@ def footnote_5_307():
     return [
         Band.parse(
             ["608-614", "Radio astronomy 5.307# (India)"],
-            unit=ureg.MHz,
+            units=ureg.MHz,
             jurisdictions=["R1"],
         )
     ]
@@ -89,7 +89,7 @@ def footnote_5_339():
                     "Earth exploration-satellite (passive) 5.339#",
                     "Space research (passive) 5.339#",
                 ],
-                unit=u,
+                units=u,
                 jurisdictions=["R1", "R2", "R3"],
             )
         )
@@ -100,7 +100,7 @@ def footnote_5_385():
     return [
         Band.parse(
             ["1718.8-1722.2", "Radio astronomy 5.385#"],
-            unit=ureg.MHz,
+            units=ureg.MHz,
             jurisdictions=["R1", "R2", "R3"],
         )
     ]
@@ -110,7 +110,7 @@ def footnote_5_437():
     return [
         Band.parse(
             ["4200-4400", "Earth exploration-satellite (passive) 5.437#"],
-            unit=ureg.MHz,
+            units=ureg.MHz,
             jurisdictions=["R1", "R2", "R3"],
         )
     ]
@@ -126,7 +126,7 @@ def footnote_5_443():
         bands.append(
             Band.parse(
                 [r, "RADIO ASTRONOMY 5.443# (Argentina, Australia, Canada only)"],
-                unit=ureg.MHz,
+                units=ureg.MHz,
                 jurisdictions=["R2", "R3"],
             )
         )
@@ -137,7 +137,7 @@ def footnote_5_479():
     return [
         Band.parse(
             ["9.975-10.025", "Earth exploration-satellite (active) 5.479#"],
-            unit=ureg.GHz,
+            units=ureg.GHz,
             jurisdictions=["R1", "R2", "R3"],
         )
     ]
@@ -153,7 +153,7 @@ def footnote_5_458():
         bands.append(
             Band.parse(
                 [r, "Earth exploration-satellite (passive) 5.458#"],
-                unit=ureg.MHz,
+                units=ureg.MHz,
                 jurisdictions=["R1", "R2", "R3"],
             )
         )
@@ -164,7 +164,7 @@ def footnote_5_543():
     return [
         Band.parse(
             ["29.95-30", "Earth exploration-satellite (space-to-space, comms.) 5.543#"],
-            unit=ureg.GHz,
+            units=ureg.GHz,
             jurisdictions=["R1", "R2", "R3"],
         )
     ]
@@ -174,7 +174,7 @@ def footnote_5_555():
     return [
         Band.parse(
             ["48.94-49.05", "RADIO ASTRONOMY 5.555#"],
-            unit=ureg.GHz,
+            units=ureg.GHz,
             jurisdictions=["R1", "R2", "R3"],
         )
     ]
@@ -191,7 +191,7 @@ def footnote_5_556():
         bands.append(
             Band.parse(
                 [r, "Radio astronomy 5.556# (On a nation-by-nation basis)"],
-                unit=ureg.GHz,
+                units=ureg.GHz,
                 jurisdictions=["R1", "R2", "R3"],
             )
         )
@@ -210,7 +210,7 @@ def footnote_5_562D():
         bands.append(
             Band.parse(
                 [r, "RADIO ASTRONOMY 5.562D# (Korea, Rep. of, only)"],
-                unit=ureg.GHz,
+                units=ureg.GHz,
                 jurisdictions=["R3"],
             )
         )
@@ -296,7 +296,7 @@ def footnote_5_149():
         bands.append(
             Band.parse(
                 [bounds, "Radio astronomy 5.149#"],
-                unit=unit,
+                units=unit,
                 jurisdictions=jurisdictions,
             )
         )

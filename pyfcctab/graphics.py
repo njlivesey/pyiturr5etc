@@ -1,7 +1,7 @@
 """Some graphics routines to visualize spectra"""
 
 import numpy as np
-import pint
+from .fccpint import ureg
 import matplotlib.pyplot as plt
 from matplotlib.collections import PatchCollection
 from matplotlib.patches import Rectangle
@@ -9,7 +9,7 @@ import matplotlib.ticker as ticker
 import matplotlib
 from astropy.visualization import quantity_support
 
-ureg = pint.unitRegistry()
+
 
 def plot_bands(*args, skip_empty=False):
     """Do the iconic frequncy plot"""
@@ -51,7 +51,7 @@ def plot_bands(*args, skip_empty=False):
         # Do x ticks
         suffix = str(span[0].units)
         xticks = (
-            np.array([3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30]) / 3.0 * span[0].value
+            np.array([3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30]) / 3.0 * span[0].magnitude
         )
         xticklabels = [
             str(t) + " " + str(span[0].units) for t in np.around(xticks, 1).tolist()
@@ -72,7 +72,7 @@ def plot_bands(*args, skip_empty=False):
                 yticklabels.append(f"Row {tier}")
             boxes = []
             for b in these_bands:
-                x = [v.to(span[0].units).value for v in b.bounds]
+                x = [v.to(span[0].units).magnitude for v in b.bounds]
                 y = tier + 0.1
                 rect = Rectangle((x[0], y), x[1] - x[0], 0.8)
                 boxes.append(rect)

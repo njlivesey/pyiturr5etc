@@ -12,8 +12,9 @@ from .additional_allocations import all_additions
 from .band_collections import BandCollection
 from .footnotes import ingest_footnote_definitions, footnotedef2html
 from .jurisdictions import Jurisdiction
+from .fccpint import ureg
 
-ureg = pint.UnitRegistry()
+
 
 class FCCTables(object):
     """Class that holds all information in the FCC tables document"""
@@ -183,7 +184,7 @@ def htmltable(bands, append_footnotes=False, tooltips=True, filename=None):
     # Make this information unique and sorted
     edges = list(set(edges))
     edges.sort()
-    edges = pint.Quantity(edges)
+    edges = pint.Quantity.from_sequence(edges)
     jurisdictions = list(set(jurisdictions))
     jurisdictions.sort()
     # OK, so how many rows and columns?

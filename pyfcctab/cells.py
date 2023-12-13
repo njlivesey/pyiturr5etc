@@ -12,7 +12,7 @@ class FCCCell(object):
     def __init__(
         self,
         text,
-        unit=None,
+        units=None,
         ordered_row=None,
         ordered_column=None,
         logical_column=None,
@@ -21,7 +21,7 @@ class FCCCell(object):
         """Create an FCCCell object"""
         self.text = text
         self.lines = text2lines(text)
-        self.unit = unit
+        self.units = units
         self.ordered_row = ordered_row
         self.ordered_column = ordered_column
         self.logical_column = logical_column
