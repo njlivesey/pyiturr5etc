@@ -4,9 +4,9 @@ from setuptools import setup, find_packages
 requirements = []  # This could be retrieved from requirements.txt
 # Package (minimal) configuration
 setup(
-    name="pyfcctab",
-    version="1.0.0",
-    description="Read/parse FCC tables docx file and enable queries etc.",
+    name="njl-corf",
+    version="0.01",
+    description="Various CORF-related tools",
     packages=find_packages(),  # __init__.py folders search
     install_requires=requirements,
 )
