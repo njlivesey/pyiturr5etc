@@ -14,16 +14,17 @@ from .jurisdictions import Jurisdiction
 
 __all__ = ["NotBoundsError", "NotBandError", "Band"]
 
-# First a supporting class
-# --------------------------------------------------------------------- Bounds
 
-
+# First define some exceptions we'll be using/raising
 class NotBoundsError(Exception):
     """Exception used to flag failed parse of Bounds"""
 
-    pass
+
+class NotBandError(Exception):
+    """Exception used to indicate failed parse of band"""
 
 
+# Now a support routine.
 def _parse_bounds(text, units):
     """Turn a string giving a frequency range into a bounds object"""
     re_float = r"[0-9_]+(?:\.[0-9_]+)?"
@@ -45,12 +46,6 @@ def _parse_bounds(text, units):
 
 
 # --------------------------------------------------------------------- Band
-
-
-class NotBandError(Exception):
-    """Exception used to indicate failed parse of band"""
-
-    pass
 
 
 class Band:
@@ -515,7 +510,7 @@ class Band:
             fcc_rules = [entry for entry in rules_lines if entry != ""]
             if len(fcc_rules) == 0:
                 fcc_rules = None
-        except (TypeError):
+        except TypeError:
             fcc_rules = None
         # Deal with the jurisdictions
         if jurisdictions is not None:
