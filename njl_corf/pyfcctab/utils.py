@@ -1,10 +1,9 @@
 """Some low level routines for (mainly parsing) the FCC tables"""
 
 from IPython.display import display, HTML
+import pandas as pd
 
 from docx.table import _Cell as DocxCell
-
-# from .cells import FCCCell
 
 
 def cell2text(cell: DocxCell, munge: bool = False):
@@ -43,12 +42,12 @@ def cell2text(cell: DocxCell, munge: bool = False):
     return result
 
 
-def first_line(cell):
+def first_line(cell: DocxCell):
     """Return the first line of text corresponding to a cell"""
     return cell2text(cell)[0].strip()
 
 
-def last_line(cell):
+def last_line(cell: DocxCell):
     """Return the last line of text corresponding to a cell"""
     return cell2text(cell)[-1].strip()
 
@@ -85,13 +84,13 @@ def text2lines(text):
     return lines
 
 
-def dump_cells(cells):
+def dump_cells(cells: list[DocxCell]):
     """Simply dump all the cells as text"""
     for i, c in enumerate(cells):
         print(f"-------------- Cell {i}")
         print(cell2text(c))
 
 
-def pretty_print(df):
+def pretty_print(df: pd.DataFrame):
     """Get nice text version of dataframe"""
     return display(HTML(df.to_html().replace(r"\n", "<br>")))
