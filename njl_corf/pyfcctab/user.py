@@ -89,7 +89,7 @@ def read(
 ):
     """Reader routine for FCC tables file"""
     if filename is None:
-        filename = DEFAULT_PATH + "fcctable.docx"
+        filename = DEFAULT_PATH + "fcctable-2020-08-18.docx"
     # Open the FCC file
     docx_data = docx.Document(filename)
     # Read all the tables

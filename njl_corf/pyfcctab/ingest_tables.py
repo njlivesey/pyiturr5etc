@@ -2,7 +2,10 @@
 
 import numpy as np
 import pandas as pd
+
 import pint
+from docx.document import Document
+from docx.table import Table
 
 from .bands import NotBandError, Band
 from .versions import Version
@@ -20,9 +23,44 @@ N_LOGICAL_COLUMNS = 6
 
 
 def _parse_table(
-    table, units, version=Version("20200818"), dump_raw=False, dump_ordered=False
-):
-    """Go through one table in the document and return a guess as to its contents"""
+    table: Table,
+    units: pint.Unit,
+    version: Version,
+    dump_raw: bool = False,
+    dump_ordered: bool = False,
+) -> (dict[BandCollection], pint.Unit, dict):
+    """Go through one table in the document and return a guess as to its contents
+
+    Parameters
+    ----------
+    table : docx.table.Table
+        Table entry from Word FCC tables file
+    units : pint.Unit
+        Current frequency unit
+    version : Version
+        Version-specific information
+    dump_raw : bool, optional
+        Dump the raw information for debugging purposes
+    dump_ordered : bool, optional
+        Dump the ordered information for debugging purposes.
+
+    Returns
+    -------
+    collections : dict[BandCollections]
+        The information in this table
+    units : pint.Unit
+        Potentially updated frquency unit information
+    diagnostics : dict
+        Various sources of information
+
+    Raises
+    ------
+    FCCTableError
+        Raised if there is some problem with the table itself
+    ValueError
+        _description_
+    """
+
     # First get the first row and work out if this is a table with headers or not
     header = first_line(table.rows[0].cells[0])
     n_rows = len(table.rows)
@@ -152,8 +190,6 @@ def _parse_table(
             )
     # Finish off
     diagnostics = {"page": page, "has_header": has_header}
-    # for c in collections[0]:
-    #     print (c.lines)
     return collections, units, diagnostics
 
 
@@ -273,10 +309,29 @@ def _digest_collection(cells, fcc_rules_cells=None, jurisdictions=None, debug=Fa
     return result
 
 
-def parse_all_tables(fccfile, table_range=None, **kwargs):
-    """Go through tables in fcc file and parse them"""
+def parse_all_tables(
+    fccfile: Document,
+    table_range: range = None,
+    **kwargs,
+) -> (dict[BandCollection], Version):
+    """Go through all the tables in the FCC Word file and parse them
 
-    version = Version("20200818")
+    Parameters
+    ----------
+    fccfile : Document
+        The Word document as read by docx
+    table_range : range
+        Which tables in the files are the ones to consider
+
+    Returns
+    -------
+    collections : dict[BandCollection]
+        All the parsed information
+
+    version : Version
+        Version related information
+    """
+    version = Version("2020-08-18")
     tables = fccfile.tables
     unit = ureg.dimensionless
     collections_list = [list() for i in range(N_LOGICAL_COLUMNS)]

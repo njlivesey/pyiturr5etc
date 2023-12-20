@@ -33,13 +33,13 @@ class Version(object):
 
 database = dict()
 
-database["page_patches_20200818"] = {
+database["page_patches_2020-08-18"] = {
     "International Table": "Page 5",
     "NG527A": "Page 52",
     "Flexible Use (30)": "Page 54",
 }
 
-database["layouts_20200818"] = {
+database["layouts_2020-08-18"] = {
     "Page 1": "012357/9",
     "Page 2": "023467/8",
     "Page 3": "012345/6",
