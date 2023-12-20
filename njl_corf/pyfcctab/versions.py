@@ -15,6 +15,7 @@ class Version(object):
         return self.page_patches.get(page, page)
 
     def get_layout(self, page, row=0):
+        """Get the layout for a given page"""
         entry = self.layouts[page]
         clauses = entry.split(",")
         layouts = []
@@ -26,8 +27,7 @@ class Version(object):
                 count = int(words[1])
             else:
                 raise ValueError(f"Badly formatted layout {entry}")
-            for i in range(count):
-                layouts.append(words[0])
+            layouts += [words[0]] * count
         return layouts[min(row, len(layouts) - 1)]
 
 

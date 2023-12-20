@@ -1,14 +1,12 @@
 """Some graphics routines to visualize spectra"""
 
 import numpy as np
-from .fccpint import ureg
 import matplotlib.pyplot as plt
 from matplotlib.collections import PatchCollection
 from matplotlib.patches import Rectangle
-import matplotlib.ticker as ticker
-import matplotlib
 from astropy.visualization import quantity_support
 
+from .fccpint import ureg
 
 
 def plot_bands(*args, skip_empty=False):
@@ -36,11 +34,12 @@ def plot_bands(*args, skip_empty=False):
                 relevant_spans.append(span)
         spans = relevant_spans
 
+    # pylint: disable-next=unused-variable
     fig, axes = plt.subplots(len(spans), figsize=(14, 12.0 * len(spans) / 7.0))
     plt.subplots_adjust(hspace=0.4)
     quantity_support()
 
-    for panel in range(len(spans)):
+    for panel, span in enumerate(spans):
         # Identify panel
         span = spans[panel]
         ax = axes[panel]
@@ -49,9 +48,10 @@ def plot_bands(*args, skip_empty=False):
         ax.set_xlim([span[0], span[1]])
         ax.set_xscale("log")
         # Do x ticks
-        suffix = str(span[0].units)
         xticks = (
-            np.array([3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30]) / 3.0 * span[0].magnitude
+            np.array([3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30])
+            / 3.0
+            * span[0].magnitude
         )
         xticklabels = [
             str(t) + " " + str(span[0].units) for t in np.around(xticks, 1).tolist()
@@ -79,4 +79,3 @@ def plot_bands(*args, skip_empty=False):
                 patches = PatchCollection(boxes, color=f"C{tier}")
                 axes[panel].add_collection(patches)
         ax.set_yticklabels(yticklabels)
-    # plt.show()

@@ -11,6 +11,31 @@ from .footnotes import footnote2html
 class Allocation:
     """An entry allocating a service to a band"""
 
+    def __init__(
+        self,
+        service: Service,
+        modifiers: list[str],
+        footnotes: list[str],
+        primary: bool,
+    ):
+        """Create an allocation from inputs
+
+        Parameters
+        ----------
+        service : Service
+            The ITU-R service for this allocation
+        modifiers : list[str]
+            List of any modifiers for this allocation
+        footnotes : list[str]
+            List of any footnotes for this allocation
+        primary : bool
+            True if this allocation is primary
+        """
+        self.service = service
+        self.modifiers = modifiers
+        self.footnotes = footnotes
+        self.primary = primary
+
     def to_str(self, html=False, footnote_definitions=None, tooltips=True):
         """String representation of Allocation, possibly with HTML/tooltips"""
         if self.primary:
@@ -51,7 +76,7 @@ class Allocation:
         return True
 
     def __ne__(self, a):
-        return not (self == a)
+        return not self == a
 
     def __hash__(self):
         return hash(str(self))
@@ -68,7 +93,12 @@ class Allocation:
     def __le__(self, a):
         return str(self) <= str(a)
 
-    def matches(self, line, case_sensitive=False):
+    def matches(
+        self,
+        line: str,
+        case_sensitive: bool = False,
+    ):
+        """Return true if an allocation matches a given string"""
         if case_sensitive:
             return fnmatch.fnmatchcase(str(self), line)
         else:
@@ -101,10 +131,10 @@ class Allocation:
                 break
         # Now the remainder (if anything) must be footnotes
         footnotes = remainder.split()
-        # Create the result
-        result = cls()
-        result.service = service  # .strip()
-        result.modifiers = modifiers
-        result.footnotes = footnotes
-        result.primary = primary
-        return result
+        # Create and return the result
+        return Allocation(
+            service=service,
+            modifiers=modifiers,
+            footnotes=footnotes,
+            primary=primary,
+        )

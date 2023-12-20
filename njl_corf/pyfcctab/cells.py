@@ -3,6 +3,7 @@
 import copy
 import re
 
+import pint
 from .utils import text2lines
 
 
@@ -11,12 +12,12 @@ class FCCCell(object):
 
     def __init__(
         self,
-        text,
-        units=None,
-        ordered_row=None,
-        ordered_column=None,
-        logical_column=None,
-        page=None,
+        text: str,
+        units: pint.Unit = None,
+        ordered_row: int = None,
+        ordered_column: int = None,
+        logical_column: int = None,
+        page: int = None,
     ):
         """Create an FCCCell object"""
         self.text = text
@@ -52,6 +53,7 @@ class FCCCell(object):
 
     def is_band_start(self):
         """Return True if this cell starts a new band"""
+        # pylint: disable-next=import-outside-toplevel
         from .bands import Band, NotBandError
 
         try:

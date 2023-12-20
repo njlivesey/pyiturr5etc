@@ -1,11 +1,11 @@
 """Code for handling collections of bands"""
 
-from .fccpint import ureg
-from intervaltree import IntervalTree
 import copy
+
+from intervaltree import IntervalTree
 import numpy as np
 
-
+from .fccpint import ureg
 
 __all__ = ["BandCollection"]
 
@@ -32,7 +32,8 @@ class BandCollection:
             key = round(key.to(ureg.Hz).magnitude)
         except AttributeError:
             key = slice(
-                round(key.start.to(ureg.Hz).magnitude), round(key.stop.to(ureg.Hz).magnitude)
+                round(key.start.to(ureg.Hz).magnitude),
+                round(key.stop.to(ureg.Hz).magnitude),
             )
         intervals = self.data.__getitem__(key)
         result = []
@@ -80,7 +81,7 @@ class BandCollection:
             # tomorrow's recorded_band, so if we don't the input lists
             # will get trampled on.  Don't deep copy footnote
             # definitions though.
-            new_band = interim_band.deepcopy()
+            new_band = copy.deepcopy(interim_band)
             add_band = True
             if single_jurisdiction:
                 if not new_band.has_jurisdiction(single_jurisdiction):
@@ -113,47 +114,53 @@ class BandCollection:
 
     def flatten(self):
         """Where bands overlap, split them, then merge contents of bands with same spans"""
-        # First loop over the bands and slice at overlap boundaries, so
-        # all overlaps are complete rather than partial.  This
-        # functionality is taken from intervaltree's own splitoverlaps
-        # method.
+        # First loop over the bands and slice at overlap boundaries, so all overlaps are
+        # complete rather than partial.  This functionality is taken from intervaltree's
+        # own splitoverlaps method.  First get all the starts and stops of each band
         bounds = self.get_boundaries()
+        # Create an interim result
         interim = BandCollection()
+        # Loop over all the frequency ranges
         for lbound, ubound in zip(bounds[:-1], bounds[1:]):
+            # Check this range isn't too narrow
             if ubound - lbound < 10 * ureg.Hz:
                 raise ValueError(
                     f"Tiny or negative band: {lbound} to {ubound} ({ubound-lbound})"
                 )
+            # Find the band(s) encompassing the midpoint of the current range
             relevant_bands = self[0.5 * (lbound + ubound)]
+            # Loop over these and make them have the bounds of the current range we're
+            # interested in, then append to our interim result
             for band in relevant_bands:
-                new_band = band.deepcopy()
+                new_band = copy.deepcopy(band)
                 new_band.bounds[0] = np.around(lbound.to(band.bounds[0].units), 5)
                 new_band.bounds[1] = np.around(ubound.to(band.bounds[0].units), 5)
                 interim.append(new_band)
         # Now find the exactly overlapping bands that have resulted and merge them.
         result = BandCollection()
         for band in interim:
+            # Find the bands overlapping the current one.
             overlapping_bands = interim[band.center]
             if len(overlapping_bands) == 1:
-                # If there's only one band, this one, then add to result
+                # If there's only one band, presumably this one, then add to result
                 if overlapping_bands[0] is not band:
                     raise ValueError("Confused flatten")
                 result.append(band)
             else:
                 # Otherwise, merge the bands
-                merged_band = band.deepcopy()
+                merged_band = copy.deepcopy(band)
                 for overlapping_band in overlapping_bands:
                     if overlapping_band is band:
                         continue
                     if not overlapping_band.has_same_bounds_as(merged_band):
-                        print(merged_band.compact_str())
-                        print(overlapping_band.compact_str())
-                        raise ValueError(f"Inappropriate overlap")
+                        raise ValueError(
+                            f"Inappropriate overlap <{merged_band.compact_str()}> vs. "
+                            f"<{overlapping_band.compact_str()}>"
+                        )
                     merged_band = merged_band.combine_with(
                         overlapping_band, skip_bounds=True
                     )
                 result.append(merged_band)
-            pass
         return result
 
     def get_bands(
@@ -211,10 +218,10 @@ class BandCollection:
 
         # Now add any adjacent bands
         if adjacent:
-            deltaF = 1.0 * ureg.kHz
+            delta_f = 1.0 * ureg.kHz
             # Identify all the bands that are truely adjacent
             truly_adjacent_bands = []
-            for f in [core_min - deltaF, core_max + deltaF]:
+            for f in [core_min - delta_f, core_max + delta_f]:
                 truly_adjacent_bands += self[f]
             # Now make the span of this collection the span of what we're after.
             adjacent_min = min(b.bounds[0] for b in truly_adjacent_bands)
@@ -234,7 +241,8 @@ class BandCollection:
         return sorted([b.data for b in self.data])
 
     def stitch(self, condition=None):
-        """Group adjacent/overlapping bands together in ever-larger groups provided condition is met"""
+        """Group adjacent/overlapping bands together in ever-larger groups provided
+        condition is met"""
         # Keep a list of the bands we've got thus far
         bands_claimed = set()
         # Create an empty result

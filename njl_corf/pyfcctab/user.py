@@ -1,139 +1,166 @@
 """User level routines for the pyfcctab suite, including main table class"""
 
 import copy
-import docx
-import numpy as np
 import pickle
+import numpy as np
+
+import docx
 import pint
 
 from IPython.display import display, HTML
 from .ingest_tables import parse_all_tables
 from .additional_allocations import all_additions
 from .band_collections import BandCollection
-from .footnotes import ingest_footnote_definitions, footnotedef2html
+from .footnotes import ingestfootnote_definitions, footnotedef2html
 from .jurisdictions import Jurisdiction
-from .fccpint import ureg
-
 
 
 class FCCTables(object):
     """Class that holds all information in the FCC tables document"""
 
+    def __init__(
+        self,
+        version: str,
+        collections: dict[BandCollection],
+        footnote_definitions: dict = None,
+    ):
+        """Initialize an FCCTables object
+
+        Parameters
+        ----------
+        version : str
+            The version of the Microsoft Word file from which the data are drawn
+        collections : dict[BandCollection]
+            The various band collections (international and USA)
+        """
+        self.version = version
+        self.collections = collections
+        self.footenote_definitions = (footnote_definitions,)
+
     @property
     def r1(self):
+        """The ITU-R1 collection"""
         return self.collections["R1"]
 
     @property
     def r2(self):
+        """The ITU-R2 collection"""
         return self.collections["R2"]
 
     @property
     def r3(self):
+        """The ITU-R3 collection"""
         return self.collections["R3"]
 
     @property
     def f(self):
+        """The federal collection"""
         return self.collections["F"]
 
     @property
     def nf(self):
+        """The non-federal collection"""
         return self.collections["NF"]
 
     @property
     def itu(self):
+        """The complete set of ITU collections"""
         return self.collections["ITU"]
 
     @property
     def usa(self):
+        """The complete set of USA collections"""
         return self.collections["USA"]
 
     @property
     def all(self):
+        """The complete set of all collections"""
         return self.collections["all"]
 
 
-default_path = "/users/livesey/corf/"
+DEFAULT_PATH = "/users/livesey/corf/"
 
 
 def read(
-    filename=default_path + "fcctable.docx",
-    skip_additionals=False,
-    skip_footnote_definitions=False,
+    filename=None,
+    skip_additionals: bool = False,
+    skipfootnote_definitions: bool = False,
     **kwargs,
 ):
     """Reader routine for FCC tables file"""
-
+    if filename is None:
+        filename = DEFAULT_PATH + "fcctable.docx"
     # Open the FCC file
     docx_data = docx.Document(filename)
     # Read all the tables
     collections, version = parse_all_tables(docx_data, **kwargs)
-    result = FCCTables()
-    result.version = version
-    result.collections = collections
     # Now possibly insert the additional bands.
     if not skip_additionals:
         # We'll create an interim result for the collections we have.
-        print(f"Injecting additions in: ", end="")
-        for jname in result.collections.keys():
+        print("Injecting additions in: ", end="")
+        for jname, collection in collections.items():
             jurisdiction = Jurisdiction.parse(jname)
             print(f"{jurisdiction.name}, ", end="")
             for new_band in all_additions:
                 if jurisdiction in new_band.jurisdictions:
                     inserted_band = copy.deepcopy(new_band)
                     inserted_band.jurisdictions = [jurisdiction]
-                    result.collections[jname].append(inserted_band)
-            result.collections[jname] = result.collections[jname].flatten()
+                    collection.append(inserted_band)
+            collections[jname] = collection.flatten()
         print("done.")
     # Now we'll merge everything we have
     itu_regions = ["R1", "R2", "R3"]
     usa_regions = ["F", "NF"]
-    all_regions = itu_regions + usa_regions
     print("Merging: ITU, ", end="")
     itu_all = BandCollection()
     for tag in itu_regions:
-        itu_all = itu_all.merge(result.collections[tag])
+        itu_all = itu_all.merge(collections[tag])
     print("USA, ", end="")
     usa_all = BandCollection()
     for tag in usa_regions:
-        usa_all = usa_all.merge(result.collections[tag])
+        usa_all = usa_all.merge(collections[tag])
     # Now add these merges to the results
-    result.collections = {**result.collections, "ITU": itu_all, "USA": usa_all}
+    collections = collections | {"ITU": itu_all, "USA": usa_all}
     # Now do a merge on literally everything
     print("all, ", end="")
     all_all = BandCollection()
     for tag in ["ITU", "USA"]:
-        all_all = all_all.merge(result.collections[tag])
-    result.collections = {**result.collections, "all": all_all}
+        all_all = all_all.merge(collections[tag])
+    collections = collections | {"all": all_all}
     print("done.")
     # Now go through all the bands we have and add the relevant
     # footnote definitions to them.  First read the footnote
     # definitions, and store them in the result
-    if not skip_footnote_definitions:
+    if not skipfootnote_definitions:
         print("Footnote definitions: reading, ", end="")
-        footnote_definitions = ingest_footnote_definitions(docx_data)
-        result.footnote_definitions = footnote_definitions
+        footnote_definitions = ingestfootnote_definitions(docx_data)
         print("appending, ", end="")
-        for collection in result.collections.values():
+        for collection in collections.values():
             for b in collection:
                 footnotes = b.all_footnotes()
-                b._footnote_definitions = {}
+                b.footnote_definitions = {}
                 for f in footnotes:
                     if f[-1] == "#":
                         f = f[:-1]
                     if f in footnote_definitions:
-                        b._footnote_definitions[f] = footnote_definitions[f]
+                        b.footnote_definitions[f] = footnote_definitions[f]
         print("done.")
-    return result
+    # Build and return the result
+    return FCCTables(
+        version=version,
+        collections=collections,
+        footnote_definitions=footnote_definitions,
+    )
 
 
-def save(tables, filename=default_path + "fcctable.pickle"):
+def save(tables, filename=DEFAULT_PATH + "fcctable.pickle"):
     """Write tables to a pickle file"""
     outfile = open(filename, "wb")
     pickle.dump(tables, outfile)
     outfile.close()
 
 
-def load(filename=default_path + "fcctable.pickle"):
+def load(filename=DEFAULT_PATH + "fcctable.pickle"):
     """Read tables from a pickle file"""
     infile = open(filename, "rb")
     result = pickle.load(infile)
@@ -159,7 +186,7 @@ def htmlcolumn(bands, append_footnotes=False):
         definitions = {}
         for b in bands:
             footnotes += b.all_footnotes()
-            definitions.update(b._footnote_definitions)
+            definitions.update(b.footnote_definitions)
         footnotes = list(set(footnotes))
         footnotes.sort()
 
@@ -171,7 +198,12 @@ def htmlcolumn(bands, append_footnotes=False):
     return text
 
 
-def htmltable(bands, append_footnotes=False, tooltips=True, filename=None):
+def htmltable(
+    bands,
+    append_footnotes: bool = False,
+    tooltips: bool = True,
+    filename: str = None,
+):
     """Produce an HTML table corresponding to a set of bands"""
     # First loop over the bands and work out how many rows (frequency
     # spans) and columns (jurisdictions) we'll need.
@@ -188,17 +220,17 @@ def htmltable(bands, append_footnotes=False, tooltips=True, filename=None):
     jurisdictions = list(set(jurisdictions))
     jurisdictions.sort()
     # OK, so how many rows and columns?
-    nColumns = len(jurisdictions)
-    nRows = len(edges) - 1
+    n_columns = len(jurisdictions)
+    n_rows = len(edges) - 1
 
     # Now set up some data structures to define the table.  First its
     # contents (None initially)
     table = list()
-    for r in range(nRows):
-        table.append([None for c in range(nColumns)])
+    for r in range(n_rows):
+        table.append([None for c in range(n_columns)])
     # Now some arrays that define the span of each cell, 1x1 to start with
-    rSpan = np.ones(shape=[nRows, nColumns], dtype=np.int_)
-    cSpan = np.ones(shape=[nRows, nColumns], dtype=np.int_)
+    r_span = np.ones(shape=[n_rows, n_columns], dtype=np.int_)
+    c_span = np.ones(shape=[n_rows, n_columns], dtype=np.int_)
 
     # Now loop over the bands and put them in cells
     for b in bands:
@@ -207,18 +239,17 @@ def htmltable(bands, append_footnotes=False, tooltips=True, filename=None):
         # Identify which columns this band should be listed in
         column_flags = [j in b.jurisdictions for j in jurisdictions]
         for r in range(row_span[0], row_span[1]):
-            for c in range(nColumns):
+            for c in range(n_columns):
                 if column_flags[c]:
                     if table[r][c] is not None:
                         raise ValueError(f"Overlapping bands for {r}, {c}")
                     else:
                         table[r][c] = b
     # Now go through the cells and work out which ones should be aggolomorated
-    Overlapped = "overlapped"
-    for r in range(nRows):
-        for c in range(nColumns):
+    for r in range(n_rows):
+        for c in range(n_columns):
             band = table[r][c]
-            if band is None or band is Overlapped:
+            if band is None or band == "overlapped":
                 continue
             # Now search forward in columns and see how many bands are the same
             column_flags = [
@@ -240,13 +271,13 @@ def htmltable(bands, append_footnotes=False, tooltips=True, filename=None):
                 row_span = len(row_flags)
             # Now make our data structures reflect that. First blow away the entire rectangle
             for rr in range(r, r + row_span):
-                table[rr][c : c + column_span] = [Overlapped] * column_span
-            cSpan[r : r + row_span, c : c + column_span] = 0
-            rSpan[r : r + row_span, c : c + column_span] = 0
+                table[rr][c : c + column_span] = ["overlapped"] * column_span
+            c_span[r : r + row_span, c : c + column_span] = 0
+            r_span[r : r + row_span, c : c + column_span] = 0
             # Now put the top left corner back
             table[r][c] = band
-            cSpan[r, c] = column_span
-            rSpan[r, c] = row_span
+            c_span[r, c] = column_span
+            r_span[r, c] = row_span
 
     # print (f"cSpan:\n{cSpan}")
     # print (f"rSpan:\n{rSpan}")
@@ -262,7 +293,9 @@ def htmltable(bands, append_footnotes=False, tooltips=True, filename=None):
     #     print ()
 
     # Start the HTML for the table
-    text = ['<-- HTML output from pyfcctab package by Nathaniel.J.Livesey@jpl.nasa.gov-->']
+    text = [
+        "<-- HTML output from pyfcctab package by Nathaniel.J.Livesey@jpl.nasa.gov-->"
+    ]
     text += ['<link rel="stylesheet" href="fcc.css">']
     # with open("fcc.css", "r") as css_file:
     #    text = css_file.readlines()
@@ -276,20 +309,24 @@ def htmltable(bands, append_footnotes=False, tooltips=True, filename=None):
     for r, row in enumerate(table):
         text += ["<tr>"]
         for c, cell in enumerate(row):
-            if cell is not Overlapped and cell is not None:
+            if cell != "overlapped" and cell is not None:
                 text += [
-                    f'<td id="fcc-td"; colspan="{cSpan[r,c]}"; rowspan="{rSpan[r,c]}">'
+                    f'<td id="fcc-td"; colspan="{c_span[r,c]}"; rowspan="{r_span[r,c]}">'
                 ]
-                text += [cell.to_html(
-                    highlight_allocations=True,
-                    tooltips=tooltips,
-                    skip_jurisdictions=True,
-                )]
+                text += [
+                    cell.to_html(
+                        highlight_allocations=True,
+                        tooltips=tooltips,
+                        skip_jurisdictions=True,
+                    )
+                ]
                 text += ["</td>"]
             if cell is None:
                 text += [
-                    f'<td id="fcc-td"; colspan="{cSpan[r,c]}"; rowspan="{rSpan[r,c]}">'
-                    + "&nbsp;" + "</td>"]
+                    f'<td id="fcc-td"; colspan="{c_span[r,c]}"; rowspan="{r_span[r,c]}">'
+                    + "&nbsp;"
+                    + "</td>"
+                ]
         text += ["</tr>"]
     text += ["</table>"]
 
@@ -299,7 +336,7 @@ def htmltable(bands, append_footnotes=False, tooltips=True, filename=None):
         definitions = {}
         for b in bands:
             footnotes += b.all_footnotes()
-            definitions.update(b._footnote_definitions)
+            definitions.update(b.footnote_definitions)
         footnotes = list(set(footnotes))
         footnotes.sort()
 
@@ -307,10 +344,11 @@ def htmltable(bands, append_footnotes=False, tooltips=True, filename=None):
             text += [footnotedef2html(f, definitions)]
 
     # Now output the HTML
-    return text
-    if filename is None:
-        display(HTML("\n".join(text)))
-    else:
-        with open(filename, "w") as file:
+    if filename:
+        with open(
+            filename,
+            mode="w",
+            encoding="utf-8",
+        ) as file:
             file.writelines(text)
     return text

@@ -12,17 +12,11 @@ from .band_collections import BandCollection
 from .fccpint import ureg
 
 
-
-
-class OtherTable(Exception):
-    pass
-
-
 class FCCTableError(Exception):
-    pass
+    """Exception raised when there is a problem with this table"""
 
 
-n_logical_columns = 6
+N_LOGICAL_COLUMNS = 6
 
 
 def _parse_table(
@@ -71,15 +65,17 @@ def _parse_table(
         for r in table.rows:
             entries = []
             for c in r.cells:
+                # pylint: disable=protected-access
                 try:
                     this_bottom = c._element.bottom
-                except (ValueError):
+                except ValueError:
                     this_bottom = None
                 entries.append(
                     c.text
                     + f"<{c._element.left},{c._element.right}>, "
                     + f"<{c._element.top},{this_bottom}>"
                 )
+                # pylint: enable=protected-access
             frame = frame.append(pd.Series(entries), ignore_index=True)
         print(page)
         pretty_print(frame)
@@ -93,6 +89,7 @@ def _parse_table(
     ]
     for ir, r in enumerate(table.rows):
         for ic, c in enumerate(r.cells):
+            # pylint: disable=protected-access
             left[ir, ic] = c._element.left
             right[ir, ic] = c._element.right
             top[ir, ic] = c._element.top
@@ -100,6 +97,7 @@ def _parse_table(
                 bottom[ir, ic] = c._element.bottom
             except ValueError:
                 bottom[ir, ic] = top[ir, ic] + 1
+            # pylint: enable=protected-access
     assert np.max(bottom) == n_rows, "Confused about the number of rows"
 
     # Build up a new data structure for the cells in the proper order
@@ -108,18 +106,18 @@ def _parse_table(
     for ir in range(n_rows):
         boxes = [None] * max_boxes
         ordered.append(boxes)
-    for rIn, r in enumerate(table.rows):
-        for cIn, c in enumerate(r.cells):
-            for rOut in range(top[rIn, cIn], bottom[rIn, cIn]):
-                for cOut in range(left[rIn, cIn], right[rIn, cIn]):
+    for r_in, r in enumerate(table.rows):
+        for c_in, c in enumerate(r.cells):
+            for r_out in range(top[r_in, c_in], bottom[r_in, c_in]):
+                for c_out in range(left[r_in, c_in], right[r_in, c_in]):
                     new_value = cell2text(c)
-                    current_value = ordered[rOut][cOut]
+                    current_value = ordered[r_out][c_out]
                     if current_value is not None and current_value != new_value:
                         raise FCCTableError(
-                            f"Trampled unexpectedly {rOut},{cOut} from {rIn},{cIn}"
+                            f"Trampled unexpectedly {r_out},{c_out} from {r_in},{c_in}"
                         )
                     else:
-                        ordered[rOut][cOut] = new_value
+                        ordered[r_out][c_out] = new_value
 
     # Possibly dump the ordered table
     if dump_ordered:
@@ -133,15 +131,15 @@ def _parse_table(
     ordered = ordered[first_useful_row : last_useful_row + 1]
     n_rows = n_rows - first_useful_row
     # Create a list of lists to hold the result
-    collections = [list() for i in range(n_logical_columns)]
+    collections = [list() for i in range(N_LOGICAL_COLUMNS)]
     for ir, boxes in enumerate(ordered):
         # OK, get the layout for this page/row
         layout = version.get_layout(page, ir)
-        assert layout[n_logical_columns] == "/", f"Bad layout: {layout}"
-        if int(layout[n_logical_columns + 1 :]) != max_boxes:
+        assert layout[N_LOGICAL_COLUMNS] == "/", f"Bad layout: {layout}"
+        if int(layout[N_LOGICAL_COLUMNS + 1 :]) != max_boxes:
             raise ValueError("Supplied layout does not match table")
-        sources = [int(l, 16) for l in layout[0:n_logical_columns]]
-        for i in range(n_logical_columns):
+        sources = [int(l, 16) for l in layout[0:N_LOGICAL_COLUMNS]]
+        for i in range(N_LOGICAL_COLUMNS):
             collections[i].append(
                 FCCCell(
                     boxes[sources[i]],
@@ -162,9 +160,8 @@ def _parse_table(
 class DigestError(Exception):
     """Error raised when collection can't be digested"""
 
-    pass
 
-
+# pylint: disable-next=too-many-locals, too-many-branches, too-many-statements
 def _digest_collection(cells, fcc_rules_cells=None, jurisdictions=None, debug=False):
     """Go through column of cells, merge and parse as needed"""
     # Set up some defaults
@@ -203,15 +200,14 @@ def _digest_collection(cells, fcc_rules_cells=None, jurisdictions=None, debug=Fa
                 cell_is_new_band = accumulator_as_band.bounds != cell_as_band.bounds
             except AttributeError:
                 cell_is_new_band = True
-            pass  # End try/except
         else:
             cell_is_new_band = False
         if debug:
             print(
                 f"    cell_is_band_start={cell_is_band_start}, "
-                + f"cell_is_new_band={cell_is_new_band}"
+                f"cell_is_new_band={cell_is_new_band}"
             )
-            print(f"    cell_as_band=", end="")
+            print("    cell_as_band=", end="")
             try:
                 print(cell_as_band.compact_str())
             except AttributeError:
@@ -227,7 +223,7 @@ def _digest_collection(cells, fcc_rules_cells=None, jurisdictions=None, debug=Fa
                 result.append(accumulator_as_band)
             else:
                 if debug:
-                    print(f"    nothing in accumulator to store.")
+                    print("    nothing in accumulator to store.")
             accumulator = []
             rules_accumulator = []
         elif cell_is_band_start:
@@ -270,8 +266,7 @@ def _digest_collection(cells, fcc_rules_cells=None, jurisdictions=None, debug=Fa
             if accumulator_as_band is not None:
                 print(f"    accumulator_as_band={accumulator_as_band.compact_str()}")
             else:
-                print(f"    accumulator_as_band=None")
-        pass  # End of loop over cells
+                print("    accumulator_as_band=None")
     # Once we're done with the loop, add the final band
     if accumulator_as_band is not None:
         result.append(accumulator_as_band)
@@ -284,13 +279,14 @@ def parse_all_tables(fccfile, table_range=None, **kwargs):
     version = Version("20200818")
     tables = fccfile.tables
     unit = ureg.dimensionless
-    collections_list = [list() for i in range(n_logical_columns)]
+    collections_list = [list() for i in range(N_LOGICAL_COLUMNS)]
     if table_range is None:
         table_range = range(0, 65)
     print("Reading tables: ", end="")
     for it in table_range:
         print(f"{it}, ", end="")
         table = tables[it]
+        # pylint: disable-next=unused-variable
         new_columns, new_unit, diagnostics = _parse_table(
             table, unit, version, **kwargs
         )

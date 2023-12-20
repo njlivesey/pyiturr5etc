@@ -2,8 +2,25 @@
 
 from IPython.display import display, HTML
 
+from docx.table import _Cell as DocxCell
 
-def cell2text(cell, munge=False):
+# from .cells import FCCCell
+
+
+def cell2text(cell: DocxCell, munge: bool = False):
+    """Convert an FCC cell to ttext for debugging
+
+    Parameters
+    ----------
+    cell : FCCCell
+        Input from Word document
+    munge : bool, optional
+        Return result as single string (otherwise list)
+
+    Returns
+    -------
+    result : str or list[str]
+    """
     result = []
     for p in cell.paragraphs:
         entry = p.text
@@ -23,19 +40,21 @@ def cell2text(cell, munge=False):
         result.append(entry)
     if munge:
         return "\n".join(result)
-    else:
-        return result
+    return result
 
 
 def first_line(cell):
+    """Return the first line of text corresponding to a cell"""
     return cell2text(cell)[0].strip()
 
 
 def last_line(cell):
+    """Return the last line of text corresponding to a cell"""
     return cell2text(cell)[-1].strip()
 
 
 def text2lines(text):
+    """Handle continuation lines for text (ending hyphens I think)"""
     if text is None:
         return None
     lines = []
@@ -52,6 +71,7 @@ def text2lines(text):
             if len(line) == 0:
                 is_continuation = False
         if is_continuation:
+            # pylint: disable-next=unsubscriptable-object
             if line[-1] != "-":
                 line = line + " " + t.strip()
             else:
@@ -66,10 +86,12 @@ def text2lines(text):
 
 
 def dump_cells(cells):
+    """Simply dump all the cells as text"""
     for i, c in enumerate(cells):
-        print(f"-------------- Cell {c}")
+        print(f"-------------- Cell {i}")
         print(cell2text(c))
 
 
 def pretty_print(df):
+    """Get nice text version of dataframe"""
     return display(HTML(df.to_html().replace(r"\n", "<br>")))

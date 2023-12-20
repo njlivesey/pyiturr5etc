@@ -1,15 +1,16 @@
 """Code for handling bands (i.e., cells in the FCC tables)"""
 
-import copy
 import re
 import fnmatch
 import numpy as np
-from .fccpint import ureg
 from termcolor import colored
+
+import pint
 
 from .allocations import Allocation
 from .footnotes import footnote2html
 from .jurisdictions import Jurisdiction
+from .fccpint import ureg
 
 
 __all__ = ["NotBoundsError", "NotBandError", "Band"]
@@ -51,8 +52,59 @@ def _parse_bounds(text, units):
 class Band:
     """A frequency bound and allocations thereto (i.e., contents of a table cell)"""
 
+    def __init__(
+        self,
+        bounds: list[pint.Quantity],
+        primary_allocations: list[Allocation],
+        secondary_allocations: list[Allocation],
+        footnotes: list[str],
+        fcc_rules: list[str],
+        jurisdictions: list[Jurisdiction],
+        annotations: list[str],
+        footnote_definitions: dict[str] = None,
+        metadata: dict = None,
+    ):
+        """Generate a Band based on inputs
+
+        Parameters
+        ----------
+        bounds : list[pint.Quantity]
+            start and stop frequency for the band
+        primary_allocations : list[Allocation]
+            List of the primary allocations
+        secondary_allocations : list[Allocation]
+            List of the secondary allocations
+        footnotes : list[str]
+            List of the associated footnotes
+        fcc_rules : list[str]
+            List of any associated fcc rules
+        jurisdictions : list[Jurisdiction]
+            Which jurisdiction(s) does this band fall under
+        annotations : list[str]
+            Any annotations from the FCC table
+        footnote_definitions: dict[str] (optional)
+            Information for defining the footnotes.
+        metadata : dict
+            Collection of other data (typically referring back to Word document)
+        """
+        self.bounds = bounds
+        self.primary_allocations = primary_allocations
+        self.secondary_allocations = secondary_allocations
+        self.footnotes = footnotes
+        self.fcc_rules = fcc_rules
+        self.jurisdictions = jurisdictions
+        self.annotations = annotations
+        if metadata is None:
+            metadata = {}
+        if footnote_definitions is None:
+            footnote_definitions = {}
+        self.metadata = metadata
+        self.footnote_definitions = footnote_definitions
+        # Finalize to deal with all the internals
+        self.finalize()
+
     def __str__(self):
-        """Return a string representation of a Band"""
+        """Return a string representation 66 a Band"""
         return self.to_str()
 
     def __repr__(self):
@@ -61,18 +113,49 @@ class Band:
 
     def to_str(
         self,
-        separator=None,
-        skip_footnotes=False,
-        specific_allocations=None,
-        skip_rules=False,
-        skip_jurisdictions=False,
-        skip_annotations=False,
-        highlight_allocations=None,
-        html=False,
-        tooltips=True,
+        separator: str = None,
+        skip_footnotes: bool = False,
+        specific_allocations: list[Allocation] = None,
+        skip_rules: bool = False,
+        skip_jurisdictions: bool = False,
+        skip_annotations: bool = False,
+        highlight_allocations: list[Allocation] = None,
+        html: bool = False,
+        tooltips: bool = True,
     ):
-        """Return a string representation of a Band"""
-        # Deal with setting defaults etc.
+        """Get string representation of band with various options
+
+        Parameters
+        ----------
+        separator : str, optional
+            String used to speparate clauses (defaults to line break, either string or HTML)
+        skip_footnotes : bool, optional
+            If set, omit any footnote information
+        specific_allocations : list[Allocation], optional
+            If set, only list specific allocations
+        skip_rules : bool, optional
+            _description_, by default False
+        skip_jurisdictions : bool, optional
+            _description_, by default False
+        skip_annotations : bool, optional
+            _description_, by default False
+        highlight_allocations : list[Allocation], optional
+            _description_, by default None
+        html : bool, optional
+            _description_, by default False
+        tooltips : bool, optional
+            _description_, by default True
+
+        Returns
+        -------
+        _type_
+            _description_
+
+        Raises
+        ------
+        ValueError
+            _description_
+        """  # Deal with setting defaults etc.
         if html:
             if separator is not None:
                 raise ValueError("Cannot select HTML and supply separator")
@@ -100,19 +183,18 @@ class Band:
         result = result + separator
         # Do allocations
         if specific_allocations is None:
-            allocations = [a for a in self.allocations]
+            allocations = self.allocations
         else:
-            allocations = []
-            for a in self.allocations:
-                for sa in specific_allocations:
-                    if a.matches(sa):
-                        allocations.append(a)
+            allocations = list(
+                set(self.allocations).intersection(set(specific_allocations))
+            )
+        # Start to build the result
         clauses = []
         if highlight_allocations is not None:
             for a in allocations:
                 a_str = a.to_str(
                     html=html,
-                    footnote_definitions=self._footnote_definitions,
+                    footnote_definitions=self.footnote_definitions,
                     tooltips=tooltips,
                 )
                 try:
@@ -142,7 +224,7 @@ class Band:
                     + " ".join(
                         [
                             footnote2html(
-                                f, self._footnote_definitions, tooltips=tooltips
+                                f, self.footnote_definitions, tooltips=tooltips
                             )
                             for f in self.footnotes
                         ]
@@ -164,6 +246,17 @@ class Band:
         return result
 
     def range_str(self, html=False):
+        """Generate string describing frequency range
+
+        Parameters
+        ----------
+        html : bool, optional
+            If true, return in HTML-compatible form
+
+        Returns
+        -------
+        str : result
+        """
         values = [f"{np.around(value,5):~H}" for value in self.bounds]
         if html:
             return "&ndash;".join(values)
@@ -171,12 +264,14 @@ class Band:
             return "-".join(values)
 
     def compact_str(self, **kwargs):
+        """Return a compact string representation of band"""
         return self.to_str(separator="/", **kwargs)
 
     def __hash__(self):
         return hash(str(self))
 
     def jurisdictions_str(self):
+        """Return string representation of band's jurisdictions"""
         if self.jurisdictions is not None:
             clauses = [str(j) for j in self.jurisdictions]
             result = "[" + ", ".join(clauses) + "]"
@@ -185,6 +280,7 @@ class Band:
         return result
 
     def fcc_rules_str(self):
+        """Return string representation of band's fcc rules"""
         result = ""
         if self.fcc_rules is not None:
             if len(self.fcc_rules) > 0:
@@ -192,6 +288,7 @@ class Band:
         return result
 
     def annotations_str(self):
+        """Return string representation of band's annotations"""
         result = ""
         try:
             if len(self.annotations) > 0:
@@ -221,13 +318,30 @@ class Band:
 
     def equal(
         self,
-        a,
-        ignore_jurisdictions=False,
-        ignore_annotations=False,
-        ignore_fcc_rules=False,
-    ):
-        """Compare two sets of band information"""
-        if type(self) != type(a):
+        a: "Band",
+        ignore_jurisdictions: bool = False,
+        ignore_annotations: bool = False,
+        ignore_fcc_rules: bool = False,
+    ) -> bool:
+        """Return true if two bands are appropriately equal
+
+        Parameters
+        ----------
+        a : Band
+            Other band to compare with self
+        ignore_jurisdictions : bool, optional
+            If set, ignore juridiction information in comparison
+        ignore_annotations : bool, optional
+            If set, ignore annotation information in comparison
+        ignore_fcc_rules : bool, optional
+            If set, ignore fcc_rules information in comparison
+
+        Returns
+        -------
+        _type_
+            _description_
+        """
+        if not isinstance(a, Band):
             return False
         if self.bounds != a.bounds:
             return False
@@ -256,34 +370,44 @@ class Band:
         return True
 
     def __eq__(self, a):
-        """Compare two sets of Band information"""
+        """Return true if two bands equal"""
         return self.equal(a)
 
     def __ne__(self, a):
-        return not (self == a)
+        """Return true if two bands not eqal"""
+        return not self == a
 
     def __gt__(self, a):
+        """Compare bands based on frequency bounds and jurisdictions"""
         if self.bounds[0] != a.bounds[0]:
             return self.bounds[0] > a.bounds[0]
         else:
             return self.jurisdictions > a.jurisdictions
 
     def __lt__(self, a):
+        """Compare bands based on frequency bounds and jurisdictions"""
         if self.bounds[0] != a.bounds[0]:
             return self.bounds[0] < a.bounds[0]
         else:
             return self.jurisdictions < a.jurisdictions
 
     def __ge__(self, a):
+        """Compare bands based on frequency bounds and jurisdictions"""
         return self.bounds[0] >= a.bounds[0]
 
     def __le__(self, a):
+        """Compare bands based on frequency bounds and jurisdictions"""
         return self.bounds[0] <= a.bounds[0]
 
     def __add__(self, a):
+        """Combine two bands together"""
         return self.combine_with(a)
 
     def all_footnotes(self):
+        """Combine all the footnotes referred to in a band
+
+        Both those that apply across the band and those applying to specific allocations
+        """
         result = self.footnotes
         for a in self.allocations:
             result = result + a.footnotes
@@ -293,7 +417,7 @@ class Band:
         """Return text defining a given footnote"""
         if footnote[-1] == r"#":
             footnote = footnote[0:-1]
-        return self._footnote_definitions[footnote]
+        return self.footnote_definitions[footnote]
 
     def combine_with(self, a, force=False, skip_bounds=False):
         """Merge the contents of two different bands"""
@@ -308,66 +432,70 @@ class Band:
 
         if (not force) and (not self.overlaps(a) and not self.is_adjacent(a)):
             raise ValueError("Two bands not overlapping/adjacent, set force=True")
-        result = Band()
         # Merge the bounds
         if not skip_bounds:
-            result.bounds = [
+            bounds = [
                 min(self.bounds[0], a.bounds[0]),
                 max(self.bounds[1], a.bounds[1]),
             ]
         else:
-            result.bounds = self.bounds
+            bounds = self.bounds
         # Merge the allocations
-        result.primary_allocations = sorted(
+        primary_allocations = sorted(
             list(set(self.primary_allocations + a.primary_allocations))
         )
-        result.secondary_allocations = sorted(
+        secondary_allocations = sorted(
             list(set(self.secondary_allocations + a.secondary_allocations))
         )
         # Merge the footnotes
-        result.footnotes = sorted(_combine_elements(self.footnotes, a.footnotes))
+        footnotes = sorted(_combine_elements(self.footnotes, a.footnotes))
         # Merge the FCC rules and the jurisdictions
-        result.fcc_rules = _combine_elements(self.fcc_rules, a.fcc_rules)
-        result.jurisdictions = sorted(
-            _combine_elements(self.jurisdictions, a.jurisdictions)
-        )
-        result.annotations = _combine_elements(self.annotations, a.annotations)
+        fcc_rules = _combine_elements(self.fcc_rules, a.fcc_rules)
+        jurisdictions = sorted(_combine_elements(self.jurisdictions, a.jurisdictions))
+        annotations = _combine_elements(self.annotations, a.annotations)
         # Think about the footnote definitions
-        _footnote_definitions = dict()
+        footnote_definitions = dict()
         for band in [self, a]:
-            if hasattr(band, "_footnote_definitions"):
-                _footnote_definitions = {
-                    **_footnote_definitions,
-                    **band._footnote_definitions,
-                }
-        if _footnote_definitions:
-            result._footnote_definitions = _footnote_definitions
+            if hasattr(band, "footnote_definitions"):
+                footnote_definitions = footnote_definitions | band.footnote_definitions
         # Use the finalize routine to sort out all the metadata
-        result.finalize()
-        return result
+        return Band(
+            bounds=bounds,
+            primary_allocations=primary_allocations,
+            secondary_allocations=secondary_allocations,
+            footnotes=footnotes,
+            fcc_rules=fcc_rules,
+            jurisdictions=jurisdictions,
+            annotations=annotations,
+            footnote_definitions=footnote_definitions,
+        )
 
-    def copy(self):
-        """Return a shallow copy of the band"""
-        return copy.copy(self)
-
-    def deepcopy(self):
-        """Return a deep copy of the band
-
-        (_footnote_definitions is shallow copy, if present)"""
-        result = copy.deepcopy(self)
-        try:
-            result._footnote_definitions = self._footnote_definitions
-        except AttributeError:
-            pass
-        return result
-
-    def definitelyUSA(self):
+    def definitely_usa(self):
+        """Return true if the band includes USA footnotes"""
         for f in self.all_footnotes():
             if f[0] != "5" and f[0] != "(":
                 return True
         return False
 
-    def has_footnote(self, footnote, band_level_only=False):
+    def has_footnote(
+        self,
+        footnote: str,
+        band_level_only: bool = False,
+    ):
+        """Return true if band includes a given footnote
+
+        Parameters
+        ----------
+        footnote : str
+            Specific footnote queried
+        band_level_only : bool, optional
+            If set, only consider footnotes that apply across the band, not those
+            associated with a specific allocation.
+
+        Returns
+        -------
+        boolean : reslut
+        """
         if band_level_only:
             footnotes = self.footnotes
         else:
@@ -380,14 +508,37 @@ class Band:
 
     def has_allocation(
         self,
-        allocation,
-        but_not=None,
-        primary=None,
-        secondary=None,
-        co_primary=None,
-        exclusive=None,
-        case_sensitive=False,
-    ):
+        allocation: str,
+        but_not: str = None,
+        primary: bool = None,
+        secondary: bool = None,
+        co_primary: bool = None,
+        exclusive: bool = None,
+        case_sensitive: bool = False,
+    ) -> bool:
+        """Returns true if band has a given allocation
+
+        Parameters
+        ----------
+        allocation : str
+            The allocation being queried
+        but_not : str, optional
+            If supplied return false includes this allocation
+        primary : bool, optional
+            If set, require allocation's primary flag to match this value
+        secondary : bool, optional
+            If set, require allocation's secondary flag to match this value
+        co_primary : bool, optional
+            If set, require allocation's co_primary flag to match this value
+        exclusive : bool, optional
+            If set, require allocation's exclusive flag to match this value
+        case_sensitive : bool, optional
+            If set, force a case-sensitive comparison
+
+        Returns
+        -------
+        bool : result
+        """
         for a in self.allocations:
             if a.matches(allocation, case_sensitive=case_sensitive):
                 if primary is not None:
@@ -409,40 +560,45 @@ class Band:
         return False
 
     def applies_in(self, jurisdiction):
+        """Return true if this band applies in a give jurisdiction"""
         if self.jurisdictions is None:
             return None
-        for j in self.jurisdictions:
-            if j == jurisdiction:
-                return True
-        return False
+        return jurisdiction in self.jurisdictions
 
     def covers(self, frequency):
+        """Return true if band overlaps a given frequency"""
         return self.bounds[0] <= frequency and self.bounds[1] > frequency
 
-    def overlaps(self, a):
+    def overlaps(self, a: "Band"):
+        """Return true if a band overlaps another band"""
         return max(a.bounds[0], self.bounds[0]) < min(a.bounds[1], self.bounds[1])
 
-    def has_same_bounds_as(self, a):
+    def has_same_bounds_as(self, a: "Band"):
+        """Return True if band has same bounds as another band"""
         for s, a in zip(self.bounds, a.bounds):
             if round(s.to(ureg.Hz).magnitude) != round(a.to(ureg.Hz).magnitude):
                 return False
         return True
 
-    def is_adjacent(self, a):
+    def is_adjacent(self, a: "Band"):
+        """Return true if a band is directly adjacent to another"""
         return np.allclose(a.bounds[1], self.bounds[0]) or np.allclose(
             a.bounds[0], self.bounds[1]
         )
 
     @property
     def frequency_range(self):
+        """Return the frequency range for a band"""
         return pint.Quantity([self.bounds[0], self.bounds[1].to(self.bounds[0].units)])
 
     @property
     def bandwidth(self):
+        """Return the bandwidth for a band"""
         return self.bounds[1] - self.bounds[0]
 
     @property
     def center(self):
+        """Return the center frequency for a band"""
         return 0.5 * sum(self.bounds)
 
     @classmethod
@@ -450,10 +606,11 @@ class Band:
         cls, cell, fcc_rules=None, units=None, jurisdictions=None, annotations=None
     ):
         """Parse a table cell into a Band"""
-        # Work out what type of input we've been give, an FCCCell type
-        # or just a set of strings.
+        # pylint: disable-next=import-outside-toplevel
         from .cells import FCCCell
 
+        # Work out what type of input we've been give, an FCCCell type
+        # or just a set of strings.
         if cell is None:
             raise NotBandError("Cell is None")
         proper_cell = isinstance(cell, FCCCell)
@@ -472,8 +629,10 @@ class Band:
         # Now the first line should be a frequency range
         try:
             bounds = _parse_bounds(lines[0], units)
-        except NotBoundsError:
-            raise NotBandError("Text doesn't start with bounds, so not a band")
+        except NotBoundsError as exception:
+            raise NotBandError(
+                "Text doesn't start with bounds, so not a band"
+            ) from exception
 
         # Now the remainder will either be allocations, blanks or
         # collections of footnotes
@@ -515,27 +674,26 @@ class Band:
         # Deal with the jurisdictions
         if jurisdictions is not None:
             jurisdictions = [Jurisdiction.parse(j) for j in jurisdictions]
-        # Now create a Band to hold the result
-        result = cls()
-        result.bounds = bounds
-        result.primary_allocations = primary_allocations
-        result.secondary_allocations = secondary_allocations
-        result.footnotes = footnotes
-        result.fcc_rules = fcc_rules
-        result.jurisdictions = jurisdictions
-        result._lines = lines
-        result.annotations = annotations
+        # Bundle up all the metadata
         if proper_cell:
-            result._text = cell.text
-            result._page = cell.page
-            result._logical_column = cell.logical_column
-            result._ordered_row = cell.ordered_row
-            result._ordered_column = cell.ordered_row
+            metadata = {
+                "lines": lines,
+                "text": cell.text,
+                "page": cell.page,
+                "logical_column": cell.logical_column,
+                "ordered_row": cell.ordered_row,
+                "ordered_column": cell.ordered_column,
+            }
         else:
-            result._text = None
-            result._page = None
-            result._logical_column = None
-            result._ordered_row = None
-            result._ordered_column = None
-        result.finalize()
-        return result
+            metadata = {}
+        # Now create and return the result
+        return Band(
+            bounds=bounds,
+            primary_allocations=primary_allocations,
+            secondary_allocations=secondary_allocations,
+            footnotes=footnotes,
+            fcc_rules=fcc_rules,
+            jurisdictions=jurisdictions,
+            annotations=annotations,
+            metadata=metadata,
+        )

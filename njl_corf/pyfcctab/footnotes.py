@@ -6,6 +6,8 @@ from docx.table import Table
 
 
 def _document_iterator(source):
+    """Iterator for the word document"""
+    # pylint: disable-next=protected-access
     elements = source._element.iter()
     for e in elements:
         if isinstance(e, docx.oxml.text.paragraph.CT_P):
@@ -16,7 +18,8 @@ def _document_iterator(source):
             yield "Cell"
 
 
-def ingest_footnote_definitions(source):
+def ingestfootnote_definitions(source):
+    """Ingest all the footnote definitions from a source document"""
     # Create a dictionary to store all the footnote definitions
     definitions = {}
     # Setup a data structure that notes the text that introduces each
@@ -49,7 +52,6 @@ def ingest_footnote_definitions(source):
             eob = True
         if isinstance(element, Table):
             accumulator += ["[TABLE]\n"]
-            pass
         # if type(element) is type("xx"):
         #     print(f"Element is string: {element}")
         if element == "Cell":
@@ -58,7 +60,7 @@ def ingest_footnote_definitions(source):
         if isinstance(element, docx.text.paragraph.Paragraph):
             # If this is the first part of a block, move on to that
             # block
-            if any([element.text == k for k in blocks.keys()]):
+            if any([element.text == k for k in blocks]):
                 eoe = True
                 eob = True
             # Now check to see if we're starting a fotnote
@@ -72,12 +74,11 @@ def ingest_footnote_definitions(source):
         if eoe:
             if current_block is not None:
                 accumulator = " ".join(accumulator)
-                accumulator = accumulator.replace(u"\xa0", " ").strip()
+                accumulator = accumulator.replace("\xa0", " ").strip()
                 if accumulator != "":
                     name, content = accumulator.split(None, 1)
                     definitions[name] = content.strip()
                 accumulator = []
-            pass
         if eob:
             current_block = element.text
         else:
@@ -93,6 +94,12 @@ def ingest_footnote_definitions(source):
 
 
 def sanitize_footnote_name(footnote):
+    """Remove any trailing # symbols from footnote
+
+    These symbols denote an artificial "band" created in a BandCollection that flags
+    that the band is purely a result of the footnote (see additional_allocations
+    module)
+    """
     if footnote[-1] != "#":
         return footnote
     else:
