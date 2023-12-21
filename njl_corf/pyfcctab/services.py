@@ -42,6 +42,10 @@ class Service:
             match.lower() for match in [self.name] + self.aliases
         ]
 
+    def __eq__(self, other):
+        """Return true if services are the same"""
+        return self.name == other.name
+
     @classmethod
     def identify(cls: type, line: str) -> "Service":
         """Work out what service is requested in a string.

@@ -67,11 +67,13 @@ class Allocation:
         return self.to_str()
 
     def __eq__(self, a):
-        if self.primary != a.primary:
+        if self.service != a.service:
             return False
         if self.modifiers != a.modifiers:
             return False
         if self.footnotes != a.footnotes:
+            return False
+        if self.primary != a.primary:
             return False
         return True
 

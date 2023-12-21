@@ -15,7 +15,7 @@ from .footnotes import ingestfootnote_definitions, footnotedef2html
 from .jurisdictions import Jurisdiction
 
 
-class FCCTables(object):
+class FCCTables:
     """Class that holds all information in the FCC tables document"""
 
     def __init__(
@@ -82,18 +82,33 @@ DEFAULT_PATH = "/users/livesey/corf/"
 
 
 def read(
-    filename=None,
+    filename: str = None,
     skip_additionals: bool = False,
-    skipfootnote_definitions: bool = False,
+    skip_footnote_definitions: bool = False,
     **kwargs,
-):
-    """Reader routine for FCC tables file"""
+) -> FCCTables:
+    """_summary_
+
+    Parameters
+    ----------
+    filename : str, optional
+        The Word file to read (defaults to sensible option if omitted)
+    skip_additionals : bool, optional
+        If set, do not isert additional footnote-derived bands
+    skip_footnote_definitions : bool, optional
+        If set, do not bother to read/parse the footnote definitions (for speed)
+
+    Returns
+    -------
+    FCCTables
+        All the information from the FCC tables
+    """
     if filename is None:
         filename = DEFAULT_PATH + "fcctable-2020-08-18.docx"
     # Open the FCC file
     docx_data = docx.Document(filename)
     # Read all the tables
-    collections, version = parse_all_tables(docx_data, **kwargs)
+    collections, version = parse_all_tables(docx_data, filename, **kwargs)
     # Now possibly insert the additional bands.
     if not skip_additionals:
         # We'll create an interim result for the collections we have.
@@ -131,7 +146,7 @@ def read(
     # Now go through all the bands we have and add the relevant
     # footnote definitions to them.  First read the footnote
     # definitions, and store them in the result
-    if not skipfootnote_definitions:
+    if not skip_footnote_definitions:
         print("Footnote definitions: reading, ", end="")
         footnote_definitions = ingestfootnote_definitions(docx_data)
         print("appending, ", end="")
@@ -198,6 +213,7 @@ def htmlcolumn(bands, append_footnotes=False):
     return text
 
 
+# pylint: disable-next=too-many-locals, too-many-branches, too-many-statements
 def htmltable(
     bands,
     append_footnotes: bool = False,

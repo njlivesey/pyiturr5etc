@@ -2,6 +2,7 @@
 
 import numpy as np
 import pandas as pd
+import pathlib
 
 import pint
 from docx.document import Document
@@ -88,9 +89,9 @@ def _parse_table(
         last_useful_row = n_rows - 1
     # Also, get the page number if it's in the last row/column (or thereabouts)
     if not has_header:
-        for ir in [-1, -2, -3]:
+        for i_row in [-1, -2, -3]:
             try:
-                page = last_line(table.rows[ir].cells[-1])
+                page = last_line(table.rows[i_row].cells[-1])
                 break
             except IndexError:
                 pass
@@ -100,21 +101,21 @@ def _parse_table(
     # Possibly dump the raw table
     if dump_raw:
         frame = pd.DataFrame()
-        for r in table.rows:
+        for row in table.rows:
             entries = []
-            for c in r.cells:
+            for column in row.cells:
                 # pylint: disable=protected-access
                 try:
-                    this_bottom = c._element.bottom
+                    this_bottom = column._element.bottom
                 except ValueError:
                     this_bottom = None
                 entries.append(
-                    c.text
-                    + f"<{c._element.left},{c._element.right}>, "
-                    + f"<{c._element.top},{this_bottom}>"
+                    column.text
+                    + f"<{column._element.left},{column._element.right}>, "
+                    + f"<{column._element.top},{this_bottom}>"
                 )
                 # pylint: enable=protected-access
-            frame = frame.append(pd.Series(entries), ignore_index=True)
+            frame = pd.concat([frame, pd.DataFrame([entries])], ignore_index=True)
         print(page)
         pretty_print(frame)
 
@@ -125,30 +126,30 @@ def _parse_table(
     left, right, top, bottom = [
         np.zeros(shape=[n_rows, max_cols], dtype=int) for i in range(4)
     ]
-    for ir, r in enumerate(table.rows):
-        for ic, c in enumerate(r.cells):
+    for i_row, row in enumerate(table.rows):
+        for i_column, column in enumerate(row.cells):
             # pylint: disable=protected-access
-            left[ir, ic] = c._element.left
-            right[ir, ic] = c._element.right
-            top[ir, ic] = c._element.top
+            left[i_row, i_column] = column._element.left
+            right[i_row, i_column] = column._element.right
+            top[i_row, i_column] = column._element.top
             try:
-                bottom[ir, ic] = c._element.bottom
+                bottom[i_row, i_column] = column._element.bottom
             except ValueError:
-                bottom[ir, ic] = top[ir, ic] + 1
+                bottom[i_row, i_column] = top[i_row, i_column] + 1
             # pylint: enable=protected-access
     assert np.max(bottom) == n_rows, "Confused about the number of rows"
 
     # Build up a new data structure for the cells in the proper order
     max_boxes = np.max(right)
     ordered = []
-    for ir in range(n_rows):
+    for i_row in range(n_rows):
         boxes = [None] * max_boxes
         ordered.append(boxes)
-    for r_in, r in enumerate(table.rows):
-        for c_in, c in enumerate(r.cells):
+    for r_in, row in enumerate(table.rows):
+        for c_in, column in enumerate(row.cells):
             for r_out in range(top[r_in, c_in], bottom[r_in, c_in]):
                 for c_out in range(left[r_in, c_in], right[r_in, c_in]):
-                    new_value = cell2text(c)
+                    new_value = cell2text(column)
                     current_value = ordered[r_out][c_out]
                     if current_value is not None and current_value != new_value:
                         raise FCCTableError(
@@ -161,7 +162,10 @@ def _parse_table(
     if dump_ordered:
         frame = pd.DataFrame(columns=range(max_boxes))
         for boxes in ordered:
-            frame = frame.append(pd.Series(boxes), ignore_index=True)
+            frame = pd.concat(
+                [frame, pd.DataFrame([boxes])],
+                ignore_index=True,
+            )
         print(page)
         pretty_print(frame)
 
@@ -170,9 +174,9 @@ def _parse_table(
     n_rows = n_rows - first_useful_row
     # Create a list of lists to hold the result
     collections = [list() for i in range(N_LOGICAL_COLUMNS)]
-    for ir, boxes in enumerate(ordered):
+    for i_row, boxes in enumerate(ordered):
         # OK, get the layout for this page/row
-        layout = version.get_layout(page, ir)
+        layout = version.get_layout(page, i_row)
         assert layout[N_LOGICAL_COLUMNS] == "/", f"Bad layout: {layout}"
         if int(layout[N_LOGICAL_COLUMNS + 1 :]) != max_boxes:
             raise ValueError("Supplied layout does not match table")
@@ -183,7 +187,7 @@ def _parse_table(
                     boxes[sources[i]],
                     units=units,
                     logical_column=i,
-                    ordered_row=ir,
+                    ordered_row=i_row,
                     ordered_column=sources[i],
                     page=page,
                 )
@@ -311,15 +315,18 @@ def _digest_collection(cells, fcc_rules_cells=None, jurisdictions=None, debug=Fa
 
 def parse_all_tables(
     fccfile: Document,
+    filename: str,
     table_range: range = None,
     **kwargs,
-) -> (dict[BandCollection], Version):
+) -> tuple[dict[BandCollection], Version]:
     """Go through all the tables in the FCC Word file and parse them
 
     Parameters
     ----------
     fccfile : Document
         The Word document as read by docx
+    filename : str
+        Used to extract the version information
     table_range : range
         Which tables in the files are the ones to consider
 
@@ -331,7 +338,10 @@ def parse_all_tables(
     version : Version
         Version related information
     """
-    version = Version("2020-08-18")
+    # Get the version as the suffix to the filename
+    version_words = pathlib.Path(filename).stem.split("-")[1:]
+    # Convert it to a set of version information
+    version = Version("-".join(version_words))
     tables = fccfile.tables
     unit = ureg.dimensionless
     collections_list = [list() for i in range(N_LOGICAL_COLUMNS)]
