@@ -3,6 +3,7 @@
 import copy
 import pickle
 import numpy as np
+import pathlib
 
 import docx
 import pint
@@ -78,7 +79,7 @@ class FCCTables:
         return self.collections["all"]
 
 
-DEFAULT_PATH = "/users/livesey/corf/"
+DEFAULT_PATH = "/users/livesey/corf/data/"
 
 
 def read(
@@ -104,7 +105,7 @@ def read(
         All the information from the FCC tables
     """
     if filename is None:
-        filename = DEFAULT_PATH + "fcctable-2020-08-18.docx"
+        filename = DEFAULT_PATH + "fcctable-2022-08-23.docx"
     # Open the FCC file
     docx_data = docx.Document(filename)
     # Read all the tables
@@ -310,11 +311,16 @@ def htmltable(
 
     # Start the HTML for the table
     text = [
-        "<-- HTML output from pyfcctab package by Nathaniel.J.Livesey@jpl.nasa.gov-->"
+        "<-- HTML output from pyfcctab package by Nathaniel.J.Livesey@jpl.nasa.gov -->"
     ]
-    text += ['<link rel="stylesheet" href="fcc.css">']
-    # with open("fcc.css", "r") as css_file:
-    #    text = css_file.readlines()
+    # Append the style sheet information
+    with open(
+        pathlib.Path(__file__).parent / "fcc.css", "r", encoding="utf-8"
+    ) as css_file:
+        style_data = css_file.read().splitlines()
+    text += ["<style>"] + style_data + ["</style>"]
+    # text += ['<link rel="stylesheet" href="fcc.css">']
+    # Now start on the table``
     text += ['<table id="fcc-table">']
     text += ["<tr>"]
     # Add the header row

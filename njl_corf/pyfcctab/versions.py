@@ -116,7 +116,7 @@ database["layouts_2020-08-18"] = {
 
 database["page_patches_2022-08-23"] = {
     "International Table": "Page 5",
-    "NG527A": "Page 52",
+    "Communications (25)": "Page 52",
     "Flexible Use (30)": "Page 54",
 }
 
@@ -172,7 +172,7 @@ database["layouts_2022-08-23"] = {
     "Page 49": "012345/6",
     "Page 50": "012345/6",
     "Page 51": "023456/7",
-    "Page 52": "012345/7",
+    "Page 52": "012345/6",
     "Page 53": "012345/6",
     "Page 54": "012345/6",
     "Page 55": "012345/6",

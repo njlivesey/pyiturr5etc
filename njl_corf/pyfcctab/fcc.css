@@ -55,22 +55,22 @@ div.output_scroll {
 }
 
 .tooltip .tooltiptext {
-  visibility: hidden;
-  width: 25em;
-  font-size: 9pt;
-  line-height: 11pt;
-  border: 1px solid black;
-  background-color: whitesmoke;
-  color: black;
-  text-align: left;
-  border-radius: 3pt;
-  padding: 4pt 5pt;
+    visibility: hidden;
+    width: 25em;
+    font-size: 9pt;
+    line-height: 11pt;
+    border: 1px solid black;
+    background-color: whitesmoke;
+    color: black;
+    text-align: left;
+    border-radius: 3pt;
+    padding: 4pt 5pt;
 
-  /* Position the tooltip */
-  position: absolute;
-  z-index: 1;
+    /* Position the tooltip */
+    position: absolute;
+    z-index: 1;
 }
 
 .tooltip:hover .tooltiptext {
-  visibility: visible;
+    visibility: visible;
 }
