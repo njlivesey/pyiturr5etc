@@ -32,6 +32,8 @@ class Service:
         self.name = name.lower().strip()
         if abbreviation is None:
             self.abbreviation = self.name
+        else:
+            self.abbreviation = abbreviation
         self.science = science
         self.science_support = science_support
         if aliases is None:
