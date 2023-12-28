@@ -9,7 +9,6 @@ from dataclasses import dataclass
 import intervaltree
 import numpy as np
 import pandas as pd
-import pint
 
 from .pyfcctab.fccpint import ureg
 

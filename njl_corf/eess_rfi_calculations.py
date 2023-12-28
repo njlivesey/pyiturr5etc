@@ -2,7 +2,6 @@
 
 import numpy as np
 import pint
-import intervaltree
 
 # Do some setup on the pint unit registry
 ureg = pint.UnitRegistry(autoconvert_offset_to_baseunit=True)
