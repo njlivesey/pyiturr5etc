@@ -4,3 +4,5 @@ __pycache__
 *.egg-info
 /jpl-nsf.pdf
 /jpl-nsf.png
+njl_corf/pyoscar.py
+**.pdf
