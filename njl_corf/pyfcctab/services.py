@@ -48,6 +48,9 @@ class Service:
         """Return true if services are the same"""
         return self.name == other.name
 
+    def __hash__(self):
+        return hash(self.name)
+
     @classmethod
     def identify(cls: type, line: str) -> "Service":
         """Work out what service is requested in a string.
