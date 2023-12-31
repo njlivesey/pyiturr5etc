@@ -17,6 +17,7 @@ class Allocation:
         modifiers: list[str],
         footnotes: list[str],
         primary: bool,
+        user_annotations: dict = None,
     ):
         """Create an allocation from inputs
 
@@ -30,11 +31,17 @@ class Allocation:
             List of any footnotes for this allocation
         primary : bool
             True if this allocation is primary
+        user_annotations : dict
+            Additional information that can be supplied by user.  Note that the parent
+            Band instance has its own user_annotations attribute.
         """
         self.service = service
         self.modifiers = modifiers
         self.footnotes = footnotes
         self.primary = primary
+        if user_annotations is None:
+            user_annotations = {}
+        self.user_annotations = user_annotations
 
     def to_str(self, html=False, footnote_definitions=None, tooltips=True):
         """String representation of Allocation, possibly with HTML/tooltips"""

@@ -63,6 +63,7 @@ class Band:
         annotations: list[str],
         footnote_definitions: dict[str] = None,
         metadata: dict = None,
+        user_annotations: dict = None,
     ):
         """Generate a Band based on inputs
 
@@ -82,10 +83,13 @@ class Band:
             Which jurisdiction(s) does this band fall under
         annotations : list[str]
             Any annotations from the FCC table
-        footnote_definitions: dict[str] (optional)
+        footnote_definitions: dict[str], optional
             Information for defining the footnotes.
-        metadata : dict
+        metadata : dict, optional
             Collection of other data (typically referring back to Word document)
+        user_annotations : dict, optional
+            Collection of user supplied annotations specific to the band (note that the
+            individual Allocations within the band can carry user_annotations also.)
         """
         self.bounds = bounds
         self.primary_allocations = primary_allocations
@@ -100,6 +104,9 @@ class Band:
             footnote_definitions = {}
         self.metadata = metadata
         self.footnote_definitions = footnote_definitions
+        if user_annotations is None:
+            user_annotations = {}
+        self.user_annotations = user_annotations
         # Finalize to deal with all the internals
         self.finalize()
 
@@ -322,6 +329,7 @@ class Band:
         ignore_jurisdictions: bool = False,
         ignore_annotations: bool = False,
         ignore_fcc_rules: bool = False,
+        ignore_user_annotations: bool = True,
     ) -> bool:
         """Return true if two bands are appropriately equal
 
@@ -330,11 +338,13 @@ class Band:
         a : Band
             Other band to compare with self
         ignore_jurisdictions : bool, optional
-            If set, ignore juridiction information in comparison
+            If set, ignore juridiction information in comparison. Default False
         ignore_annotations : bool, optional
-            If set, ignore annotation information in comparison
+            If set, ignore annotation information in comparison. Default False
         ignore_fcc_rules : bool, optional
-            If set, ignore fcc_rules information in comparison
+            If set, ignore fcc_rules information in comparison.  Default False
+        ignore_user_annotations : bool, optional
+            If set, ignore the information in user_annotations.  Default True
 
         Returns
         -------
@@ -366,6 +376,8 @@ class Band:
         if not ignore_jurisdictions and self.jurisdictions != a.jurisdictions:
             return False
         if not ignore_annotations and self.annotations != a.annotations:
+            return False
+        if not ignore_user_annotations and self.user_annotations != a.user_annotations:
             return False
         return True
 
@@ -458,6 +470,8 @@ class Band:
         for band in [self, a]:
             if hasattr(band, "footnote_definitions"):
                 footnote_definitions = footnote_definitions | band.footnote_definitions
+        # Think about the user annotations
+        user_annotations = self.user_annotations | a.user_annotations
         # Use the finalize routine to sort out all the metadata
         return Band(
             bounds=bounds,
@@ -468,6 +482,7 @@ class Band:
             jurisdictions=jurisdictions,
             annotations=annotations,
             footnote_definitions=footnote_definitions,
+            user_annotations=user_annotations,
         )
 
     def definitely_usa(self):
@@ -515,6 +530,7 @@ class Band:
         co_primary: bool = None,
         exclusive: bool = None,
         case_sensitive: bool = False,
+        user_annotations: dict = None,
     ) -> bool:
         """Returns true if band has a given allocation
 
@@ -534,6 +550,9 @@ class Band:
             If set, require allocation's exclusive flag to match this value
         case_sensitive : bool, optional
             If set, force a case-sensitive comparison
+        user_annotations : dict, optional
+            If provided, all the user_annotations in the allocation must match those
+            supplied
 
         Returns
         -------
@@ -556,6 +575,12 @@ class Band:
                 if but_not is not None:
                     if a.matches(but_not, case_sensitive=case_sensitive):
                         continue
+                if user_annotations:
+                    for key, item in user_annotations.items():
+                        if key not in a.user_annotations:
+                            continue
+                        if item != a.user_annotations[key]:
+                            continue
                 return True
         return False
 
