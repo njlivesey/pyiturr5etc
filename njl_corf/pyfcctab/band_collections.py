@@ -13,7 +13,7 @@ __all__ = ["BandCollection"]
 class BandCollection:
     """A collection of bands corresponding to one or more jurisdictions"""
 
-    # This is basically a wrapper around IntervalTree, but not a subclass
+    # This is basically a wrapper a IntervalTree, but not a subclass
 
     def __init__(self, *args):
         """Create a band collection and possibly fill it with bands supplied"""
@@ -28,13 +28,6 @@ class BandCollection:
         # Something of a wrapper around IntervalTree.__getitem__.
         # However, while the former returns a set of Intervals, we
         # want to return a list of bands.
-        try:
-            key = round(key.to(ureg.Hz).magnitude)
-        except AttributeError:
-            key = slice(
-                round(key.start.to(ureg.Hz).magnitude),
-                round(key.stop.to(ureg.Hz).magnitude),
-            )
         intervals = self.data.__getitem__(key)
         result = []
         for i in intervals:
@@ -53,14 +46,8 @@ class BandCollection:
 
     def append(self, band):
         """Append a band to the collection"""
-        # This just invokes the addi method from IntervalTree.  Use
-        # integer Hertz as the indexing.  This is to avoid rounding
-        # issues and lack of clarity when mixing MHz, GHz, etc.
-        self.data.addi(
-            round(band.bounds[0].to(ureg.Hz).magnitude),
-            round(band.bounds[1].to(ureg.Hz).magnitude),
-            band,
-        )
+        # This just invokes the addi method from IntervalTree.
+        self.data.addi(band.bounds[0], band.bounds[1], band)
 
     def union(self, other):
         """Merge two sets of band collections without regard to their content"""
@@ -110,7 +97,7 @@ class BandCollection:
 
     def get_boundaries(self):
         """Return an array that gives all the band edges, in order"""
-        return sorted(self.data.boundary_table) * ureg.Hz
+        return sorted(self.data.boundary_table)
 
     def flatten(self):
         """Where bands overlap, split them, then merge contents of bands with same spans"""
@@ -133,8 +120,8 @@ class BandCollection:
             # interested in, then append to our interim result
             for band in relevant_bands:
                 new_band = copy.deepcopy(band)
-                new_band.bounds[0] = np.around(lbound.to(band.bounds[0].units), 5)
-                new_band.bounds[1] = np.around(ubound.to(band.bounds[0].units), 5)
+                new_band.bounds[0] = lbound
+                new_band.bounds[1] = ubound
                 interim.append(new_band)
         # Now find the exactly overlapping bands that have resulted and merge them.
         result = BandCollection()
