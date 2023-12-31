@@ -10,7 +10,7 @@ import pint
 
 from IPython.display import display, HTML
 from .ingest_tables import parse_all_tables
-from .additional_allocations import all_additions
+from .apply_specific_footnote_rules import all_additions
 from .band_collections import BandCollection
 from .footnotes import ingestfootnote_definitions, footnotedef2html
 from .jurisdictions import Jurisdiction
