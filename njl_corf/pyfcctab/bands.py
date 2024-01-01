@@ -15,6 +15,9 @@ from .fccpint import ureg
 
 __all__ = ["NotBoundsError", "NotBandError", "Band"]
 
+_FREQUENCY_ATOL = 10 * ureg.Hz
+_FREQUENCY_RTOL = 1e-6
+
 
 # First define some exceptions we'll be using/raising
 class NotBoundsError(Exception):
@@ -601,14 +604,22 @@ class Band:
     def has_same_bounds_as(self, a: "Band"):
         """Return True if band has same bounds as another band"""
         for s, a in zip(self.bounds, a.bounds):
-            if round(s.to(ureg.Hz).magnitude) != round(a.to(ureg.Hz).magnitude):
+            if not np.isclose(s, a, atol=_FREQUENCY_ATOL, rtol=_FREQUENCY_RTOL):
                 return False
         return True
 
     def is_adjacent(self, a: "Band"):
         """Return true if a band is directly adjacent to another"""
-        return np.allclose(a.bounds[1], self.bounds[0]) or np.allclose(
-            a.bounds[0], self.bounds[1]
+        return np.allclose(
+            a.bounds[1],
+            self.bounds[0],
+            atol=_FREQUENCY_ATOL,
+            rtol=_FREQUENCY_RTOL,
+        ) or np.allclose(
+            a.bounds[0],
+            self.bounds[1],
+            atol=_FREQUENCY_ATOL,
+            rtol=_FREQUENCY_RTOL,
         )
 
     @property

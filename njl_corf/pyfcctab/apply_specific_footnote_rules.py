@@ -1,8 +1,18 @@
 """Code to provide additional alocations"""
 
+import copy
+
+from intervaltree import IntervalTree
+
 from .fccpint import ureg
 from .bands import Band
 from .band_collections import BandCollection
+
+NOTES = """
+5.149 adds RAS at 6650-6675.2 MHz (see 5.458A), possibly others
+"""
+
+# ------------------------------------------------------- Allocation-adding footnotes.
 
 
 def footnote_5_225():
@@ -294,9 +304,9 @@ def footnote_5_149():
     for i in entries:
         words = i.split()
         # The first word is the bounds
-        bounds = words[0]
+        bounds_str = words[0]
         # The second is the units
-        unit = ureg.Unit(words[1])
+        units = ureg.Unit(words[1])
         if len(words) > 2:
             if words[2] != "in":
                 raise ValueError("'in' expected.")
@@ -313,42 +323,166 @@ def footnote_5_149():
             jurisdictions = ["R1", "R2", "R3"]
         bands.append(
             Band.parse(
-                [bounds, "Radio astronomy 5.149#"],
-                units=unit,
+                [bounds_str, "Radio astronomy 5.149#"],
+                units=units,
                 jurisdictions=jurisdictions,
             )
         )
     return bands
 
 
-# ---------------------------------------------------------------------
+# ------------------------------------------------------- Master routine
 
-all_additions = []
-routines = [
-    footnote_5_149,
-    footnote_5_225,
-    footnote_5_250,
-    footnote_5_304,
-    footnote_5_305,
-    footnote_5_306,
-    footnote_5_307,
-    footnote_5_339,
-    footnote_5_385,
-    footnote_5_437,
-    footnote_5_443,
-    footnote_5_479,
-    footnote_5_543,
-    footnote_5_458,
-    footnote_5_555,
-    footnote_5_556,
-    footnote_5_562d,
-]
-all_additions = BandCollection()
-for r in routines:
-    these_bands = r()
-    for b in these_bands:
-        all_additions.append(b)
 
-NOTES = """
-5.149 adds RAS at 6650-6675.2 MHz (see 5.458A), possibly others
-"""
+def get_all_itu_footnote_based_additions() -> BandCollection:
+    """Creates a bunch of new allocations from footnotes
+
+    Calling code should then insert these allocations into the tables.
+
+    Returns
+    -------
+    BandCollection
+        The various additional allocations.
+    """
+    all_additions = []
+    routines = [
+        footnote_5_149,
+        footnote_5_225,
+        footnote_5_250,
+        footnote_5_304,
+        footnote_5_305,
+        footnote_5_306,
+        footnote_5_307,
+        footnote_5_339,
+        footnote_5_385,
+        footnote_5_437,
+        footnote_5_443,
+        footnote_5_479,
+        footnote_5_543,
+        footnote_5_458,
+        footnote_5_555,
+        footnote_5_556,
+        footnote_5_562d,
+    ]
+    all_additions = BandCollection()
+    for r in routines:
+        these_bands = r()
+        for b in these_bands:
+            all_additions.append(b)
+    return all_additions
+
+
+# ------------------------------------------------------- 5.340
+
+
+def enact_5_340_US246(collections: dict[BandCollection]):
+    """Enact the 5.340 and US-246 protections
+
+    In most cases the bands are already marked as 5.340/US246 protected, however, in a
+    couple of them the protection is limited to a small slice within the band.  In those
+    cases we will split the existing bands and insert the protected band.
+    """
+    # These entries are cut and pasted directly from the FCC document (2022-08-23 version).
+    entries_5_340 = [
+        "1400-1427 MHz",
+        "2690-2700 MHz, except those provided for by No. 5.422",
+        "10.68-10.7 GHz, except those provided for by No. 5.483",
+        "15.35-15.4 GHz, except those provided for by No. 5.511",
+        "23.6-24 GHz",
+        "31.3-31.5 GHz",
+        "31.5-31.8 GHz, in Region 2",
+        "48.94-49.04 GHz, from airborne stations",
+        "50.2-50.4 GHz",
+        "52.6-54.25 GHz",
+        "86-92 GHz",
+        "100-102 GHz",
+        "109.5-111.8 GHz",
+        "114.25-116 GHz",
+        "148.5-151.5 GHz",
+        "164-167 GHz",
+        "182-185 GHz",
+        "190-191.8 GHz",
+        "200-209 GHz",
+        "226-231.5 GHz",
+        "250-252 GHz",
+    ]
+    entries_us246 = [
+        "73-74.6 MHz",
+        "608-614 MHz, except for medical telemetry equipment and white space devices",
+        "1400-1427 MHz",
+        "1660.5-1668.4 MHz",
+        "2690-2700 MHz",
+        "4990-5000 MHz",
+        "10.68-10.7 GHz",
+        "15.35-15.4 GHz",
+        "23.6-24 GHz",
+        "31.3-31.8 GHz",
+        "50.2-50.4 GHz",
+        "52.6-54.25 GHz",
+        "86-92 GHz",
+        "100-102 GHz",
+        "109.5-111.8 GHz",
+        "114.25-116 GHz",
+        "148.5-151.5 GHz",
+        "164-167 GHz",
+        "182-185 GHz",
+        "190-191.8 GHz",
+        "200-209 GHz",
+        "226-231.5 GHz",
+        "250-252 GHz",
+    ]
+    itu_jurisdictions = ["R1", "R2", "R3"]  # list(collections.keys())
+    usa_jurisdictions = ["F", "NF"]
+    for entries, relevant_jurisdictions, trigger_footnote in zip(
+        [entries_5_340, entries_us246],
+        [itu_jurisdictions, usa_jurisdictions],
+        ["5.340", "US246"],
+    ):
+        for entry in entries:
+            try:
+                range_str, suffix = entry.split(",")
+                suffix = suffix.strip()
+            except ValueError:
+                range_str = entry
+                suffix = ""
+            bounds_str, units_str = range_str.split(" ")
+            units = ureg.Unit(units_str)
+            # Deal with any suffixes
+            if suffix == "in Region 2":
+                jurisdictions = ["R2"]
+            else:
+                jurisdictions = relevant_jurisdictions
+            # Create a template just for this band.
+            # Find all the bands in the table that overlap this band
+            for jurisdiction in jurisdictions:
+                this_protected_band = Band.parse(
+                    [bounds_str], units=units, jurisdictions=[jurisdiction]
+                )
+                this_protected_band.footnotes.append(trigger_footnote)
+                collection = collections[jurisdiction]
+                overlapping_bands = collection[
+                    this_protected_band.bounds[0] : this_protected_band.bounds[1]
+                ]
+                if len(overlapping_bands) != 1:
+                    raise ValueError(
+                        f"Incorrect number of overlapping bands {jurisdiction}:\n{overlapping_bands}"
+                    )
+                overlapping_band = overlapping_bands[0]
+                if not overlapping_band.has_same_bounds_as(this_protected_band):
+                    # OK, we need to split this and apply the 5.340 to only the actual 5.340
+                    # band.  Remove 5.340 from the overlapping band if present
+                    try:
+                        overlapping_band.footnotes.remove(trigger_footnote)
+                    except ValueError:
+                        pass
+                    collection.data[
+                        this_protected_band.bounds[0] : this_protected_band.bounds[1]
+                    ] = this_protected_band
+                    # Invoke split_overlaps to distinguish all the regions
+                    collection.data.split_overlaps()
+                    # But this still leaves the slivers of the underlying wider bands in
+                    # place.  Spot and remove these because we removed 5.340 from the wider
+                    # bands earlier
+                    for candidate_band in collection.data[this_protected_band.center]:
+                        if not candidate_band.data.has_footnote(trigger_footnote):
+                            collection.data.remove(candidate_band)
