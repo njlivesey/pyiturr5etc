@@ -81,7 +81,7 @@ def read(filename: str = None) -> IntervalTree:
     bandwidth.loc[
         (bandwidth == "N/R") | (bandwidth == "-") | (bandwidth == "nan")
     ] = "0 MHz"
-    # Convert it to GHz to match the frequency range information
+    # Convert it to GHz to match the frequency range information.
     bandwidth_value = (
         bandwidth.str.split(" ", expand=True)[0].str.strip().astype(float) / 1e3
     )
