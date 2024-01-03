@@ -5,7 +5,7 @@ import copy
 from intervaltree import IntervalTree
 import numpy as np
 
-from .fccpint import ureg
+from njl_corf.corf_pint import ureg
 
 __all__ = ["BandCollection"]
 

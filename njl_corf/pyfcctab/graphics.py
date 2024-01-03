@@ -6,7 +6,7 @@ from matplotlib.collections import PatchCollection
 from matplotlib.patches import Rectangle
 from astropy.visualization import quantity_support
 
-from .fccpint import ureg
+from njl_corf.corf_pint import ureg
 
 
 def plot_bands(*args, skip_empty=False):

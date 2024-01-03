@@ -10,7 +10,7 @@ import pint
 from .allocations import Allocation
 from .footnotes import footnote2html
 from .jurisdictions import Jurisdiction
-from .fccpint import ureg
+from njl_corf.corf_pint import ureg
 
 
 __all__ = ["NotBoundsError", "NotBandError", "Band"]

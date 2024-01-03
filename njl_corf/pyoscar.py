@@ -11,7 +11,7 @@ from intervaltree import IntervalTree
 import numpy as np
 import pandas as pd
 
-from .pyfcctab.fccpint import ureg
+from .corf_pint import ureg
 
 
 @dataclass

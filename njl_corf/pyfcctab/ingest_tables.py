@@ -13,7 +13,7 @@ from .versions import Version
 from .utils import cell2text, first_line, last_line, pretty_print
 from .cells import FCCCell
 from .band_collections import BandCollection
-from .fccpint import ureg
+from njl_corf.corf_pint import ureg
 
 
 class FCCTableError(Exception):

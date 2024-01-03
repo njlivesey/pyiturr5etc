@@ -4,7 +4,7 @@ import copy
 
 from intervaltree import IntervalTree
 
-from .fccpint import ureg
+from njl_corf.corf_pint import ureg
 from .bands import Band
 from .band_collections import BandCollection
 
