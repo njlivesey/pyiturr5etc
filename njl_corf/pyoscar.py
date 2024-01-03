@@ -7,7 +7,7 @@ import math
 from dataclasses import dataclass
 import fnmatch
 
-from intervaltree import IntervalTree, Interval
+from intervaltree import IntervalTree
 import numpy as np
 import pandas as pd
 
@@ -34,10 +34,11 @@ class OscarEntry:
     def __post_init__(self):
         """Just some tidying up after definition"""
         if self.bounds.stop == self.bounds.start:
-            # pylint: disable-next=no-member
+            # pylint: disable=no-member
             delta = (
                 math.sqrt(math.ulp(self.bounds.stop.magnitude)) * self.bounds.stop.units
             )
+            # pylint: enable=no-member
             self.bounds = slice(self.bounds.start, self.bounds.stop + delta)
 
 
@@ -180,7 +181,6 @@ def _merge_entries(a: OscarEntry, b: OscarEntry, new_service: str = None):
 def merge_sensors(
     database: IntervalTree,
     rules: dict[str | list[str]],
-    overlapping_only: bool = True,
 ) -> IntervalTree:
     """_summary_
 
@@ -192,8 +192,6 @@ def merge_sensors(
         Named rules giving wildcards which are then merged into a single entry according
         to the name.  For example, {"AMSR":"AMSR*"} will merge all the entries named
         AMSR* into a single AMSR entry.  Multiple wildcards can be given as a list
-    overlapping_only : bool, optional
-        If set, only merge candidates that overlap, by default True
 
     Returns
     -------
@@ -203,7 +201,7 @@ def merge_sensors(
     # We'll need to do two passes for this I think, one where we identify all the
     # possible matches, the second when we collate them.  First get all the services (as
     # a unique list).
-    all_services = list(set([entry.data.service for entry in database]))
+    all_services = list(set(entry.data.service for entry in database))
     rule_map = {}
     # Now go through all the rules and work out which specific service names match them
     for rule_name, wildcards in rules.items():
@@ -214,14 +212,11 @@ def merge_sensors(
             for service in all_services:
                 if fnmatch.fnmatch(service, wildcard):
                     matching_services.append(service)
-            # Was using this filter, but the lambda thing didn't work because of
-            # cell-var-from-loop / W0640
-            #
-            # matching_services = filter( lambda name: fnmatch.fnmatch(name, wildcard), all_services )
             for matching_service in matching_services:
                 if matching_service in rule_map:
                     raise ValueError(
-                        f"Duplicate entries: {matching_service} trying {rule_name}, already have {rule_map[matching_service]}"
+                        f"Duplicate entries: {matching_service} trying {rule_name}, "
+                        f"already have {rule_map[matching_service]}"
                     )
                 rule_map[matching_service] = rule_name
 
@@ -239,11 +234,13 @@ def merge_sensors(
     result = IntervalTree()
     for collection_name, collection in collections.items():
         if collection_name != default_collection:
+            # pylint: disable=cell-var-from-loop
             collection.merge_overlaps(
                 data_reducer=lambda a, b: _merge_entries(
                     a, b, new_service=collection_name
                 ),
                 strict=False,
             )
+            # pylint: enable=cell-var-from-loop
         result |= collection
     return result

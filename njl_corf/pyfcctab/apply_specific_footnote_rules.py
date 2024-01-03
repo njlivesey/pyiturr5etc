@@ -372,15 +372,34 @@ def get_all_itu_footnote_based_additions() -> BandCollection:
     return all_additions
 
 
-# ------------------------------------------------------- 5.340
+# ------------------------------------------------------- 5.340/US246
 
 
-def enact_5_340_US246(collections: dict[BandCollection]):
+# pylint: disable-next=too-many-locals
+def enact_5_340_us246(
+    collections: dict[BandCollection],
+    interrupt_other_allocations: bool = True,
+):
     """Enact the 5.340 and US-246 protections
 
     In most cases the bands are already marked as 5.340/US246 protected, however, in a
     couple of them the protection is limited to a small slice within the band.  In those
     cases we will split the existing bands and insert the protected band.
+
+    Parameters
+    ----------
+    collections : dict[BandCollection]
+        The collections of bands that have been read in.
+    interrupt_other_allocations : bool, optional
+        If set, then any allocations that cover the protected band but are wider than it
+        are split in two such that their allocation appears to be interrupted. By
+        default True
+
+    Raises
+    ------
+    ValueError
+        In cases where there seem to be multiple bands overlapping a protected band
+        (shouldn't happen by construction).
     """
     # These entries are cut and pasted directly from the FCC document (2022-08-23 version).
     entries_5_340 = [
@@ -433,6 +452,8 @@ def enact_5_340_US246(collections: dict[BandCollection]):
     ]
     itu_jurisdictions = ["R1", "R2", "R3"]  # list(collections.keys())
     usa_jurisdictions = ["F", "NF"]
+
+    # pylint: disable-next=too-many-nested-blocks
     for entries, relevant_jurisdictions, trigger_footnote in zip(
         [entries_5_340, entries_us246],
         [itu_jurisdictions, usa_jurisdictions],
@@ -452,33 +473,45 @@ def enact_5_340_US246(collections: dict[BandCollection]):
                 jurisdictions = ["R2"]
             else:
                 jurisdictions = relevant_jurisdictions
-            # Create a template just for this band.
-            # Find all the bands in the table that overlap this band
+            # Go through all the jurisdictions and basically do nothing when the
+            # protected band spans the full band in the alocation table.  However, when
+            # the protected band is a narrow subset of the full band, some extra steps
+            # can be taken.
             for jurisdiction in jurisdictions:
+                # Create a band to denote this protection
                 this_protected_band = Band.parse(
                     [bounds_str], units=units, jurisdictions=[jurisdiction]
                 )
                 this_protected_band.footnotes.append(trigger_footnote)
                 collection = collections[jurisdiction]
+                # Find the band that overlaps it (there should be only one per jurisdiction)
                 overlapping_bands = collection[
                     this_protected_band.bounds[0] : this_protected_band.bounds[1]
                 ]
                 if len(overlapping_bands) != 1:
                     raise ValueError(
-                        f"Incorrect number of overlapping bands {jurisdiction}:\n{overlapping_bands}"
+                        "Incorrect number of overlapping bands "
+                        f"{jurisdiction}:\n{overlapping_bands}"
                     )
                 overlapping_band = overlapping_bands[0]
-                if not overlapping_band.has_same_bounds_as(this_protected_band):
+                # Now, if the protected band is a narrow subset of the overlapping band,
+                # then we potentially take extra steps to "interrupt" the overlapping
+                # band.
+                if (
+                    not overlapping_band.has_same_bounds_as(this_protected_band)
+                    and interrupt_other_allocations
+                ):
                     # OK, we need to split this and apply the 5.340 to only the actual 5.340
                     # band.  Remove 5.340 from the overlapping band if present
                     try:
                         overlapping_band.footnotes.remove(trigger_footnote)
                     except ValueError:
                         pass
+                    # Insert the new "protected" band into the list of bands
                     collection.data[
                         this_protected_band.bounds[0] : this_protected_band.bounds[1]
                     ] = this_protected_band
-                    # Invoke split_overlaps to distinguish all the regions
+                    # Invoke split_overlaps so as to interrupt the underlying allocations
                     collection.data.split_overlaps()
                     # But this still leaves the slivers of the underlying wider bands in
                     # place.  Spot and remove these because we removed 5.340 from the wider
@@ -486,3 +519,11 @@ def enact_5_340_US246(collections: dict[BandCollection]):
                     for candidate_band in collection.data[this_protected_band.center]:
                         if not candidate_band.data.has_footnote(trigger_footnote):
                             collection.data.remove(candidate_band)
+                else:
+                    # Otherwise, at least check that the overlapping band has the
+                    # trigger foonote.
+                    if not overlapping_band.has_footnote(trigger_footnote):
+                        raise ValueError(
+                            f"Band {overlapping_band.compact_str()} "
+                            f"does not have footnote {trigger_footnote}"
+                        )

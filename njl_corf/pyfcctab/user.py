@@ -12,7 +12,7 @@ from IPython.display import display, HTML
 from .ingest_tables import parse_all_tables
 from .apply_specific_footnote_rules import (
     get_all_itu_footnote_based_additions,
-    enact_5_340_US246,
+    enact_5_340_us246,
 )
 from .band_collections import BandCollection
 from .footnotes import ingestfootnote_definitions, footnotedef2html
@@ -115,7 +115,7 @@ def read(
     collections, version = parse_all_tables(docx_data, filename, **kwargs)
     # Now possibly insert the additional bands.
     if not skip_additionals:
-        enact_5_340_US246(collections)
+        enact_5_340_us246(collections)
         # We'll create an interim result for the collections we have.
         all_additions = get_all_itu_footnote_based_additions()
         print("Injecting additions in: ", end="")
