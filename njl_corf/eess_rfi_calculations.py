@@ -74,6 +74,7 @@ def beam_length(
     return viewing_distance
 
 
+# pylint: disable-next=too-many-arguments, too-many-locals, too-many-branches
 def link_budget(
     *,
     frequency: pint.Quantity,
@@ -140,7 +141,8 @@ def link_budget(
         if implied_psd > source_max_psd:
             source_power = source_max_psd * received_bandwidth
             notes.append(
-                f"Limiting transmitted power to {source_power.to(ureg.dBm):.2f~P} in light of implied PSD"
+                f"Limiting transmitted power to {source_power.to(ureg.dBm):.2f~P} "
+                "in light of implied PSD"
             )
     # Don't think I need to consider any kind of bandwidth "gain" do I?
     received_power = (
@@ -170,6 +172,7 @@ def link_budget(
         details = {}
         for variable in variables:
             try:
+                # pylint: disable-next=eval-used
                 details[variable] = eval(variable)
             except NameError:
                 details[variable] = None
