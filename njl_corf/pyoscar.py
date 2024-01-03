@@ -15,6 +15,7 @@ from .pyfcctab.fccpint import ureg
 
 
 @dataclass
+# pylint: disable-next=too-many-instance-attributes
 class OscarEntry:
     """Contains one entry from the OSCAR database"""
 
