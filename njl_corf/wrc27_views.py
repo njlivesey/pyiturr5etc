@@ -1,6 +1,7 @@
 """Generates plots etc. in WRC-27 views report"""
 
-from njl_corf.pyfcctab
+from njl_corf.corf_pint import ureg
+
 
 def get_ai_info() -> dict:
     """Populate a dictionary detailing the bands in each AI"""

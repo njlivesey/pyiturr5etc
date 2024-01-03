@@ -1,9 +1,5 @@
 """Code to provide additional alocations"""
 
-import copy
-
-from intervaltree import IntervalTree
-
 from njl_corf.corf_pint import ureg
 from .bands import Band
 from .band_collections import BandCollection

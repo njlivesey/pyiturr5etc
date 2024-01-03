@@ -3,7 +3,6 @@
 import copy
 
 from intervaltree import IntervalTree
-import numpy as np
 
 from njl_corf.corf_pint import ureg
 
@@ -18,7 +17,7 @@ class BandCollection:
     def __init__(self, *args):
         """Create a band collection and possibly fill it with bands supplied"""
         self.data = IntervalTree()
-        self.metadata = dict()
+        self.metadata = {}
         for a in args:
             for b in a:
                 self.append(b)
