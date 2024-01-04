@@ -534,7 +534,8 @@ class Band:
         exclusive: bool = None,
         case_sensitive: bool = False,
         user_annotations: dict = None,
-    ) -> bool:
+        return_allocation: bool = False,
+    ) -> bool | tuple[bool, Allocation]:
         """Returns true if band has a given allocation
 
         Parameters
@@ -542,27 +543,32 @@ class Band:
         allocation : str
             The allocation being queried
         but_not : str, optional
-            If supplied return false includes this allocation
+            If supplied return false if the band includes this allocation
         primary : bool, optional
-            If set, require allocation's primary flag to match this value
+            If provided, require allocation's primary flag to match this value
         secondary : bool, optional
-            If set, require allocation's secondary flag to match this value
+            If provided, require allocation's secondary flag to match this value
         co_primary : bool, optional
-            If set, require allocation's co_primary flag to match this value
+            If provided, require allocation's co_primary flag to match this value
         exclusive : bool, optional
-            If set, require allocation's exclusive flag to match this value
+            If provided, require allocation's exclusive flag to match this value
         case_sensitive : bool, optional
-            If set, force a case-sensitive comparison
+            If set, force a case-sensitive comparison, default False
         user_annotations : dict, optional
             If provided, all the user_annotations in the allocation must match those
             supplied
+        return_allocation : bool, optional
+            If set, then the routine returns the actual allocation as well as the flag
+            (or None if there is no matching allocation)
 
         Returns
         -------
-        bool : result
+        bool : result (optionally plus allocation : Allocation)
         """
         for a in self.allocations:
-            if a.matches(allocation, case_sensitive=case_sensitive):
+            if a.matches(
+                allocation, case_sensitive=case_sensitive, omit_footnotes=True
+            ):
                 if primary is not None:
                     if a.primary != primary:
                         continue
@@ -584,7 +590,14 @@ class Band:
                             continue
                         if item != a.user_annotations[key]:
                             continue
+                # Return the result (optionally including the allocation itself)
+                if return_allocation:
+                    return True, a
                 return True
+        # Return the result (optinonally including None, to indicate no allocation
+        # found)
+        if return_allocation:
+            return False, None
         return False
 
     def applies_in(self, jurisdiction):

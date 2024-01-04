@@ -43,15 +43,22 @@ class Allocation:
             user_annotations = {}
         self.user_annotations = user_annotations
 
-    def to_str(self, html=False, footnote_definitions=None, tooltips=True):
+    def to_str(
+        self,
+        html: bool = False,
+        omit_footnotes: bool = False,
+        omit_modifiers: bool = False,
+        tooltips: bool = True,
+        footnote_definitions: dict[str] = None,
+    ):
         """String representation of Allocation, possibly with HTML/tooltips"""
         if self.primary:
             result = self.service.name.upper()
         else:
             result = self.service.name.capitalize()
-        if len(self.modifiers) != 0:
+        if self.modifiers and not omit_modifiers:
             result += " " + " ".join([f"({m})" for m in self.modifiers])
-        if len(self.footnotes) != 0:
+        if self.footnotes and not omit_footnotes:
             if html:
                 result = (
                     result
@@ -106,12 +113,18 @@ class Allocation:
         self,
         line: str,
         case_sensitive: bool = False,
+        omit_footnotes: bool = False,
+        omit_modifiers: bool = False,
     ):
         """Return true if an allocation matches a given string"""
+        self_str = self.to_str(
+            omit_footnotes=omit_footnotes,
+            omit_modifiers=omit_modifiers,
+        )
         if case_sensitive:
-            return fnmatch.fnmatchcase(str(self), line)
+            return fnmatch.fnmatchcase(self_str, line)
         else:
-            return fnmatch.fnmatchcase(str(self).lower(), line.lower())
+            return fnmatch.fnmatchcase(self_str.lower(), line.lower())
 
     @classmethod
     def parse(cls, line):
