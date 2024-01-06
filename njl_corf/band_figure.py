@@ -222,6 +222,7 @@ def views_plot(
     figure_configuration: FigureConfiguration,
     collation_rules: dict,
     frequency_margin: float = None,
+    omit_band_borders: bool = False,
 ):
     """Does one views report plot NEEDS BETTER DOCSTRING!"""
     # Increate the range if/as needed
@@ -306,9 +307,10 @@ def views_plot(
     ax.set_xlim(examined_frequency_range.start, examined_frequency_range.stop)
     ax.set_ylim(-0.5, n_bars - 0.5)
     ax.set_yticks(np.array(list(y_labels.keys())), y_labels.values())
-    band_bounds = list(set(band_bounds))
-    for b in band_bounds:
-        ax.axvline(b, color="darkgrey", zorder=-10, linewidth=0.5)
+    if not omit_band_borders:
+        band_bounds = list(set(band_bounds))
+        for b in band_bounds:
+            ax.axvline(b, color="darkgrey", zorder=-10, linewidth=0.5)
     # ------- 5.340
     # Hatch out all the areas that are 5.340
     for band in bands:
@@ -329,3 +331,4 @@ def views_plot(
             ax.add_patch(this_patch)
     # Final tidy ups
     ax.invert_yaxis()
+    ax.tick_params(axis="y", which="minor", left=False, right=False)
