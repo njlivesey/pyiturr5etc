@@ -17,9 +17,20 @@ class Allocation:
         modifiers: list[str],
         footnotes: list[str],
         primary: bool,
+        secondary: bool = None,
+        footnote_mention: bool = False,
         user_annotations: dict = None,
     ):
         """Create an allocation from inputs
+
+        To first order, allocations are either "Primary" or "Secondary", at least that's
+        how the ITU/FCC designates things.  However, this sofware can also track things
+        incorporated by footnote mentions (e.g., the 5.149 "all pracitcal steps")
+        designation.  Some of these footnote mentions are accompanied by (probably
+        mostly secondary, but I've not checked, yet) allocations, others are not. Hence,
+        while an allocation can only be either primary or secondary (or neither) not
+        both, it can be one of those and have footnote_mention set true.
+
 
         Parameters
         ----------
@@ -30,7 +41,11 @@ class Allocation:
         footnotes : list[str]
             List of any footnotes for this allocation
         primary : bool
-            True if this allocation is primary
+            True if this allocation is a primary allocation
+        secondary : bool
+            True if this allocation is a secondary allocation
+        footnote_mention : bool
+            True if this alloction derives from a footnote, see above.  Default False
         user_annotations : dict
             Additional information that can be supplied by user.  Note that the parent
             Band instance has its own user_annotations attribute.
@@ -39,9 +54,16 @@ class Allocation:
         self.modifiers = modifiers
         self.footnotes = footnotes
         self.primary = primary
+        if secondary is None:
+            secondary = (not primary) and (not footnote_mention)
+        self.secondary = secondary
+        self.footnote_mention = footnote_mention
         if user_annotations is None:
             user_annotations = {}
         self.user_annotations = user_annotations
+        # Do some checking
+        if self.primary and self.secondary:
+            raise ValueError("Allocation cannot be both primary and secondary")
 
     def to_str(
         self,
@@ -54,8 +76,10 @@ class Allocation:
         """String representation of Allocation, possibly with HTML/tooltips"""
         if self.primary:
             result = self.service.name.upper()
-        else:
+        elif self.secondary:
             result = self.service.name.capitalize()
+        else:
+            result = self.service.name.lower() + "-(by footnote)"
         if self.modifiers and not omit_modifiers:
             result += " " + " ".join([f"({m})" for m in self.modifiers])
         if self.footnotes and not omit_footnotes:
@@ -88,6 +112,10 @@ class Allocation:
         if self.footnotes != a.footnotes:
             return False
         if self.primary != a.primary:
+            return False
+        if self.secondary != a.secondary:
+            return False
+        if self.footnote_mention != a.footnote_mention:
             return False
         return True
 

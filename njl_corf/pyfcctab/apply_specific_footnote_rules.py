@@ -14,11 +14,10 @@ NOTES = """
 def footnote_5_225():
     """Return a Band corresponding to an allocation described in a footnote"""
     return [
-        Band.parse(
-            ["150.05-153", "Radio astronomy 5.225# (Australia and India only)"],
-            units=ureg.MHz,
+        Band.create_band_from_footnote(
+            bounds="150.05-153 MHz",
+            allocations="Radio astronomy 5.225# (Australia and India only)",
             jurisdictions=["R3"],
-            annotations=[""],
         )
     ]
 
@@ -26,9 +25,9 @@ def footnote_5_225():
 def footnote_5_250():
     """Return a Band corresponding to an allocation described in a footnote"""
     return [
-        Band.parse(
-            ["225-235", "Radio astronomy 5.250# (China only)"],
-            units=ureg.MHz,
+        Band.create_band_from_footnote(
+            bounds="225-235 MHz",
+            allocations="Radio astronomy 5.250# (China only)",
             jurisdictions=["R3"],
         )
     ]
@@ -37,9 +36,9 @@ def footnote_5_250():
 def footnote_5_304():
     """Return a Band corresponding to an allocation described in a footnote"""
     return [
-        Band.parse(
-            ["606-614", "RADIO ASTRONOMY 5.304# (African broadcasting area)"],
-            units=ureg.MHz,
+        Band.create_band_from_footnote(
+            bounds="606-614 MHz",
+            allocations="RADIO ASTRONOMY 5.304# (African broadcasting area)",
             jurisdictions=["R1"],
         )
     ]
@@ -48,9 +47,9 @@ def footnote_5_304():
 def footnote_5_305():
     """Return a Band corresponding to an allocation described in a footnote"""
     return [
-        Band.parse(
-            ["606-614", "RADIO ASTRONOMY 5.305# (China)"],
-            units=ureg.MHz,
+        Band.create_band_from_footnote(
+            bounds="606-614 MHz",
+            allocations="RADIO ASTRONOMY 5.305# (China)",
             jurisdictions=["R3"],
         )
     ]
@@ -59,9 +58,9 @@ def footnote_5_305():
 def footnote_5_306():
     """Return a Band corresponding to an allocation described in a footnote"""
     return [
-        Band.parse(
-            ["608-614", "Radio astronomy 5.306# (Not Africa)"],
-            units=ureg.MHz,
+        Band.create_band_from_footnote(
+            bounds="608-614 MHz",
+            allocations="Radio astronomy 5.306# (Not Africa)",
             jurisdictions=["R1"],
         )
     ]
@@ -70,9 +69,9 @@ def footnote_5_306():
 def footnote_5_307():
     """Return a Band corresponding to an allocation described in a footnote"""
     return [
-        Band.parse(
-            ["608-614", "Radio astronomy 5.307# (India)"],
-            units=ureg.MHz,
+        Band.create_band_from_footnote(
+            bounds="608-614 MHz",
+            allocations="Radio astronomy 5.307# (India)",
             jurisdictions=["R1"],
         )
     ]
@@ -81,27 +80,20 @@ def footnote_5_307():
 def footnote_5_339():
     """Return a Band corresponding to an allocation described in a footnote"""
     added_ranges = [
-        "1370-1400",
-        "2640-2655",
-        "4950-4990",
-        "15.20-15.35",
-    ]
-    added_units = [
-        ureg.MHz,
-        ureg.MHz,
-        ureg.MHz,
-        ureg.GHz,
+        "1370-1400 MHz",
+        "2640-2655 MHz",
+        "4950-4990 MHz",
+        "15.20-15.35 GHz",
     ]
     bands = []
-    for this_range, these_units in zip(added_ranges, added_units):
+    for this_range in added_ranges:
         bands.append(
-            Band.parse(
-                [
-                    this_range,
+            Band.create_band_from_footnote(
+                bounds=this_range,
+                allocations=[
                     "Earth exploration-satellite (passive) 5.339#",
                     "Space research (passive) 5.339#",
                 ],
-                units=these_units,
                 jurisdictions=["R1", "R2", "R3"],
             )
         )
@@ -111,9 +103,9 @@ def footnote_5_339():
 def footnote_5_385():
     """Return a Band corresponding to an allocation described in a footnote"""
     return [
-        Band.parse(
-            ["1718.8-1722.2", "Radio astronomy 5.385#"],
-            units=ureg.MHz,
+        Band.create_band_from_footnote(
+            bounds="1718.8-1722.2 MHz",
+            allocations="Radio astronomy 5.385#",
             jurisdictions=["R1", "R2", "R3"],
         )
     ]
@@ -122,9 +114,9 @@ def footnote_5_385():
 def footnote_5_437():
     """Return a Band corresponding to an allocation described in a footnote"""
     return [
-        Band.parse(
-            ["4200-4400", "Earth exploration-satellite (passive) 5.437#"],
-            units=ureg.MHz,
+        Band.create_band_from_footnote(
+            bounds="4200-4400 MHz",
+            allocations="Earth exploration-satellite (passive) 5.437#",
             jurisdictions=["R1", "R2", "R3"],
         )
     ]
@@ -133,18 +125,15 @@ def footnote_5_437():
 def footnote_5_443():
     """Return a Band corresponding to an allocation described in a footnote"""
     added_ranges = [
-        "4825-4835",
-        "4950-4990",
+        "4825-4835 MHz",
+        "4950-4990 MHz",
     ]
     bands = []
     for this_range in added_ranges:
         bands.append(
-            Band.parse(
-                [
-                    this_range,
-                    "RADIO ASTRONOMY 5.443# (Argentina, Australia, Canada only)",
-                ],
-                units=ureg.MHz,
+            Band.create_band_from_footnote(
+                bounds=this_range,
+                allocations="RADIO ASTRONOMY 5.443# (Argentina, Australia, Canada only)",
                 jurisdictions=["R2", "R3"],
             )
         )
@@ -154,9 +143,9 @@ def footnote_5_443():
 def footnote_5_479():
     """Return a Band corresponding to an allocation described in a footnote"""
     return [
-        Band.parse(
-            ["9.975-10.025", "Earth exploration-satellite (active) 5.479#"],
-            units=ureg.GHz,
+        Band.create_band_from_footnote(
+            bounds="9.975-10.025 GHz",
+            allocations="Earth exploration-satellite (active) 5.479#",
             jurisdictions=["R1", "R2", "R3"],
         )
     ]
@@ -165,15 +154,15 @@ def footnote_5_479():
 def footnote_5_458():
     """Return a Band corresponding to an allocation described in a footnote"""
     added_ranges = [
-        "6425-7075",
-        "7075-7250",
+        "6425-7075 MHz",
+        "7075-7250 MHz",
     ]
     bands = []
     for this_range in added_ranges:
         bands.append(
-            Band.parse(
-                [this_range, "Earth exploration-satellite (passive) 5.458#"],
-                units=ureg.MHz,
+            Band.create_band_from_footnote(
+                bounds=this_range,
+                allocations="Earth exploration-satellite (passive) 5.458#",
                 jurisdictions=["R1", "R2", "R3"],
             )
         )
@@ -183,9 +172,9 @@ def footnote_5_458():
 def footnote_5_543():
     """Return a Band corresponding to an allocation described in a footnote"""
     return [
-        Band.parse(
-            ["29.95-30", "Earth exploration-satellite (space-to-space, comms.) 5.543#"],
-            units=ureg.GHz,
+        Band.create_band_from_footnote(
+            bounds="29.95-30 GHz",
+            allocations="Earth exploration-satellite (space-to-space, comms.) 5.543#",
             jurisdictions=["R1", "R2", "R3"],
         )
     ]
@@ -194,9 +183,9 @@ def footnote_5_543():
 def footnote_5_555():
     """Return a Band corresponding to an allocation described in a footnote"""
     return [
-        Band.parse(
-            ["48.94-49.05", "RADIO ASTRONOMY 5.555#"],
-            units=ureg.GHz,
+        Band.create_band_from_footnote(
+            bounds="48.94-49.05 GHz",
+            allocations="RADIO ASTRONOMY 5.555#",
             jurisdictions=["R1", "R2", "R3"],
         )
     ]
@@ -205,16 +194,16 @@ def footnote_5_555():
 def footnote_5_556():
     """Return a Band corresponding to an allocation described in a footnote"""
     added_ranges = [
-        "51.4-54.25",
-        "58.2-59",
-        "64-65",
+        "51.4-54.25 GHz",
+        "58.2-59 GHz",
+        "64-65 GHz",
     ]
     bands = []
     for this_range in added_ranges:
         bands.append(
-            Band.parse(
-                [this_range, "Radio astronomy 5.556# (On a nation-by-nation basis)"],
-                units=ureg.GHz,
+            Band.create_band_from_footnote(
+                bounds=this_range,
+                allocations="Radio astronomy 5.556# (On a nation-by-nation basis)",
                 jurisdictions=["R1", "R2", "R3"],
             )
         )
@@ -224,17 +213,17 @@ def footnote_5_556():
 def footnote_5_562d():
     """Return a Band corresponding to an allocation described in a footnote"""
     added_ranges = [
-        "128-130",
-        "171-171.6",
-        "172.2-172.8",
-        "173.3-174",
+        "128-130 GHz",
+        "171-171.6 GHz",
+        "172.2-172.8 GHz",
+        "173.3-174 GHz",
     ]
     bands = []
     for this_range in added_ranges:
         bands.append(
-            Band.parse(
-                [this_range, "RADIO ASTRONOMY 5.562D# (Korea, Rep. of, only)"],
-                units=ureg.GHz,
+            Band.create_band_from_footnote(
+                bounds=this_range,
+                allocations="RADIO ASTRONOMY 5.562D# (Korea, Rep. of, only)",
                 jurisdictions=["R3"],
             )
         )
@@ -299,10 +288,9 @@ def footnote_5_149():
     bands = []
     for i in entries:
         words = i.split()
-        # The first word is the bounds
-        bounds_str = words[0]
-        # The second is the units
-        units = ureg.Unit(words[1])
+        # The first pair of words is the bounds and units
+        bounds_str = " ".join(words[:2])
+        # Now the remainder
         if len(words) > 2:
             if words[2] != "in":
                 raise ValueError("'in' expected.")
@@ -318,9 +306,9 @@ def footnote_5_149():
         else:
             jurisdictions = ["R1", "R2", "R3"]
         bands.append(
-            Band.parse(
-                [bounds_str, "Radio astronomy 5.149#"],
-                units=units,
+            Band.create_band_from_footnote(
+                bounds=bounds_str,
+                allocations="Radio astronomy 5.149#",
                 jurisdictions=jurisdictions,
             )
         )
@@ -462,8 +450,6 @@ def enact_5_340_us246(
             except ValueError:
                 range_str = entry
                 suffix = ""
-            bounds_str, units_str = range_str.split(" ")
-            units = ureg.Unit(units_str)
             # Deal with any suffixes
             if suffix == "in Region 2":
                 jurisdictions = ["R2"]
@@ -475,8 +461,8 @@ def enact_5_340_us246(
             # can be taken.
             for jurisdiction in jurisdictions:
                 # Create a band to denote this protection
-                this_protected_band = Band.parse(
-                    [bounds_str], units=units, jurisdictions=[jurisdiction]
+                this_protected_band = Band.create_band_from_footnote(
+                    bounds=range_str, jurisdictions=[jurisdiction]
                 )
                 this_protected_band.footnotes.append(trigger_footnote)
                 collection = collections[jurisdiction]

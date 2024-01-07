@@ -10,6 +10,7 @@ import pint
 from .allocations import Allocation
 from .footnotes import footnote2html
 from .jurisdictions import Jurisdiction
+from .cells import FCCCell
 from njl_corf.corf_pint import ureg
 
 
@@ -29,19 +30,29 @@ class NotBandError(Exception):
 
 
 # Now a support routine.
-def _parse_bounds(text, units):
+def _parse_bounds(text, units: pint.Unit = None) -> list[pint.Quantity]:
     """Turn a string giving a frequency range into a bounds object"""
     re_float = r"[0-9_]+(?:\.[0-9_]+)?"
-    re_bounds = f"^({re_float})-({re_float})[\\w]*(\\(Not allocated\\))?$"
-    # print (f"Matching {re_bounds} to {text}")
+    re_bounds = (
+        f"^({re_float})-({re_float})" r"[\s]*([kMG]Hz)?" r"[\s]*(\(Not allocated\))?$"
+    )
     match = re.match(re_bounds, text)
     if match is not None:
+        # OK, we match this rather complex wildcard
+        if match.group(3):
+            new_units = ureg.parse_expression(match.group(3))
+            if units is not None and new_units != units:
+                raise ValueError("Units mismatch")
+            units = new_units
+        else:
+            if units is None:
+                raise ValueError("No units given in string or separately")
         return [
             float(match.group(1)) * units,
             float(match.group(2)) * units,
         ]
     # Perhaps this is the "below the bottom" case.
-    re_bottom = f"^Below ({re_float}) \\(Not Allocated\\)$"
+    re_bottom = f"^Below ({re_float})" r" \(Not Allocated\)$"
     match = re.match(re_bottom, text)
     if match is not None:
         return [0.0 * units, float(match.group(1)) * units]
@@ -58,12 +69,13 @@ class Band:
     def __init__(
         self,
         bounds: list[pint.Quantity],
-        primary_allocations: list[Allocation],
-        secondary_allocations: list[Allocation],
-        footnotes: list[str],
-        fcc_rules: list[str],
         jurisdictions: list[Jurisdiction],
-        annotations: list[str],
+        primary_allocations: list[Allocation] = None,
+        secondary_allocations: list[Allocation] = None,
+        footnote_mentions: list[Allocation] = None,
+        footnotes: list[str] = None,
+        fcc_rules: list[str] = None,
+        annotations: list[str] = None,
         footnote_definitions: dict[str] = None,
         metadata: dict = None,
         user_annotations: dict = None,
@@ -74,18 +86,20 @@ class Band:
         ----------
         bounds : list[pint.Quantity]
             start and stop frequency for the band
-        primary_allocations : list[Allocation]
-            List of the primary allocations
-        secondary_allocations : list[Allocation]
-            List of the secondary allocations
-        footnotes : list[str]
-            List of the associated footnotes
-        fcc_rules : list[str]
-            List of any associated fcc rules
         jurisdictions : list[Jurisdiction]
             Which jurisdiction(s) does this band fall under
-        annotations : list[str]
+        primary_allocations : list[Allocation], optional
+            List of the primary allocations
+        secondary_allocations : list[Allocation], optional
+            List of the secondary allocations
+        footnotes : list[str], optional
+            List of the associated footnotes
+        fcc_rules : list[str], optional
+            List of any associated fcc rules
+        annotations : list[str], optional
             Any annotations from the FCC table
+        footnote_mentions : list[str], optional
+            Any quasi-allocations that are introduced by a footnote (e.g., 5.149)
         footnote_definitions: dict[str], optional
             Information for defining the footnotes.
         metadata : dict, optional
@@ -95,17 +109,30 @@ class Band:
             individual Allocations within the band can carry user_annotations also.)
         """
         self.bounds = bounds
-        self.primary_allocations = primary_allocations
-        self.secondary_allocations = secondary_allocations
-        self.footnotes = footnotes
-        self.fcc_rules = fcc_rules
         self.jurisdictions = jurisdictions
+        if primary_allocations is None:
+            primary_allocations = []
+        self.primary_allocations = primary_allocations
+        if secondary_allocations is None:
+            secondary_allocations = []
+        self.secondary_allocations = secondary_allocations
+        if footnote_mentions is None:
+            footnote_mentions = []
+        self.footnote_mentions = footnote_mentions
+        if footnotes is None:
+            footnotes = []
+        self.footnotes = footnotes
+        if fcc_rules is None:
+            fcc_rules = []
+        self.fcc_rules = fcc_rules
+        if annotations is None:
+            annotations = []
         self.annotations = annotations
         if metadata is None:
             metadata = {}
+        self.metadata = metadata
         if footnote_definitions is None:
             footnote_definitions = {}
-        self.metadata = metadata
         self.footnote_definitions = footnote_definitions
         if user_annotations is None:
             user_annotations = {}
@@ -309,21 +336,30 @@ class Band:
 
     def finalize(self):
         """Make sure all the various pieces of information for a band are correct"""
+        # Get a list of all the allocations
         self.allocations = []
-        n_allocations = len(self.primary_allocations) + len(self.secondary_allocations)
+        # Work out whether which ever allocation we have will be exclusive (ignore
+        # quasi-allocations introduced by footnotes such as 5.140)
+        single_allocation = (
+            len(self.primary_allocations) + len(self.secondary_allocations)
+        ) == 1
         for a in self.primary_allocations:
             assert (
-                a.primary
+                a.primary and not a.secondary
             ), "A secondary allocation ended up in the primary list somehow"
             a.co_primary = len(self.primary_allocations) > 1
-            a.exclusive = n_allocations == 1
+            a.exclusive = single_allocation
             self.allocations.append(a)
         for a in self.secondary_allocations:
             assert (
-                not a.primary
+                a.secondary and not a.primary
             ), "A primary allocation ended up in the secondary list somehow"
             a.co_primary = False
-            a.exclusive = n_allocations == 1
+            a.exclusive = single_allocation
+            self.allocations.append(a)
+        for a in self.footnote_mentions:
+            a.co_primary = False
+            a.exclusive = False
             self.allocations.append(a)
 
     def equal(
@@ -530,6 +566,7 @@ class Band:
         but_not: str = None,
         primary: bool = None,
         secondary: bool = None,
+        footnote_mention: bool = None,
         co_primary: bool = None,
         exclusive: bool = None,
         case_sensitive: bool = False,
@@ -550,6 +587,8 @@ class Band:
             If provided, require allocation's secondary flag to match this value
         co_primary : bool, optional
             If provided, require allocation's co_primary flag to match this value
+        footnote_mention : bool, optional
+            If provided, require allocation's footnote_mention flag to match this value
         exclusive : bool, optional
             If provided, require allocation's exclusive flag to match this value
         case_sensitive : bool, optional
@@ -573,7 +612,10 @@ class Band:
                     if a.primary != primary:
                         continue
                 if secondary is not None:
-                    if (not a.primary) != secondary:
+                    if a.secondary != secondary:
+                        continue
+                if footnote_mention is not None:
+                    if a.footnote_mention != footnote_mention:
                         continue
                 if co_primary is not None:
                     if a.co_primary != co_primary:
@@ -652,12 +694,47 @@ class Band:
 
     @classmethod
     def parse(
-        cls, cell, fcc_rules=None, units=None, jurisdictions=None, annotations=None
+        cls: type,
+        cell: FCCCell | list[str],
+        fcc_rules: FCCCell | list[str],
+        units: pint.Unit = None,
+        jurisdictions: list[Jurisdiction] = None,
+        annotations: list[str] = None,
     ):
-        """Parse a table cell into a Band"""
-        # pylint: disable-next=import-outside-toplevel
-        from .cells import FCCCell
+        """Parse a table cell into a Band
 
+        Can take either an FCCCell class from the table or a list of strings.
+
+        Parameters
+        ----------
+        cell : FCCCell | list[str]
+            The entry in the FCC table that describes the band (or can be a list of
+            strings)
+        fcc_rules : FCCCell | list[str]
+            The entry in the FCC table that gives the FCC rules (right most column in
+            the table)
+        units : pint.Unit, optional
+            The units in action for this table page (MHz, GHz, etc.)
+        jurisdictions : list[Jurisdiction], optional
+            Which jurisdiction(s) this band applies to
+        annotations : list[str], optional
+            Any annotations associated with this band
+        is_from_footnote : bool, optional
+            If set, this band is being introduced by a footnote, not as such in the
+            result
+
+        Returns
+        -------
+        result : Band
+            A parsed band
+
+        Raises
+        ------
+        NotBandError
+            Raised if the text does not parse correctly into a band
+        ValueError
+            Raised if the is scope for confusion about which units are in action.
+        """
         # Work out what type of input we've been give, an FCCCell type
         # or just a set of strings.
         if cell is None:
@@ -745,4 +822,27 @@ class Band:
             jurisdictions=jurisdictions,
             annotations=annotations,
             metadata=metadata,
+        )
+
+    @classmethod
+    def create_band_from_footnote(
+        cls: type,
+        bounds: str | slice | list[pint.Quantity],
+        allocations: str | list[str] = None,
+        jurisdictions: list[Jurisdiction] = None,
+        annotations: list[str] = None,
+    ):
+        # Process the bounds
+        bounds = _parse_bounds(bounds)
+        # Preprocess the allocations if supplied
+        if isinstance(allocations, str):
+            allocations = [allocations]
+        if allocations:
+            allocations = [Allocation.parse(allocation) for allocation in allocations]
+        # Create and return the result
+        return cls(
+            bounds=bounds,
+            footnote_mentions=allocations,
+            jurisdictions=jurisdictions,
+            annotations=annotations,
         )

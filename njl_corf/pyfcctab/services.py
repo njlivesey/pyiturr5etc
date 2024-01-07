@@ -67,7 +67,6 @@ class Service:
         Service:
             The radiocommunication service that matches that name.
         """
-        # Convert input to lower case and not its lenth
         line_lower = line.lower()
         # Loop over candidate services
         result = None
