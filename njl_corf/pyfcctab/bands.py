@@ -832,6 +832,26 @@ class Band:
         jurisdictions: list[Jurisdiction] = None,
         annotations: list[str] = None,
     ):
+        """Creates a new band per rules given in a footnote
+
+        Parameters
+        ----------
+        cls : type
+            Presumably Band
+        bounds : str | slice | list[pint.Quantity]
+            Frequency range (can be supplied as a string)
+        allocations : str | list[str], optional
+            Sring or list thereof giving the [quasi-]allocations(s) for this band
+        jurisdictions : list[Jurisdiction], optional
+            List of jurisdictions in which this quasi-allocation applies
+        annotations : list[str], optional
+            Any annotations associated with this quasi-allocation
+
+        Returns
+        -------
+        result : Band
+            The newly-created band to include in a BandCollection
+        """
         # Process the bounds
         bounds = _parse_bounds(bounds)
         # Preprocess the allocations if supplied
