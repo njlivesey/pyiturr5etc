@@ -54,6 +54,8 @@ class Allocation:
         self.modifiers = modifiers
         self.footnotes = footnotes
         self.primary = primary
+        if footnote_mention is None:
+            footnote_mention = False
         if secondary is None:
             secondary = (not primary) and (not footnote_mention)
         self.secondary = secondary
@@ -79,7 +81,7 @@ class Allocation:
         elif self.secondary:
             result = self.service.name.capitalize()
         else:
-            result = self.service.name.lower() + "-(by footnote)"
+            result = self.service.name.lower() + " (by footnote)"
         if self.modifiers and not omit_modifiers:
             result += " " + " ".join([f"({m})" for m in self.modifiers])
         if self.footnotes and not omit_footnotes:
@@ -103,6 +105,9 @@ class Allocation:
     def __str__(self):
         """Return a string representation of an allocations"""
         return self.to_str()
+
+    def __repr__(self):
+        return str(self)
 
     def __eq__(self, a):
         if self.service != a.service:

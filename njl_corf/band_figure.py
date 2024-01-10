@@ -9,12 +9,15 @@ import copy
 import re
 
 from intervaltree import IntervalTree
+import matplotlib.pyplot as plt
 import matplotlib
 import numpy as np
 import pint
 
 from njl_corf import pyfcctab
 from njl_corf.pyfcctab.allocations import Allocation
+from njl_corf.pyoscar import OscarEntry
+from njl_corf.corf_pint import ureg
 
 
 def _capitalize_service_name(service_name: str | None) -> str | None:
@@ -89,7 +92,7 @@ class FigureRow:
 def gather_relevant_allocation_data(
     frequency_range: slice,
     band_database: pyfcctab.BandCollection,
-) -> tuple[IntervalTree, IntervalTree]:
+) -> (IntervalTree, list[Allocation]):
     """Gather all the information about allocations for a plot"""
     # Identify all the bands in the frequency range
     bands = band_database[frequency_range]
@@ -100,7 +103,14 @@ def gather_relevant_allocation_data(
     secondary_allocations = itertools.chain.from_iterable(
         [band.secondary_allocations for band in bands]
     )
-    allocations = list(primary_allocations) + list(secondary_allocations)
+    footnote_mentions = itertools.chain.from_iterable(
+        [band.footnote_mentions for band in bands]
+    )
+    allocations = (
+        list(primary_allocations)
+        + list(secondary_allocations)
+        + list(footnote_mentions)
+    )
     # Now identify all the unique services that they embody
     allocations = sorted(
         list(
@@ -113,12 +123,41 @@ def gather_relevant_allocation_data(
     return bands, allocations
 
 
+def gather_relevant_oscar_data(
+    frequency_range: slice,
+    oscar_database: IntervalTree,
+) -> dict[list[OscarEntry]]:
+    """Get OSCAR entries for a frequency range and collate them by service
+
+    Parameters
+    ----------
+    frequency_range : slice
+        Frequency range under consideration
+    oscar_database : IntervalTree
+        IntervalTree of OscarDatabase entries.
+
+    Returns
+    -------
+    dict[list[OscarEntry]]:
+        Collection of entries corresponding to each relevant service
+    """
+    # Identify all the OSCAR entries in the frequency range
+    entries = oscar_database[frequency_range]
+    # Get the unique names of all the missions (aka services) in those entries
+    service_names = list(set(entry.data.service for entry in entries))
+    # Now make a dictionary of all those entries
+    result = {service_name: [] for service_name in service_names}
+    for entry in entries:
+        result[entry.data.service].append(entry.data)
+    return result
+
+
 def collate_and_sort_allocations(
     # bands: list[pyfcctab.Band],
     allocations: list[str],
     figure_configuration: FigureConfiguration,
     collation_rules: dict = None,
-) -> list[FigureRow]:
+) -> tuple[dict, dict]:
     """Organize allocation material for inclusion in figures.
 
     Parameters
@@ -218,21 +257,69 @@ def views_plot(
     frequency_range: slice,
     allocation_database: pyfcctab.FCCTables,
     oscar_database: IntervalTree,
-    ax: matplotlib.pyplot.Axes,
     figure_configuration: FigureConfiguration,
-    collation_rules: dict,
-    frequency_margin: float = None,
+    collation_rules: dict = None,
+    ax: matplotlib.pyplot.Axes = None,
+    frequency_margin: float | pint.Quantity = None,
     omit_band_borders: bool = False,
+    filename: str = None,
 ):
-    """Does one views report plot NEEDS BETTER DOCSTRING!"""
-    # Increate the range if/as needed
+    """_summary_
+
+    Parameters
+    ----------
+    frequency_range : slice
+        The frequency range to show
+    allocation_database : pyfcctab.FCCTables
+        The FCCTables (a collection of BandCollections)
+    oscar_database : IntervalTree
+        The database of EESS missions
+    figure_configuration : FigureConfiguration
+        Configuration for the figure (colors, ordering, etc.), see the
+        FigureConfiguration class.
+    collation_rules : dict, optional
+        A dict describing how to collate the rows for different allocations.  See
+        collate_and_sort_allocations for more information (someday I should make a
+        better comment here.)
+    ax : matplotlib.pyplot.Axes, optional
+        Axes to show the figure in
+    frequency_margin : float | pint.Quantity, optional
+        How much margin to add either side of the frquency range.  Behavior depends on
+        the type/sign of the argument:
+            - frequency suppled (e.g., 200 MHz): use this frequency as the margin
+            - positive dimensionless number supplied (e.g., 0.2): increase the bandwidth
+              by this fraction
+            - negative dimensionless number supplied (e.g., -0.05): increase the
+              bandwidth by this fraction of the band center frequency
+    omit_band_borders : bool, optional
+        If set, omit the vertical grey lines dividing bands
+    """
+    if collation_rules is None:
+        collation_rules = {}
+    if ax is None:
+        ax = plt.gca()
+    # Increase the range if/as needed
     if frequency_margin is None:
         frequency_margin = 0.20
-    formal_bandwidth = frequency_range.stop - frequency_range.start
+    # First try to handle the margin as if it was a fixed frequency
+    if isinstance(frequency_margin, pint.Quantity):
+        pass
+    elif frequency_margin > 0:
+        formal_bandwidth = frequency_range.stop - frequency_range.start
+        frequency_margin = formal_bandwidth * frequency_margin
+    else:
+        center_frequency = 0.5 * (frequency_range.start + frequency_range.stop)
+        frequency_margin = center_frequency * abs(frequency_margin)
+    # Now apply this margin.  Ensure we don't go below zero Hz
     examined_frequency_range = slice(
-        frequency_range.start - formal_bandwidth * frequency_margin,
-        frequency_range.stop + formal_bandwidth * frequency_margin,
+        max(
+            frequency_range.start - frequency_margin,
+            0.0 * frequency_range.start.units,
+        ),
+        frequency_range.stop + frequency_margin,
     )
+
+    # ----------------------------------------------- Allocations
     bands, allocations = gather_relevant_allocation_data(
         examined_frequency_range, allocation_database.itu
     )
@@ -254,7 +341,14 @@ def views_plot(
         # showing
         for band in bands:
             for allocation in row_allocations[row_title]:
-                if band.has_allocation(allocation):
+                has_allocation, this_allocation = band.has_allocation(
+                    allocation,
+                    return_allocation=True,
+                    case_sensitive=False,
+                )
+                if has_allocation:
+                    # Draw the band in solid (hatch over it as needed later for
+                    # secondary etc.,)
                     x_bounds = (
                         pint.Quantity.from_sequence(band.bounds)
                         .to(frequency_range.start.units)
@@ -269,38 +363,45 @@ def views_plot(
                         linewidth=0,
                     )
                     ax.add_patch(this_patch)
-                    if band.has_allocation(allocation + "*", secondary=True):
+                    # Now consider non-primary allocation cases
+                    hatch = None
+                    hatch = ""
+                    if this_allocation.secondary:
+                        hatch = "/////"
+                    elif this_allocation.footnote_mention:
+                        hatch = "xxx"
+                    if hatch:
                         this_hatch_patch = matplotlib.patches.Polygon(
                             np.stack(xy, axis=1),
                             color="white",
                             fill=None,
-                            hatch="/////",
+                            hatch=hatch,
                             linewidth=0,
                         )
                         ax.add_patch(this_hatch_patch)
-    # ------- Oscar
+    # ----------------------------------------------- Oscar
     # Now do all the things found in OSCAR
-    eess_usage = oscar_database[examined_frequency_range]
+    eess_usage = gather_relevant_oscar_data(examined_frequency_range, oscar_database)
     # Draw bars for each band usage
-    for i, eess_user in enumerate(eess_usage):
+    for i, eess_user in enumerate(eess_usage.keys()):
         y_value = i + len(row_allocations)
-        y_labels[y_value] = eess_user.data.service
-        x_bounds = (
-            pint.Quantity.from_sequence(
-                [eess_user.data.bounds.start, eess_user.data.bounds.stop]
+        y_labels[y_value] = eess_user
+        channels = eess_usage[eess_user]
+        for channel in channels:
+            x_bounds = (
+                pint.Quantity.from_sequence([channel.bounds.start, channel.bounds.stop])
+                .to(frequency_range.start.units)
+                .magnitude
             )
-            .to(frequency_range.start.units)
-            .magnitude
-        )
-        if x_bounds[1] > x_bounds[0] + 1e-6:
-            ax.plot(
-                x_bounds,
-                [y_value] * 2,
-                color="black",
-                linewidth=2.0,
-            )
-        else:
-            ax.plot(x_bounds[0], y_value, color="black", marker="*")
+            if x_bounds[1] > x_bounds[0] + 1e-6:
+                ax.plot(
+                    x_bounds,
+                    [y_value] * 2,
+                    color="black",
+                    linewidth=2.0,
+                )
+            else:
+                ax.plot(x_bounds[0], y_value, color="black", marker="*")
     # ------- Remainder
     # Now set up the rest of the plot information
     n_bars = len(row_allocations) + len(eess_usage)
@@ -332,3 +433,6 @@ def views_plot(
     # Final tidy ups
     ax.invert_yaxis()
     ax.tick_params(axis="y", which="minor", left=False, right=False)
+    if filename:
+        plt.gcf().savefig(filename)
+        plt.close()

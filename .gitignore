@@ -4,3 +4,5 @@ __pycache__
 *.egg-info
 **.pdf
 **.DS_Store
+**.html
+**.png

@@ -39,7 +39,8 @@ class FCCTables:
         """
         self.version = version
         self.collections = collections
-        self.footenote_definitions = (footnote_definitions,)
+        self.footenote_definitions = footnote_definitions
+        # Was tuple (footnote_definitions,) before for some reason.
 
     @property
     def r1(self):
@@ -120,8 +121,8 @@ def read(
         all_additions = get_all_itu_footnote_based_additions()
         print("Injecting additions in: ", end="")
         for jname, collection in collections.items():
+            print(jname + ", ", end="")
             jurisdiction = Jurisdiction.parse(jname)
-            print(f"{jurisdiction.name}, ", end="")
             for new_band in all_additions:
                 if jurisdiction in new_band.jurisdictions:
                     inserted_band = copy.deepcopy(new_band)
@@ -219,12 +220,22 @@ def htmlcolumn(bands, append_footnotes=False):
     return text
 
 
+def get_pyfcctab_css_lines():
+    """Returns the fcc.css as lines to include in an HTML file"""
+    with open(
+        pathlib.Path(__file__).parent / "fcc.css", "r", encoding="utf-8"
+    ) as css_file:
+        style_data = css_file.read().splitlines()
+    return ["<style>"] + style_data + ["</style>"]
+
+
 # pylint: disable-next=too-many-locals, too-many-branches, too-many-statements
 def htmltable(
     bands,
     append_footnotes: bool = False,
     tooltips: bool = True,
     filename: str = None,
+    omit_css: bool = False,
 ):
     """Produce an HTML table corresponding to a set of bands"""
     # First loop over the bands and work out how many rows (frequency
@@ -301,30 +312,14 @@ def htmltable(
             c_span[r, c] = column_span
             r_span[r, c] = row_span
 
-    # print (f"cSpan:\n{cSpan}")
-    # print (f"rSpan:\n{rSpan}")
-    # for row in table:
-    #     for cell in row:
-    #         if cell is None:
-    #             word = "None"
-    #         elif cell is Overlapped:
-    #             word = "Ovlp"
-    #         else:
-    #             word = "Band"
-    #         print (word+" ", end="")
-    #     print ()
-
     # Start the HTML for the table
     text = [
         "<-- HTML output from pyfcctab package by Nathaniel.J.Livesey@jpl.nasa.gov -->"
     ]
+    text = []
     # Append the style sheet information
-    with open(
-        pathlib.Path(__file__).parent / "fcc.css", "r", encoding="utf-8"
-    ) as css_file:
-        style_data = css_file.read().splitlines()
-    text += ["<style>"] + style_data + ["</style>"]
-    # text += ['<link rel="stylesheet" href="fcc.css">']
+    if not omit_css:
+        text += get_pyfcctab_css_lines()
     # Now start on the table``
     text += ['<table id="fcc-table">']
     text += ["<tr>"]

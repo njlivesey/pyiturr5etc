@@ -498,6 +498,9 @@ class Band:
         secondary_allocations = sorted(
             list(set(self.secondary_allocations + a.secondary_allocations))
         )
+        footnote_mentions = sorted(
+            list(set(self.footnote_mentions + a.footnote_mentions))
+        )
         # Merge the footnotes
         footnotes = sorted(_combine_elements(self.footnotes, a.footnotes))
         # Merge the FCC rules and the jurisdictions
@@ -516,6 +519,7 @@ class Band:
             bounds=bounds,
             primary_allocations=primary_allocations,
             secondary_allocations=secondary_allocations,
+            footnote_mentions=footnote_mentions,
             footnotes=footnotes,
             fcc_rules=fcc_rules,
             jurisdictions=jurisdictions,
@@ -859,7 +863,13 @@ class Band:
             allocations = [allocations]
         if allocations:
             allocations = [Allocation.parse(allocation) for allocation in allocations]
+        if jurisdictions is not None:
+            jurisdictions = [Jurisdiction.parse(j) for j in jurisdictions]
         # Create and return the result
+        if allocations:
+            for allocation in allocations:
+                allocation.secondary = False
+                allocation.footnote_mention = True
         return cls(
             bounds=bounds,
             footnote_mentions=allocations,

@@ -1,8 +1,13 @@
 """Code for handling collections of bands"""
 
 import copy
+from typing import Callable
+import pint
+import numpy as np
 
 from intervaltree import IntervalTree
+
+from .bands import Band
 
 from njl_corf.corf_pint import ureg
 
@@ -63,10 +68,10 @@ class BandCollection:
         # in all but region.
         result = BandCollection()
         for interim_band in interim:
-            # Do a deep copy because today's new_band becomes
-            # tomorrow's recorded_band, so if we don't the input lists
-            # will get trampled on.  Don't deep copy footnote
-            # definitions though.
+            # Do a deep copy because today's new_band becomes tomorrow's recorded_band,
+            # so if we don't the input lists will get trampled on.  Don't deep copy
+            # footnote definitions though (DOES IT DO THAT? DOESN'T SEEM TO SPEED UP IF
+            # WE STASH).
             new_band = copy.deepcopy(interim_band)
             add_band = True
             if single_jurisdiction:
@@ -276,3 +281,57 @@ class BandCollection:
         if accumulator is not None:
             result.append(accumulator)
         return result
+
+    def find_closest_matching_band(
+        self,
+        frequency: pint.Quantity,
+        direction: int,
+        condition: Callable[[Band], bool],
+        include_band_in_this_frequency: bool = False,
+    ) -> Band:
+        """Iterate through the collection to find the nearest band matching conditions
+        Parameters
+        ----------
+        frequency : pint.Quantity
+            The frequency to start the search from (defaults to ignoring the band that
+            includes this frequency)
+        direction : int
+            +1 for looking in above supplied frequency, -1 for looking below
+        condition : Callable[[Band], bool]
+            Callable that, when supplied a band, returns True if the band meets the
+            user's condition, False if not.
+        include_band_in_this_frequency : bool
+            If set, then, if a band encompasing a supplied frequency meets the condition
+            return it.
+        Returns
+        -------
+        Band
+            Return the closest band matching the condition
+        """
+        if direction not in [-1, 1]:
+            raise ValueError(
+                f"Invalid value for direction, must be -1 or +1, got {direction}"
+            )
+        # First work out the boundaries for all the bands and the midpoints of all the
+        # associated panels
+        boundaries = pint.Quantity.from_sequence(self.get_boundaries())
+        mid_points = 0.5 * (boundaries[:-1] + boundaries[1:])
+        # Now work out where we are in that setup.  We're above the boundary given by
+        # np.searchsorted - 1, so in the panel given by np.searchsorted - 1
+        i_panel = np.searchsorted(boundaries, frequency) - 1
+        starting_panel = i_panel
+        while 0 < i_panel < len(mid_points):
+            # Identify bands(s) that overlap this mid_point
+            candidate_bands = self[mid_points[i_panel]]
+            # Now loop over those bands and return the first one we find that matches
+            for candidate_band in candidate_bands:
+                # If this band matches our condition, then we're done, so just return
+                # this band (unless it's the one we started at, unless that's OK.)
+                if condition(candidate_band) and (
+                    (i_panel != starting_panel) or include_band_in_this_frequency
+                ):
+                    return candidate_band
+            # Move the pointer to the next panel
+            i_panel += direction
+        # We got to the end of this list without finding a match, return None
+        return None
