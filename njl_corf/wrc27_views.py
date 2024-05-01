@@ -1,14 +1,17 @@
 """Generates plots etc. in WRC-27 views report"""
 
-import matplotlib.pyplot as plt
+import re
 import textwrap
+import pathlib
+import shutil
+import warnings
 
-from njl_corf.corf_pint import ureg
-from njl_corf import band_figure
-
+import matplotlib.pyplot as plt
 from intervaltree import IntervalTree
+from natsort import natsorted
 
-from njl_corf import pyfcctab
+from njl_corf import band_figure, pyfcctab
+from njl_corf.corf_pint import ureg
 
 
 def get_ai_info() -> dict:
@@ -34,7 +37,7 @@ def get_ai_info() -> dict:
             slice(231.5 * ureg.GHz, 275 * ureg.GHz),
             slice(275 * ureg.GHz, 700 * ureg.GHz),
         ],
-        "WRC-27 AI-1.9": [slice(3_025 * ureg.MHz, 18.030 * ureg.GHz)],
+        "WRC-27 AI-1.9": [slice(3_025 * ureg.kHz, 18.030 * ureg.MHz)],
         "WRC-27 AI-1.10": [
             slice(71 * ureg.GHz, 76 * ureg.GHz),
             slice(81 * ureg.GHz, 86 * ureg.GHz),
@@ -42,7 +45,7 @@ def get_ai_info() -> dict:
         "WRC-27 AI-1.11": [
             slice(1_518 * ureg.MHz, 1_544 * ureg.MHz),
             slice(1_545 * ureg.MHz, 1_559 * ureg.MHz),
-            slice(1_610 * ureg.MHz, 1_6455 * ureg.MHz),
+            slice(1_610 * ureg.MHz, 1_645.5 * ureg.MHz),
             slice(1_645 * ureg.MHz, 1_660 * ureg.MHz),
             slice(1_670 * ureg.MHz, 1_675 * ureg.MHz),
             slice(2_485.5 * ureg.MHz, 2_500 * ureg.MHz),
@@ -113,7 +116,7 @@ def get_ai_info() -> dict:
     # for ease of plotting.
     merging_rules = {
         "WRC-27 AI-1.6": ["ab", "cd"],
-        "WRC-27 AI-1.11": ["abcde", "f"],
+        "WRC-27 AI-1.11": ["ab", "cde", "f"],
     }
     # Now do the actual merging
     for prefix, combinations in merging_rules.items():
@@ -124,7 +127,9 @@ def get_ai_info() -> dict:
                 max(this_slice.stop for this_slice in combined_slices),
             )
             result[prefix + combination] = enveloping_slice
-    return result
+    # Get an appropriate order
+    sorted_keys = natsorted(result.keys())
+    return {key: result[key] for key in sorted_keys}
 
 
 def ai_html_summary(
@@ -165,6 +170,17 @@ def ai_html_summary(
         """
     ).split("\n")
     contents += pyfcctab.get_pyfcctab_css_lines()
+    # Add some style information to make the images zoomable
+    contents += textwrap.dedent(
+        """\
+        <style>
+            img {
+                max-width: 100%;
+                height: auto;
+            }
+        </style>
+        """
+    ).split("\n")
     contents += textwrap.dedent(
         f"""\
         </head>
@@ -218,7 +234,110 @@ def ai_html_summary(
         omit_css=True,
     )
     # Finish off the file
-    contents += ["</html>"]
+    contents += ["</body></html>"]
     with open(f"{file_prefix}.html", "w", encoding="utf-8") as html_file:
         for line in contents:
             html_file.write(line + "\n")
+
+
+def get_ai_prefix_suffix(ai):
+    """Split AI string into name and a, b, c, etc. suffix"""
+    prefix_regex = "^WRC-(27|31) AI-\d.\d+"
+    match = re.match(prefix_regex, ai)
+    prefix = str(match.group())
+    suffix = ai[len(prefix) :]
+    return prefix, suffix
+
+
+def generate_index_html():
+    """Generate the index.html file with links to the AIs"""
+    # Generate the opening material
+    contents = []
+    contents += textwrap.dedent(
+        """\
+        <!DOCTYPE html>
+        <html>
+        <head>
+        <title>WRC-27 and WRC-31 agenda items</title>
+        """
+    ).split("\n")
+    contents += textwrap.dedent(
+        """\
+        </head>
+        <body>
+        <h1>WRC-23 agenda items and WRC-27 draft agenda items</h1>
+        """
+    ).split("\n")
+    # Get the agenda items
+    ai_ranges = get_ai_info()
+    # Gather them by agenda item
+    index_entries = {}
+    for ai in ai_ranges.keys():
+        prefix, suffix = get_ai_prefix_suffix(ai)
+        if prefix not in index_entries:
+            index_entries[prefix] = []
+        index_entries[prefix].append(suffix)
+    # Sort them into (the wrong, for now) order
+    agenda_items = natsorted(index_entries.keys())
+    # Create HTML for them, group by WRC
+    groups = ["WRC-27", "WRC-31"]
+    for group in groups:
+        contents.append(f"<h2>{group} agenda items</h2>")
+        for ai in agenda_items:
+            # Skip over the ones that are in the other group
+            if not ai.startswith(group):
+                continue
+            # Identify which are the available suffixes
+            suffixes = index_entries[ai]
+            # Sort them into some suitable order, put the multi-character suffixes at the end.
+            suffixes = sorted(
+                suffixes,
+                key=lambda suffix: ord(suffix[0]) + ord("z") * (len(suffix) > 1),
+            )
+            # Build the url links for these files
+            ai_with_underscore = "_".join(ai.split(" "))
+            links = [
+                f'<a href="{ai_with_underscore}{suffix}.html">{suffix}</a>'
+                for suffix in suffixes
+            ]
+            # Add it all to the HTML file.
+            contents.append(f"{ai}: " + ", ".join(links) + "<br>")
+    # Finish things up.
+    contents.append("</body></html>")
+    # Save the file
+    with open("index.html", "w", encoding="utf-8") as html_file:
+        for line in contents:
+            html_file.write(line + "\n")
+
+
+def push_information(
+    source_path: str | pathlib.Path = None,
+    destination_path: str | pathlib.Path = None,
+):
+    """Copy all the html and png files to a given path"""
+    # Set up the source path
+    if source_path is None:
+        source_path = "."
+    if isinstance(source_path, str):
+        source_path = pathlib.Path(source_path)
+    # Set up the destination path
+    if destination_path is None:
+        destination_path = (
+            "/Users/livesey/corf/wrc-27-views-google-drive/preliminary-information/"
+        )
+    if isinstance(destination_path, str):
+        destination_path = pathlib.Path(destination_path)
+    # Get a list of all the files we want to copy
+    files_to_copy = (
+        list(source_path.glob("WRC-??_AI-*.html"))
+        + list(source_path.glob("WRC-??_AI-*.png"))
+        + list(source_path.glob("index.html"))
+    )
+    # Perform the copy
+    for file_to_copy in files_to_copy:
+        shutil.copy(file_to_copy, destination_path)
+    # Check that there are no extraneous files in the destination directory
+    filename_strings = [file.name for file in files_to_copy]
+    for file in destination_path.iterdir():
+        if file.name not in filename_strings:
+            warnings.warn(f"Unexpected file in destination: {file.name}")
