@@ -25,12 +25,12 @@ class OscarEntry:
     space_agency: str
     launch: str
     eol: str
-    service: str
-    sensing_mode: str
     nominal_frequency: str
     bandwidth: str
     polarization: str
     comment: str
+    sensing_mode: str = None
+    service: str = None
 
     def __post_init__(self):
         """Just some tidying up after definition"""
@@ -43,16 +43,31 @@ class OscarEntry:
             self.bounds = slice(self.bounds.start, self.bounds.stop + delta)
 
 
-def read(filename: str = None) -> IntervalTree:
+def read(filename: str = None, communications: bool = False) -> IntervalTree:
     """Read the OSCAR database from Excel and ingest"""
     if filename is None:
-        filename = (
-            "/users/livesey/corf/data/"
-            "Oscar-Satellite-Frequencies-Earth-observation-MW-frequencies-2023-11-14.xlsx"
-        )
+        if not communications:
+            filename = (
+                "/users/livesey/corf/data/"
+                "Oscar-Satellite-Frequencies-Earth-observation-MW-frequencies-2023-11-14.xlsx"
+            )
+        else:
+            filename = (
+                "/users/livesey/corf/data/"
+                "Oscar-Satellite-Frequencies-for-Satellite-management-2024-05-23.xlsx"
+            )
     data = pd.read_excel(filename).astype(str)
+    # Identify fields to capture
+    if not communications:
+        frequency_field = "Frequency (GHz)"
+        frequency_unit = ureg.GHz
+        bandwidth_field = "Bandwidth (MHz)"
+    else:
+        frequency_field = "Frequency (MHz)"
+        frequency_unit = ureg.MHz
+        bandwidth_field = "Bandwidth (kHz)"
     # Parse the frequency range information
-    frequency_ranges = data["Frequency (GHz)"].str.split("-", expand=True)
+    frequency_ranges = data[frequency_field].str.split("-", expand=True)
     lower_limit = (
         frequency_ranges[0]
         .str.strip()
@@ -77,10 +92,10 @@ def read(filename: str = None) -> IntervalTree:
     # have.
     range_based_bandwidth = np.abs(upper_limit - lower_limit)
     # Now get the one in the able, if any
-    bandwidth = data["Bandwidth (MHz)"].copy().astype(str).str.strip()
-    bandwidth.loc[
-        (bandwidth == "N/R") | (bandwidth == "-") | (bandwidth == "nan")
-    ] = "0 MHz"
+    bandwidth = data[bandwidth_field].copy().astype(str).str.strip()
+    bandwidth.loc[(bandwidth == "N/R") | (bandwidth == "-") | (bandwidth == "nan")] = (
+        "0 MHz"
+    )
     # Convert it to GHz to match the frequency range information.
     bandwidth_value = (
         bandwidth.str.split(" ", expand=True)[0].str.strip().astype(float) / 1e3
@@ -98,21 +113,28 @@ def read(filename: str = None) -> IntervalTree:
     # Now create the result and store in an IntervalTree
     result = IntervalTree()
     for row in data.to_dict("records"):
+        if not communications:
+            kwargs = dict(
+                sensing_mode=row["Sensing mode"].strip(),
+                service=row["Service"].strip(),
+            )
+        else:
+            kwargs = dict()
         entry = OscarEntry(
             bounds=slice(
-                row["Frequency start"] * ureg.GHz, row["Frequency stop"] * ureg.GHz
+                row["Frequency start"] * frequency_unit,
+                row["Frequency stop"] * frequency_unit,
             ),
             oscar_id=str(row["Id"]),
             satellite=row["Satellite"],
             space_agency=row["Space Agency"],
             launch=row["Launch "],
             eol=row["Eol"],
-            service=row["Service"].strip(),
-            sensing_mode=row["Sensing mode"].strip(),
-            nominal_frequency=row["Frequency (GHz)"],
-            bandwidth=row["Bandwidth (MHz)"],
+            nominal_frequency=row[frequency_field],
+            bandwidth=row[bandwidth_field],
             polarization=row["Polarisation"].strip(),
             comment=row["Comment"],
+            **kwargs,
         )
         result[entry.bounds] = entry
     return result
