@@ -92,7 +92,11 @@ def get_ai_info() -> dict:
             slice(3_700 * ureg.MHz, 4_200 * ureg.MHz),
             slice(5_925 * ureg.MHz, 6_425 * ureg.MHz),
         ],
-        "WRC-31 AI-2.5": None,
+        "WRC-31 AI-2.5": [
+            slice(694 * ureg.MHz, 960 * ureg.MHz),
+            slice(890 * ureg.MHz, 942 * ureg.MHz),
+            slice(3_400 * ureg.MHz, 3_700 * ureg.MHz),
+        ],
         "WRC-31 AI-2.6": None,
         "WRC-31 AI-2.7": None,
         "WRC-31 AI-2.8": None,
@@ -341,3 +345,4 @@ def push_information(
     for file in destination_path.iterdir():
         if file.name not in filename_strings:
             warnings.warn(f"Unexpected file in destination: {file.name}")
+
