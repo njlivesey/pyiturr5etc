@@ -57,7 +57,10 @@ def get_ai_info() -> dict:
             slice(2_010 * ureg.MHz, 2_025 * ureg.MHz),
         ],
         "WRC-27 AI-1.13": [slice(694 * ureg.MHz, 2.7 * ureg.GHz)],
-        "WRC-27 AI-1.14": None,
+        "WRC-27 AI-1.14": [
+            slice(2_010 * ureg.MHz, 2_025 * ureg.MHz),
+            slice(2_160 * ureg.MHz, 2_170 * ureg.MHz),
+        ],
         "WRC-27 AI-1.15": [
             slice(390 * ureg.MHz, 406.1 * ureg.MHz),
             slice(420 * ureg.MHz, 430 * ureg.MHz),
@@ -80,7 +83,18 @@ def get_ai_info() -> dict:
             slice(73.0 * ureg.MHz, 74.6 * ureg.MHz),
             slice(608 * ureg.MHz, 614 * ureg.MHz),
         ],
-        "WRC-27 AI-1.18": None,
+        "WRC-27 AI-1.18": [
+            slice(71.0 * ureg.GHz, 76.0 * ureg.GHz),
+            slice(81.0 * ureg.GHz, 86.0 * ureg.GHz),
+            slice(92.0 * ureg.GHz, 94.0 * ureg.GHz),
+            slice(111.8 * ureg.GHz, 114.25 * ureg.GHz),
+            slice(123.0 * ureg.GHz, 130.0 * ureg.GHz),
+            slice(158.5 * ureg.GHz, 164 * ureg.GHz),
+            slice(167.0 * ureg.GHz, 174.5 * ureg.GHz),
+            slice(191.8 * ureg.GHz, 200.0 * ureg.GHz),
+            slice(200.0 * ureg.GHz, 217.0 * ureg.GHz),
+            slice(232.0 * ureg.GHz, 235.0 * ureg.GHz),
+        ],
         "WRC-27 AI-1.19": [
             slice(4_200 * ureg.MHz, 4_400 * ureg.MHz),
             slice(8_400 * ureg.MHz, 8_500 * ureg.MHz),
@@ -192,7 +206,8 @@ def ai_html_summary(
         <h1>{agenda_item}</h1>
         <h2>Basic information</h2>
         <p>Frequency range: {frequency_range.start:~H} to {frequency_range.stop:~H}</p>
-        <img src="{file_prefix}.png" width=1200 alt="Summary of bands under consideration in {agenda_item}">
+        <img src="{file_prefix}.png" width=1200 
+          alt="Summary of bands under consideration in {agenda_item}">
         <h2>Band under consideration</h2>
         """
     ).split("\n")
@@ -345,4 +360,3 @@ def push_information(
     for file in destination_path.iterdir():
         if file.name not in filename_strings:
             warnings.warn(f"Unexpected file in destination: {file.name}")
-
