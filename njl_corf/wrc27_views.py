@@ -111,15 +111,41 @@ def get_ai_info() -> dict:
             slice(890 * ureg.MHz, 942 * ureg.MHz),
             slice(3_400 * ureg.MHz, 3_700 * ureg.MHz),
         ],
-        "WRC-31 AI-2.6": None,
-        "WRC-31 AI-2.7": None,
-        "WRC-31 AI-2.8": None,
-        "WRC-31 AI-2.9": None,
-        "WRC-31 AI-2.10": None,
-        "WRC-31 AI-2.11": None,
-        "WRC-31 AI-2.12": None,
-        "WRC-31 AI-2.13": None,
-        "WRC-31 AI-2.14": None,
+        "WRC-31 AI-2.6": [
+            slice(102 * ureg.GHz, 109.5 * ureg.GHz),
+            slice(151.5 * ureg.GHz, 164 * ureg.GHz),
+            slice(167 * ureg.GHz, 174.8 * ureg.GHz),
+            slice(209 * ureg.GHz, 226 * ureg.GHz),
+            slice(252 * ureg.GHz, 275 * ureg.GHz),
+        ],
+        "WRC-31 AI-2.7": [
+            slice(157.1875 * ureg.MHz, 157.3375 * ureg.MHz),
+            slice(161.7875 * ureg.MHz, 161.9375 * ureg.MHz),
+        ],
+        "WRC-31 AI-2.8": [
+            slice(415 * ureg.kHz, 26.175 * ureg.MHz),
+        ],
+        "WRC-31 AI-2.9": [
+            slice(5_030 * ureg.MHz, 5_150 * ureg.MHz),
+            slice(5_150 * ureg.MHz, 5_250 * ureg.MHz),
+        ],
+        "WRC-31 AI-2.10": [
+            slice(22.55 * ureg.GHz, 23.15 * ureg.GHz),
+        ],
+        "WRC-31 AI-2.11": [
+            slice(37.5 * ureg.GHz, 40.5 * ureg.GHz),
+            slice(40.5 * ureg.GHz, 52.4 * ureg.GHz),
+        ],
+        "WRC-31 AI-2.12": [
+            slice(3_000 * ureg.MHz, 3_100 * ureg.MHz),
+            slice(3_300 * ureg.MHz, 3_400 * ureg.MHz),
+        ],
+        "WRC-31 AI-2.13": [
+            slice(9_200 * ureg.MHz, 10_400 * ureg.MHz),
+        ],
+        "WRC-31 AI-2.14": [
+            slice(470 * ureg.MHz, 694 * ureg.MHz),
+        ],
     }
     # Start creating our result, which, for now, is just the AI prefixes with a, b, c,
     # etc. for each slice
@@ -157,7 +183,7 @@ def ai_html_summary(
 ):
     """Produce an HTML file that is the agenda item summary"""
     # Get a filename prefix as the agenda item with spaces changed to underscores
-    file_prefix = "_".join(agenda_item.split(" "))
+    file_prefix = "outputs/" + "_".join(agenda_item.split(" "))
     # Look up this agenda item
     frequency_range = get_ai_info()[agenda_item]
     if frequency_range is None:
