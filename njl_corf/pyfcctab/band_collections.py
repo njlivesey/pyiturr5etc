@@ -167,16 +167,20 @@ class BandCollection:
         # First get the band(s) that are explictly in the range discussed
         if f1 is None:
             core = self[f0]
+            f1 = f0
         else:
             core = self[f0:f1]
-        if len(core) == 0:
-            return []
+        f_geom_center = np.sqrt(f0 * f1)
         # Apply the conditions if supplied
         if condition:
             core = [band for band in core if condition(band)]
         # Work out what the core range is.
-        core_min = min(b.bounds[0] for b in core)
-        core_max = max(b.bounds[1] for b in core)
+        if len(core) != 0:
+            core_min = min(min(b.bounds[0] for b in core), f0)
+            core_max = max(max(b.bounds[1] for b in core), f1)
+        else:
+            core_min = f0
+            core_max = f1
         core_bandwidth = core_max - core_min
         # Now add any bands within a given margin of the core band(s).
         if margin is not None:
@@ -209,7 +213,7 @@ class BandCollection:
 
         # Now add any adjacent bands
         if adjacent:
-            delta_f = 1.0 * ureg.kHz
+            delta_f = f_geom_center * 0.0005
             # Identify all the bands that are truely adjacent
             truly_adjacent_bands = []
             for f in [core_min - delta_f, core_max + delta_f]:
