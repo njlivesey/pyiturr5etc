@@ -14,7 +14,7 @@ from njl_corf import band_figure, pyfcctab
 from njl_corf.corf_pint import ureg
 
 
-def get_ai_info() -> dict:
+def get_ai_info(grouped: bool = False) -> dict:
     """Populate a dictionary detailing the bands in each AI"""
     raw_ranges = {
         "WRC-27 AI-1.1": [slice(47.2 * ureg.GHz, 51.4 * ureg.GHz)],
@@ -74,7 +74,14 @@ def get_ai_info() -> dict:
             slice(8.45 * ureg.GHz, 8.5 * ureg.GHz),
             slice(25.25 * ureg.GHz, 28.35 * ureg.GHz),
         ],
-        "WRC-27 AI-1.16": None,
+        "WRC-27 AI-1.16": [
+            slice(10.7 * ureg.GHz, 10.95 * ureg.GHz),
+            slice(42.0 * ureg.GHz, 42.5 * ureg.GHz),
+            slice(74.0 * ureg.GHz, 76.0 * ureg.GHz),
+            slice(95.0 * ureg.GHz, 100.0 * ureg.GHz),
+            slice(116 * ureg.GHz, 119.98 * ureg.GHz),
+            slice(123 * ureg.GHz, 130.0 * ureg.GHz),
+        ],
         "WRC-27 AI-1.17": [
             slice(27.5 * ureg.MHz, 28.0 * ureg.MHz),
             slice(29.7 * ureg.MHz, 30.2 * ureg.MHz),
@@ -147,6 +154,8 @@ def get_ai_info() -> dict:
             slice(470 * ureg.MHz, 694 * ureg.MHz),
         ],
     }
+    if grouped:
+        return raw_ranges
     # Start creating our result, which, for now, is just the AI prefixes with a, b, c,
     # etc. for each slice
     result = {}
