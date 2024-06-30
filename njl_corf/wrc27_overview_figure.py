@@ -127,18 +127,18 @@ def wrc27_overview_figure(
         ai_info = {key: item for key, item in ai_info.items() if key.startswith(wrc)}
     # Define the science allocations we're interested in.
     bars = {
+        "RAS": BarType(
+            condition=lambda band: band.has_allocation("Radio Astronomy*")
+            or band.has_allocation("Space Research (Passive)*")
+            or band.has_allocation("Space Research (Active)*"),
+            slot=1,
+            color="xkcd:dark sky blue",
+        ),
         "EESS": BarType(
             condition=lambda band: band.has_allocation(
                 "Earth Exploration-Satellite (Passive)*"
             )
             or band.has_allocation("Earth Exploration-Satellite (Active)*"),
-            slot=1,
-            color="xkcd:dark sky blue",
-        ),
-        "RAS": BarType(
-            condition=lambda band: band.has_allocation("Radio Astronomy*")
-            or band.has_allocation("Space Research (Passive)*")
-            or band.has_allocation("Space Research (Active)*"),
             slot=2,
             color="xkcd:soft green",
         ),
