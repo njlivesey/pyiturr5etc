@@ -96,6 +96,9 @@ def wrc27_overview_figure(
     wrc: str = None,
     ax: plt.Axes = None,
     no_show: bool = False,
+    include_soundbytes: bool = False,
+    first_word_only: bool = False,
+    multi_line: bool = False,
 ):
     """Figure reviewing WRC agenda items and associated bands
 
@@ -112,6 +115,12 @@ def wrc27_overview_figure(
         If supplied do figure in these axes, otherwise generate our own
     no_show : bool, optional
         If set, skip the plt.show() step.
+    include_soundbyte : bool, optional
+        If set, show the soundbyte as a right-hand x-axis
+    first_word_only : bool, optional
+        If set, only show the first "word" of the soundbyte
+    multi-line : bool, optional
+        If set, split the soundbyte into two separate lines
     """
     # Read the allocation tables if not supplied
     if allocation_tables is None:
@@ -197,13 +206,28 @@ def wrc27_overview_figure(
     # -------------------------------- y-axis
     y_range = [len(ai_info) - 0.5, -0.5]
     ax.set_ylim(y_range[0], y_range[1])
-    y_labels = [key.split(" ")[1] for key in ai_info.keys()]
-    ax.set_yticks(np.arange(len(ai_info)), labels=y_labels)
+    y_labels = [key.split(" ")[1][3:] for key in ai_info.keys()]
+    y_tick_locations = np.arange(len(ai_info))
+    ax.set_yticks(y_tick_locations, labels=y_labels)
     ax.yaxis.set_minor_locator(plt.NullLocator())
+    # Suppress the y ticks.
+    ax.tick_params(axis="y", which="both", left=False, right=False)
+    # Potentially the soundbyte labels
+    if include_soundbytes:
+        for i_ai, this_ai in enumerate(ai_info.values()):
+            ax.annotate(
+                " "
+                + this_ai.format_soundbyte(
+                    first_word_only=first_word_only,
+                    multi_line=multi_line,
+                ),
+                [frequency_range[1], i_ai],
+                va="center",
+            )
     #
     # -------------------------------- Actual figure
     # OK, loop over the agenda items
-    for i_y, (ai, bands) in enumerate(ai_info.items()):
+    for i_y, (ai, this_ai) in enumerate(ai_info.items()):
         # Draw the horiztonal separator lines, a thicker one to separate the two WRCs
         if i_y > 0:
             if ai == "WRC-31 AI-2.1":
@@ -212,11 +236,11 @@ def wrc27_overview_figure(
                 linewidth = 0.5
             ax.axhline(i_y - 0.5, linewidth=linewidth, color="lightgrey")
         # If there are no specific bands for this AI, then we're done at this point
-        if bands is None:
+        if ai_info is None:
             continue
         # Create a buffer to hold the impacted science bands
         bar_buffer = {key: pyfcctab.BandCollection() for key in bars}
-        for band in bands:
+        for band in this_ai.frequency_bands:
             # Draw this particular band
             show_band(
                 band.start,
