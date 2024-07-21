@@ -165,7 +165,7 @@ def wrc27_overview_figure(
     matplotlib.rcParams["ps.fonttype"] = 42
     # Now embark upon the figure, set up the figure itself
     if ax is None:
-        fig, ax = plt.subplots(figsize=[6, len(ai_info) * 0.18], layout="constrained")
+        _, ax = plt.subplots(figsize=[6, len(ai_info) * 0.18], layout="constrained")
     # -------------------------------- x-axis
     if frequency_range is None:
         frequency_range = [1_000_000 * ureg.Hz, 1_000_000_000_000 * ureg.Hz]

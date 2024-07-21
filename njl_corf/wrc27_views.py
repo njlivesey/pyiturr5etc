@@ -16,7 +16,7 @@ from njl_corf.corf_pint import ureg
 
 
 @dataclass
-class _AI_Kernel:
+class _AIKernel:
     """Information about a WRC agenda item
 
     Attributes
@@ -60,7 +60,7 @@ class _AI_Kernel:
             return ""
         # If we only want the first "word", get that
         if first_word_only:
-            result = result.split(" ")[0]
+            result = result.split(" ", maxsplit=1)[0]
         # Now replace any underscores with spaces
         result = result.replace("_", " ")
         # Now, possibly split into multiple lines
@@ -83,7 +83,7 @@ class _AI_Kernel:
 
 
 @dataclass
-class AgendaItem(_AI_Kernel):
+class AgendaItem(_AIKernel):
     """Information about a WRC agenda item
 
     Attributes
@@ -126,7 +126,7 @@ class AgendaItem(_AI_Kernel):
 
 
 @dataclass
-class AgendaItemSubBand(_AI_Kernel):
+class AgendaItemSubBand(_AIKernel):
     """One band from an AgendaItem"""
 
     frequency_band: slice = None
