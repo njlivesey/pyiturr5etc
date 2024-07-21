@@ -283,25 +283,32 @@ def get_ai_info(grouped: bool = False) -> dict[AgendaItem]:
             ],
             soundbyte="EESS_(Passive)",
         ),
-        "WRC-31 AI-2.1": AgendaItem(frequency_bands=None),
+        "WRC-31 AI-2.1": AgendaItem(
+            frequency_bands=[slice(275.0 * ureg.GHz, 325.0 * ureg.GHz)],
+            soundbyte=">275 GHz",
+        ),
         "WRC-31 AI-2.2": AgendaItem(
-            frequency_bands=[slice(275 * ureg.GHz, 325 * ureg.GHz)]
+            frequency_bands=[slice(275.0 * ureg.GHz, 325.0 * ureg.GHz)],
+            soundbyte="WPT",
         ),
         "WRC-31 AI-2.3": AgendaItem(
-            frequency_bands=[slice(12.75 * ureg.GHz, 13.25 * ureg.GHz)]
+            frequency_bands=[slice(12.75 * ureg.GHz, 13.25 * ureg.GHz)],
+            soundbyte="ESIMs (aero/marine)",
         ),
         "WRC-31 AI-2.4": AgendaItem(
             frequency_bands=[
                 slice(3_700 * ureg.MHz, 4_200 * ureg.MHz),
                 slice(5_925 * ureg.MHz, 6_425 * ureg.MHz),
-            ]
+            ],
+            soundbyte="space-to-space",
         ),
         "WRC-31 AI-2.5": AgendaItem(
             frequency_bands=[
                 slice(694 * ureg.MHz, 960 * ureg.MHz),
                 slice(890 * ureg.MHz, 942 * ureg.MHz),
                 slice(3_400 * ureg.MHz, 3_700 * ureg.MHz),
-            ]
+            ],
+            soundbyte="Aeronautical_IMT",
         ),
         "WRC-31 AI-2.6": AgendaItem(
             frequency_bands=[
@@ -310,51 +317,60 @@ def get_ai_info(grouped: bool = False) -> dict[AgendaItem]:
                 slice(167 * ureg.GHz, 174.8 * ureg.GHz),
                 slice(209 * ureg.GHz, 226 * ureg.GHz),
                 slice(252 * ureg.GHz, 275 * ureg.GHz),
-            ]
+            ],
+            soundbyte="IMT",
         ),
         "WRC-31 AI-2.7": AgendaItem(
             frequency_bands=[
                 slice(157.1875 * ureg.MHz, 157.3375 * ureg.MHz),
                 slice(161.7875 * ureg.MHz, 161.9375 * ureg.MHz),
-            ]
+            ],
+            soundbyte="Marine",
         ),
         "WRC-31 AI-2.8": AgendaItem(
             frequency_bands=[
                 slice(415 * ureg.kHz, 26.175 * ureg.MHz),
-            ]
+            ],
+            soundbyte="Marine",
         ),
         "WRC-31 AI-2.9": AgendaItem(
             frequency_bands=[
                 slice(5_030 * ureg.MHz, 5_150 * ureg.MHz),
                 slice(5_150 * ureg.MHz, 5_250 * ureg.MHz),
-            ]
+            ],
+            soundbyte="RNSS",
         ),
         "WRC-31 AI-2.10": AgendaItem(
             frequency_bands=[
                 slice(22.55 * ureg.GHz, 23.15 * ureg.GHz),
-            ]
+            ],
+            soundbyte="EESS (Earth-to-Space)",
         ),
         "WRC-31 AI-2.11": AgendaItem(
             frequency_bands=[
                 slice(37.5 * ureg.GHz, 40.5 * ureg.GHz),
                 slice(40.5 * ureg.GHz, 52.4 * ureg.GHz),
-            ]
+            ],
+            soundbyte="EESS (space-to-Earth)",
         ),
         "WRC-31 AI-2.12": AgendaItem(
             frequency_bands=[
                 slice(3_000 * ureg.MHz, 3_100 * ureg.MHz),
                 slice(3_300 * ureg.MHz, 3_400 * ureg.MHz),
-            ]
+            ],
+            soundbyte="EESS (Active)",
         ),
         "WRC-31 AI-2.13": AgendaItem(
             frequency_bands=[
                 slice(9_200 * ureg.MHz, 10_400 * ureg.MHz),
-            ]
+            ],
+            soundbyte="EESS (Active)",
         ),
         "WRC-31 AI-2.14": AgendaItem(
             frequency_bands=[
                 slice(470 * ureg.MHz, 694 * ureg.MHz),
-            ]
+            ],
+            soundbyte="Broadcast/Mobile",
         ),
     }
     # Now go through and properly populate the wrc/name info
