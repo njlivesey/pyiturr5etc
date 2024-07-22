@@ -1,14 +1,143 @@
 """Produces an overview graphic for the WRC 27/31 agenda items"""
 
 from dataclasses import dataclass
+from typing import Optional, Callable
+import warnings
+import re
 
+import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import pint
 from matplotlib.patches import Rectangle
-import matplotlib
+from matplotlib.ticker import FuncFormatter, MaxNLocator
 
 from njl_corf import pyfcctab, ureg, wrc27_views
+
+
+def set_nas_graphic_style():
+    """Choose fonts etc. to match NAS style"""
+    # Set plot defaults
+    matplotlib.rcParams["font.family"] = "serif"
+    matplotlib.rcParams["font.serif"] = ["Palatino"]
+    matplotlib.rcParams["font.size"] = 9
+    matplotlib.rcParams["pdf.fonttype"] = 42
+    matplotlib.rcParams["ps.fonttype"] = 42
+
+
+# pylint: disable-next=unused-argument
+def major_frequency_formatter(x, pos):
+    """A nice tick formatter for frequency"""
+    if x < 1e3:
+        return f"{x:.3g} Hz"
+    elif x < 1e6:
+        return f"{x / 1e3:.3g} kHz"
+    elif x < 1e9:
+        return f"{x / 1e6:.3g} MHz"
+    elif x < 1e12:
+        return f"{x / 1e9:.3g} GHz"
+    else:
+        return f"{x / 1e12:.3g} THz"
+
+
+# pylint: disable-next=unused-argument
+def minor_frequency_formatter(x, pos):
+    """A formatter that returns an empty string each time"""
+    return ""
+
+
+def setup_frequency_axis(
+    ax: plt.Axes,
+    frequency_range: list[pint.Quantity],
+    minimum_fractional_bandwidth: float = None,
+    decadal_ticks: bool = False,
+    add_daylight: bool = False,
+    log_axis: Optional[bool] = None,
+):
+    """Configure the frequency axis
+
+    Parameters
+    ----------
+    ax : plt.Axes
+        The axes under consideration
+    frequency_range : list[pint.Quantity]
+        The frequency range to cover
+    minimum_fractional_bandwidth : float, optional
+        The smallest a band is allowed to be in the plot (to improve visibility)
+    decadal_ticks : bool, optional
+        If set, force major ticks to be on the decades of frequency
+    add_daylight : bool, optional
+        If set, add some daylight either side of the frequency range
+    log_axis : bool, optional
+        Chose log vs. linear axis
+    """
+    # Work out whether we want to have a logarithmic axis or not.
+    orders = frequency_range[1] / frequency_range[0]
+    if log_axis is None:
+        log_axis = orders > 5.0
+    # Make the frequency range a little larger
+    if add_daylight:
+        daylight_fraction = 0.1
+        if log_axis:
+            frequency_range = [
+                frequency_range[0] * (1.0 - daylight_fraction),
+                frequency_range[1] * (1.0 + daylight_fraction),
+            ]
+        else:
+            frequency_span = frequency_range[1] - frequency_range[0]
+            frequency_range = [
+                frequency_range[0] - frequency_span * daylight_fraction,
+                frequency_range[1] + frequency_span * daylight_fraction,
+            ]
+    # Choose a default for the minimum fractional bandwidth
+    if minimum_fractional_bandwidth is None:
+        minimum_fractional_bandwidth = (
+            np.log10(frequency_range[1] / max(frequency_range[0], 1 * ureg.Hz)) * 0.005
+        )
+    ax.set_xlim(*[f.to(ureg.Hz) for f in frequency_range])
+    if log_axis:
+        ax.set_xscale("log")
+    if decadal_ticks:
+        # Work out potential ticks
+        x_ticks = [
+            1.0 * ureg.kHz,
+            10.0 * ureg.kHz,
+            100.0 * ureg.kHz,
+            1.0 * ureg.MHz,
+            10.0 * ureg.MHz,
+            100.0 * ureg.MHz,
+            1.0 * ureg.GHz,
+            10.0 * ureg.GHz,
+            100.0 * ureg.GHz,
+            1.0 * ureg.THz,
+        ]
+        x_ticks = [
+            x_tick
+            for x_tick in x_ticks
+            if x_tick >= frequency_range[0] and x_tick <= frequency_range[1]
+        ]
+        x_tick_labels = [f"{f:.0f~H}" for f in x_ticks]
+        ax.set_xticks(x_ticks, labels=x_tick_labels)
+        # Add thin vertical lines at major tick lines
+        for f_line in x_ticks:
+            # Skip if we're right at the left/right edge (not the confusing meaning of "in"
+            # below, it's the range as a list, not a true range.
+            if f_line not in frequency_range:
+                ax.axvline(f_line, color="grey", linewidth=0.5)
+    else:
+        # Create a formatter, note we need to apply to both major and minor ticks with a
+        # log axis for it to take effect.
+        ax.xaxis.set_major_formatter(FuncFormatter(major_frequency_formatter))
+        if log_axis:
+            ax.xaxis.set_minor_formatter(FuncFormatter(minor_frequency_formatter))
+        else:
+            # For linear axes, the number of ticks could be reduced
+            ax.xaxis.set_major_locator(MaxNLocator(prune="both", nbins=4))
+    # Have the tickmarks point outwards
+    ax.tick_params(axis="x", which="both", direction="out")
+    # Suppress the x-axis label
+    ax.set_xlabel("")
+    return minimum_fractional_bandwidth, log_axis
 
 
 def ensure_visible_bandwidth(
@@ -52,17 +181,18 @@ def ensure_visible_bandwidth(
     return start, stop
 
 
-def show_band(
+def show_band_for_overview(
     start: pint.Quantity,
     stop: pint.Quantity,
     row: int,
-    slot: int,
     ax: plt.Axes,
+    slot: int = None,
     minimum_fractional_bandwidth: float = None,
     **kwargs,
 ):
     """Show a band as a rectangle patch"""
-    slot_centers = np.linspace(0.5, -0.5, 6)[1:-1]
+    n_slots = 4
+    slot_centers = np.linspace(0.5, -0.5, n_slots + 2)[1:-1]
     slot_widths = [0.175] * len(slot_centers)
     y_bottom = row - slot_centers[slot] - 0.5 * slot_widths[slot]
     # For really small bands, make them bigger
@@ -71,6 +201,8 @@ def show_band(
         stop,
         minimum_fractional_bandwidth=minimum_fractional_bandwidth,
     )
+    start = start.to(ureg.Hz)
+    stop = stop.to(ureg.Hz)
     # Draw the rectangle
     patch = Rectangle(
         [start, y_bottom],
@@ -81,20 +213,78 @@ def show_band(
     ax.add_patch(patch)
 
 
+def show_band_for_individual(
+    start: pint.Quantity,
+    stop: pint.Quantity,
+    row: int,
+    ax: plt.Axes,
+    status: int,
+    minimum_fractional_bandwidth: float = None,
+    **kwargs,
+):
+    """Show a band as a rectangle patch"""
+    vertical_width = 0.8
+    y_bottom = row - 0.5 * vertical_width
+    # For really small bands, make them bigger
+    start, stop = ensure_visible_bandwidth(
+        start,
+        stop,
+        minimum_fractional_bandwidth=minimum_fractional_bandwidth,
+    )
+    start = start.to(ureg.Hz)
+    stop = stop.to(ureg.Hz)
+    # Draw the rectangle
+    patch = Rectangle(
+        [start, y_bottom],
+        width=(stop - start),
+        height=vertical_width,
+        **kwargs,
+    )
+    ax.add_patch(patch)
+    # Possibly hatch it
+    hatches = {1: "///////", 2: "xxxxx"}
+    if status > 0:
+        patch = Rectangle(
+            [start, y_bottom],
+            width=(stop - start),
+            height=vertical_width,
+            hatch=hatches[status],
+            color="white",
+            fill=None,
+            linewidth=0,
+        )
+        ax.add_patch(patch)
+
+
 @dataclass
 class BarType:
     """Contains the information describing a family of bars"""
 
-    condition: str
-    slot: int
     color: str
+    slot: int = None
+    allocation: Optional[str] = None
+    footnote: Optional[str] = None
+    condition: Optional[Callable] = None
+
+    def construct_condition(self):
+        """A condition to pass to get_bands"""
+        if self.allocation and self.footnote:
+            return lambda band: band.has_allocation(
+                self.allocation
+            ) and band.has_footnote(self.footnote)
+        elif self.allocation:
+            return lambda band: band.has_allocation(self.allocation)
+        elif self.footnote:
+            return lambda band: band.has_footnote(self.footnote)
+        else:
+            raise ValueError("No way to subset bands for this BarType")
 
 
 def wrc27_overview_figure(
-    allocation_tables: pyfcctab.FCCTables = None,
-    frequency_range: list[pint.Quantity] = None,
+    allocation_tables: Optional[pyfcctab.FCCTables] = None,
+    frequency_range: Optional[list[pint.Quantity]] = None,
     wrc: str = None,
-    ax: plt.Axes = None,
+    ax: Optional[plt.Axes] = None,
     no_show: bool = False,
     include_soundbytes: bool = False,
     first_word_only: bool = False,
@@ -157,52 +347,19 @@ def wrc27_overview_figure(
             color="xkcd:melon",
         ),
     }
-    # Set plot defaults
-    matplotlib.rcParams["font.family"] = "serif"
-    matplotlib.rcParams["font.serif"] = ["Palatino"]
-    matplotlib.rcParams["font.size"] = 9
-    matplotlib.rcParams["pdf.fonttype"] = 42
-    matplotlib.rcParams["ps.fonttype"] = 42
+    # Set font defaults etc.
+    set_nas_graphic_style()
     # Now embark upon the figure, set up the figure itself
     if ax is None:
         _, ax = plt.subplots(figsize=[6, len(ai_info) * 0.18], layout="constrained")
     # -------------------------------- x-axis
     if frequency_range is None:
         frequency_range = [1_000_000 * ureg.Hz, 1_000_000_000_000 * ureg.Hz]
-    # Choose a default for the minimum fractional bandwidth
-    minimum_fractional_bandwidth = (
-        np.log10(frequency_range[1] / frequency_range[0]) * 0.005
+    minimum_fractional_bandwidth, _ = setup_frequency_axis(
+        ax=ax,
+        frequency_range=frequency_range,
+        decadal_ticks=True,
     )
-    ax.set_xlim(*frequency_range)
-    ax.set_xscale("log")
-    # Work out potential ticks
-    x_ticks = [
-        1.0 * ureg.kHz,
-        10.0 * ureg.kHz,
-        100.0 * ureg.kHz,
-        1.0 * ureg.MHz,
-        10.0 * ureg.MHz,
-        100.0 * ureg.MHz,
-        1.0 * ureg.GHz,
-        10.0 * ureg.GHz,
-        100.0 * ureg.GHz,
-        1.0 * ureg.THz,
-    ]
-    x_ticks = [
-        x_tick
-        for x_tick in x_ticks
-        if x_tick >= frequency_range[0] and x_tick <= frequency_range[1]
-    ]
-    x_tick_labels = [f"{f:.0f~H}" for f in x_ticks]
-    ax.set_xticks(x_ticks, labels=x_tick_labels)
-    ax.tick_params(axis="x", which="both", direction="out")
-    ax.set_xlabel("")
-    # Add vertical grid lines
-    for f_line in x_ticks:
-        # Skip if we're right at the left/right edge (not the confusing meaning of "in"
-        # below, it's the range as a list, not a true range.
-        if f_line not in frequency_range:
-            ax.axvline(f_line, color="grey", linewidth=0.5)
     # -------------------------------- y-axis
     y_range = [len(ai_info) - 0.5, -0.5]
     ax.set_ylim(y_range[0], y_range[1])
@@ -242,7 +399,7 @@ def wrc27_overview_figure(
         bar_buffer = {key: pyfcctab.BandCollection() for key in bars}
         for band in this_ai.frequency_bands:
             # Draw this particular band
-            show_band(
+            show_band_for_overview(
                 band.start,
                 band.stop,
                 row=i_y,
@@ -265,7 +422,7 @@ def wrc27_overview_figure(
         for key, science_bands in bar_buffer.items():
             bar_info = bars[key]
             for band in science_bands:
-                show_band(
+                show_band_for_overview(
                     band.bounds[0],
                     band.bounds[1],
                     row=i_y,
@@ -276,3 +433,253 @@ def wrc27_overview_figure(
                 )
     if not no_show:
         plt.show()
+
+
+def wrc27_ai_figure(
+    ai: str | list[str],
+    allocation_tables: Optional[pyfcctab.FCCTables] = None,
+    frequency_range: Optional[list[pint.Quantity]] = None,
+    ax: Optional[plt.Axes] = None,
+    no_show: Optional[bool] = False,
+    log_axis: Optional[bool] = False,
+):
+    """Figure reviewing WRC agenda items and associated bands
+
+    Parameters
+    ----------
+    ai : str | list[str], optional
+        AI identifier or list thereof (e.g. 1.6)
+    allocation_tables : pyfcctab.FCCTables, optional
+        FCC allocation tables from pyfcctab.  If not supplied, these are read in.
+        Having them as an optional argument enables faster debugging.
+    frequency_range : list[pint.Quantity], optional
+        Range of frequencies to cover, expansive default assumed if not given.
+    ax : plt.Axes, optional
+        If supplied do figure in these axes, otherwise generate our own
+    no_show : bool, optional
+        If set, skip the plt.show() step.
+    log_xaxis : bool, optional
+        Force log or linear x-axis
+    """
+    # Read the allocation tables if not supplied
+    if allocation_tables is None:
+        allocation_tables = pyfcctab.read()
+    # Get the agenda items
+    ai_info = wrc27_views.get_ai_info(grouped=True)
+    # Subset them if/as necessary
+    if isinstance(ai, str):
+        ai = [ai]
+    ai_info = {key: ai_info[key] for key in ai}
+    # Define the science allocations we're interested in.
+    bars = {
+        "RAS": BarType(
+            allocation="Radio Astronomy*",
+            color="xkcd:dark sky blue",
+        ),
+        "SRS (Passive)": BarType(
+            allocation="Space Research (Passive)*",
+            color="xkcd:royal purple",
+        ),
+        "SRS (Active)": BarType(
+            allocation="Space Research (Active)*",
+            color="xkcd:pale purple",
+        ),
+        "EESS (Passive)": BarType(
+            allocation="Earth Exploration-Satellite (Passive)*",
+            color="xkcd:soft green",
+        ),
+        "EESS (Active)": BarType(
+            allocation="Earth Exploration-Satellite (Active)*",
+            color="xkcd:easter green",
+        ),
+        "5.340": BarType(
+            footnote="5.340",
+            slot=3,
+            color="xkcd:melon",
+        ),
+    }
+    # Identify the bars for each agenda item
+    bar_buffers = {}
+    for ai, this_ai in ai_info.items():
+        bar_buffers[ai] = {key: pyfcctab.BandCollection() for key in bars}
+        for band in this_ai.frequency_bands:
+            for key, bar_info in bars.items():
+                relevant_bands = allocation_tables.itu.get_bands(
+                    band.start,
+                    band.stop,
+                    condition=bar_info.construct_condition(),
+                    adjacent=True,
+                )
+                bar_buffers[ai][key] = bar_buffers[ai][key].union(
+                    pyfcctab.BandCollection(relevant_bands)
+                )
+    # Set font defaults etc.
+    set_nas_graphic_style()
+    # Now embark upon the figure, set up the figure itself
+    if ax is None:
+        fig, ax = plt.subplots(layout="constrained")
+
+    # -------------------------------- x-axis
+    if frequency_range is None:
+        # Identify the frequency range
+        f_mins = []
+        f_maxs = []
+        for ai, this_ai in ai_info.items():
+            # Gather mins/maxes for the bands in this AI
+            f_mins += [band.start for band in this_ai.frequency_bands]
+            f_maxs += [band.stop for band in this_ai.frequency_bands]
+            # Now do the same for any relevant science bands
+            for key, science_bands in bar_buffers[ai].items():
+                f_mins += [band.bounds[0] for band in science_bands]
+                f_maxs += [band.bounds[1] for band in science_bands]
+        if len(f_mins):
+            frequency_range = [min(f_mins), max(f_maxs)]
+        else:
+            frequency_range = [1.0 * ureg.MHz, 1.0 * ureg.GHz]
+        add_daylight = True
+    else:
+        add_daylight = False
+    #
+    minimum_fractional_bandwidth, log_axis = setup_frequency_axis(
+        ax=ax,
+        frequency_range=frequency_range,
+        add_daylight=add_daylight,
+        log_axis=log_axis,
+    )
+    # -------------------------------- Actual figure
+    # OK, loop over the agenda items
+    y_labels = []
+    new_ai_labels = []
+    for ai, this_ai in ai_info.items():
+        # If there are no specific bands for this AI, then we're done at this point
+        if ai_info is None:
+            continue
+        new_ai_labels.append(len(y_labels))
+        # If we're not on the first one, then put a dividing line in
+        if len(y_labels) > 0:
+            ax.axhline(len(y_labels) - 0.5, linewidth=1.0, color="black")
+        for band in this_ai.frequency_bands:
+            # Draw this particular band
+            show_band_for_individual(
+                band.start,
+                band.stop,
+                row=len(y_labels),
+                facecolor="dimgrey",
+                ax=ax,
+                minimum_fractional_bandwidth=minimum_fractional_bandwidth,
+                edgecolor="none",
+                status=0,
+            )
+        y_labels.append(ai)
+        for key, science_bands in bar_buffers[ai].items():
+            if len(science_bands) == 0:
+                continue
+            bar_info = bars[key]
+            for band in science_bands:
+                # Work out what the status of this row is
+                status = 3
+                for allocation in band.allocations:
+                    if bar_info.allocation is None:
+                        continue
+                    if allocation.matches(bar_info.allocation):
+                        if allocation.primary:
+                            status = min(status, 0)
+                        if allocation.secondary:
+                            status = min(status, 1)
+                        if allocation.footnote_mention:
+                            status = min(status, 2)
+                if status == 3:
+                    status = 0
+                show_band_for_individual(
+                    band.bounds[0],
+                    band.bounds[1],
+                    row=len(y_labels),
+                    ax=ax,
+                    minimum_fractional_bandwidth=minimum_fractional_bandwidth,
+                    facecolor=bar_info.color,
+                    status=status,
+                )
+            y_labels.append(key)
+    # -------------------------------- y-axis
+    y_range = [len(y_labels) - 0.5, -0.5]
+    ax.set_ylim(y_range[0], y_range[1])
+    y_tick_locations = np.arange(len(y_labels))
+    ax.set_yticks(y_tick_locations, labels=y_labels)
+    ax.yaxis.set_minor_locator(plt.NullLocator())
+    # Suppress the y ticks.
+    ax.tick_params(axis="y", which="both", left=False, right=False)
+    # Now set the size
+    fig.set_size_inches(4.4, len(y_labels) * 0.20 + 0.20)
+    # Make the AI axis labels stand out
+    yticklabels = ax.get_yticklabels()
+    for i_label in range(len(y_labels)):
+        if i_label in new_ai_labels:
+            yticklabels[i_label].set_fontweight("bold")
+            yticklabels[i_label].set_color("red")
+        else:
+            pass
+            # yticklabels[i_label].set_size(8.0)
+
+    # --------------------------------- Done
+    if not no_show:
+        plt.show()
+
+
+@dataclass
+class AIPlotConfiguration:
+    """Defines the configuration of a specific Agenda Item plot"""
+
+    ai: str | list[str]
+    log_axis: Optional[bool] = None
+    frequency_range: Optional[list[pint.Quantity]] = None
+
+
+def all_individual_figures(
+    allocation_tables: Optional[pyfcctab.FCCTables] = None,
+):
+    """Generate all the figures for the agenda items"""
+    # Get the agenda items
+    ai_info = wrc27_views.get_ai_info(grouped=True)
+    # Make a bunch of plots for the WRC-27 items
+    plot_configurations: dict[AIPlotConfiguration] = {}
+    solo_wrc31_items = [
+        "WRC-31 AI-2.3",
+        "WRC-31 AI-2.4",
+        "WRC-31 AI-2.8",
+        "WRC-31 AI-2.14",
+    ]
+    for key, item in ai_info.items():
+        if key.startswith("WRC-27") or key in solo_wrc31_items:
+            plot_configurations[key] = AIPlotConfiguration(key)
+    # Now do those that are in combination
+    plot_configurations["WRC-31 AIs-2.1-2.2-2.6"] = AIPlotConfiguration(
+        ai=[
+            "WRC-31 AI-2.1",
+            "WRC-31 AI-2.2",
+            "WRC-31 AI-2.6",
+        ]
+    )
+    plot_configurations["WRC-31 AIs-2.10-2.11"] = AIPlotConfiguration(
+        ai=[
+            "WRC-31 AI-2.10",
+            "WRC-31 AI-2.11",
+        ]
+    )
+    plot_configurations["WRC-31 AIs-2.12-2.13"] = AIPlotConfiguration(
+        ai=[
+            "WRC-31 AI-2.12",
+            "WRC-31 AI-2.13",
+        ]
+    )
+
+    for key, item in plot_configurations.items():
+        print(key)
+        wrc27_ai_figure(
+            allocation_tables=allocation_tables,
+            ai=item.ai,
+            log_axis=item.log_axis,
+            frequency_range=item.frequency_range,
+            no_show=True,
+        )
+        plt.savefig(f"specific-ai-plots/SpecificAI-{key}.pdf")
+        plt.close()
