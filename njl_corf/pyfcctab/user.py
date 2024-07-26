@@ -1,21 +1,23 @@
 """User level routines for the pyfcctab suite, including main table class"""
 
 import copy
-import pickle
-import numpy as np
 import pathlib
+import pickle
+from typing import Optional, Sequence
 
 import docx
+import numpy as np
 import pint
+from IPython.display import HTML, display
 
-from IPython.display import display, HTML
-from .ingest_tables import parse_all_tables
 from .apply_specific_footnote_rules import (
-    get_all_itu_footnote_based_additions,
     enact_5_340_us246,
+    get_all_itu_footnote_based_additions,
 )
 from .band_collections import BandCollection
-from .footnotes import ingestfootnote_definitions, footnotedef2html
+from .bands import Band
+from .footnotes import footnotedef2html, ingestfootnote_definitions
+from .ingest_tables import parse_all_tables
 from .jurisdictions import Jurisdiction
 
 
@@ -43,42 +45,42 @@ class FCCTables:
         # Was tuple (footnote_definitions,) before for some reason.
 
     @property
-    def r1(self):
+    def r1(self) -> BandCollection:
         """The ITU-R1 collection"""
         return self.collections["R1"]
 
     @property
-    def r2(self):
+    def r2(self) -> BandCollection:
         """The ITU-R2 collection"""
         return self.collections["R2"]
 
     @property
-    def r3(self):
+    def r3(self) -> BandCollection:
         """The ITU-R3 collection"""
         return self.collections["R3"]
 
     @property
-    def f(self):
+    def f(self) -> BandCollection:
         """The federal collection"""
         return self.collections["F"]
 
     @property
-    def nf(self):
+    def nf(self) -> BandCollection:
         """The non-federal collection"""
         return self.collections["NF"]
 
     @property
-    def itu(self):
+    def itu(self) -> BandCollection:
         """The complete set of ITU collections"""
         return self.collections["ITU"]
 
     @property
-    def usa(self):
+    def usa(self) -> BandCollection:
         """The complete set of USA collections"""
         return self.collections["USA"]
 
     @property
-    def all(self):
+    def all(self) -> BandCollection:
         """The complete set of all collections"""
         return self.collections["all"]
 
@@ -175,22 +177,26 @@ def read(
     )
 
 
-def save(tables, filename=DEFAULT_PATH + "fcctable.pickle"):
+def save(tables: FCCTables, filename: Optional[str] = None):
     """Write tables to a pickle file"""
+    if filename is None:
+        filename = DEFAULT_PATH + "fcctable.pickle"
     outfile = open(filename, "wb")
     pickle.dump(tables, outfile)
     outfile.close()
 
 
-def load(filename=DEFAULT_PATH + "fcctable.pickle"):
+def load(filename: Optional[str] = None) -> FCCTables:
     """Read tables from a pickle file"""
+    if filename is None:
+        filename = DEFAULT_PATH + "fcctable.pickle"
     infile = open(filename, "rb")
     result = pickle.load(infile)
     infile.close()
     return result
 
 
-def htmlcolumn(bands, append_footnotes=False):
+def htmlcolumn(bands: BandCollection | Sequence[Band], append_footnotes: bool = False):
     """Produce an HTML table corresponding to a set of bands"""
     # First loop over the bands and work out how many rows and columns
     # we'll need
@@ -220,7 +226,7 @@ def htmlcolumn(bands, append_footnotes=False):
     return text
 
 
-def get_pyfcctab_css_lines():
+def get_pyfcctab_css_lines() -> list[str]:
     """Returns the fcc.css as lines to include in an HTML file"""
     with open(
         pathlib.Path(__file__).parent / "fcc.css", "r", encoding="utf-8"
@@ -231,7 +237,7 @@ def get_pyfcctab_css_lines():
 
 # pylint: disable-next=too-many-locals, too-many-branches, too-many-statements
 def htmltable(
-    bands,
+    bands: BandCollection | Sequence[Band],
     append_footnotes: bool = False,
     tooltips: bool = True,
     filename: str = None,

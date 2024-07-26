@@ -55,6 +55,7 @@ def setup_frequency_axis(
     decadal_ticks: Optional[bool] = False,
     add_daylight: Optional[bool] = False,
     log_axis: Optional[bool] = None,
+    daylight_factor: Optional[float] = None,
 ):
     """Configure the frequency axis
 
@@ -72,6 +73,8 @@ def setup_frequency_axis(
         If set, add some daylight either side of the frequency range
     log_axis : bool, optional
         Chose log vs. linear axis
+    daylight_factor : float, optional
+        Amount of daylight to add
     """
     # Work out whether we want to have a logarithmic axis or not.
     orders = frequency_range[1] / frequency_range[0]
@@ -79,23 +82,29 @@ def setup_frequency_axis(
         log_axis = orders > 5.0
     # Make the frequency range a little larger
     if add_daylight:
-        daylight_fraction = 0.1
+        if daylight_factor is None:
+            daylight_factor = 0.1
         if log_axis:
             frequency_range = [
-                frequency_range[0] * (1.0 - daylight_fraction),
-                frequency_range[1] * (1.0 + daylight_fraction),
+                frequency_range[0] * (1.0 - daylight_factor),
+                frequency_range[1] * (1.0 + daylight_factor),
             ]
         else:
             frequency_span = frequency_range[1] - frequency_range[0]
             frequency_range = [
-                frequency_range[0] - frequency_span * daylight_fraction,
-                frequency_range[1] + frequency_span * daylight_fraction,
+                frequency_range[0] - frequency_span * daylight_factor,
+                frequency_range[1] + frequency_span * daylight_factor,
             ]
+            frequency_range[0] = max(frequency_range[0], 0.0 * ureg.Hz)
     # Choose a default for the minimum fractional bandwidth
     if minimum_fractional_bandwidth is None:
-        minimum_fractional_bandwidth = (
-            np.log10(frequency_range[1] / max(frequency_range[0], 1 * ureg.Hz)) * 0.01
-        )
+        if log_axis:
+            minimum_fractional_bandwidth = (
+                np.log10(frequency_range[1] / max(frequency_range[0], 1 * ureg.Hz))
+                * 0.01
+            )
+        else:
+            minimum_fractional_bandwidth = 0.005
     ax.set_xlim(*[f.to(ureg.Hz) for f in frequency_range])
     if log_axis:
         ax.set_xscale("log")
@@ -291,6 +300,7 @@ def wrc27_overview_figure(
     include_soundbytes: bool = False,
     first_word_only: bool = False,
     multi_line: bool = False,
+    include_srs: bool = False,
 ):
     """Figure reviewing WRC agenda items and associated bands
 
@@ -313,6 +323,8 @@ def wrc27_overview_figure(
         If set, only show the first "word" of the soundbyte
     multi-line : bool, optional
         If set, split the soundbyte into two separate lines
+    include_srs : bool, optional
+        If set, include SRS allocations as part of RAS.
     """
     # Read the allocation tables if not supplied
     if allocation_tables is None:
@@ -330,8 +342,13 @@ def wrc27_overview_figure(
     bars = {
         "RAS": BarType(
             condition=lambda band: band.has_allocation("Radio Astronomy*")
-            or band.has_allocation("Space Research (Passive)*")
-            or band.has_allocation("Space Research (Active)*"),
+            or (
+                include_srs
+                and (
+                    band.has_allocation("Space Research (Passive)*")
+                    or band.has_allocation("Space Research (Active)*")
+                )
+            ),
             slot=1,
             color="xkcd:dark sky blue",
         ),
@@ -399,11 +416,11 @@ def wrc27_overview_figure(
             continue
         # Create a buffer to hold the impacted science bands
         bar_buffer = {key: pyfcctab.BandCollection() for key in bars}
-        for band in this_ai.frequency_bands:
-            # Draw this particular band
+        for ai_band in this_ai.frequency_bands:
+            # Draw the bands addressed by the Agenda Item
             show_band_for_overview(
-                band.start,
-                band.stop,
+                ai_band.start,
+                ai_band.stop,
                 row=i_y,
                 slot=0,
                 facecolor="dimgrey",
@@ -411,12 +428,11 @@ def wrc27_overview_figure(
                 minimum_fractional_bandwidth=minimum_fractional_bandwidth,
                 edgecolor="none",
             )
+            # Draw all the science bands we found
             for key, bar_info in bars.items():
-                if ai == "WRC-27 AI-1.11":
-                    print("HERE")
                 relevant_bands = allocation_tables.itu.get_bands(
-                    band.start,
-                    band.stop,
+                    ai_band.start,
+                    ai_band.stop,
                     condition=bar_info.condition,
                     adjacent=True,
                 )
@@ -425,10 +441,10 @@ def wrc27_overview_figure(
                 )
         for key, science_bands in bar_buffer.items():
             bar_info = bars[key]
-            for band in science_bands:
+            for ai_band in science_bands:
                 show_band_for_overview(
-                    band.bounds[0],
-                    band.bounds[1],
+                    ai_band.bounds[0],
+                    ai_band.bounds[1],
                     row=i_y,
                     slot=bar_info.slot,
                     ax=ax,
@@ -446,6 +462,8 @@ def wrc27_ai_figure(
     ax: Optional[plt.Axes] = None,
     no_show: Optional[bool] = False,
     log_axis: Optional[bool] = False,
+    comprehensive_overview: Optional[bool] = False,
+    include_srs: Optional[bool] = False,
 ):
     """Figure reviewing WRC agenda items and associated bands
 
@@ -464,6 +482,10 @@ def wrc27_ai_figure(
         If set, skip the plt.show() step.
     log_xaxis : bool, optional
         Force log or linear x-axis
+    comprehensive_overview : bool, optional
+        If set, show all the science bands, regardless of distance, and increase the range a bit.
+    include_srs : bool, optional
+        If set, include the SRS entries.
     """
     # Read the allocation tables if not supplied
     if allocation_tables is None:
@@ -473,21 +495,26 @@ def wrc27_ai_figure(
     # Subset them if/as necessary
     if isinstance(ai, str):
         ai = [ai]
-    ai_info = {key: ai_info[key] for key in ai}
+    ai_info = {ai_key: ai_info[ai_key] for ai_key in ai}
     # Define the science allocations we're interested in.
-    bars = {
+    science_rows = {
         "RAS": BarType(
             allocation="Radio Astronomy*",
             color="xkcd:dark sky blue",
         ),
-        "SRS (Passive)": BarType(
-            allocation="Space Research (Passive)*",
-            color="xkcd:royal purple",
-        ),
-        "SRS (Active)": BarType(
-            allocation="Space Research (Active)*",
-            color="xkcd:pale purple",
-        ),
+    }
+    if include_srs:
+        science_rows = science_rows | {
+            "SRS (Passive)": BarType(
+                allocation="Space Research (Passive)*",
+                color="xkcd:royal purple",
+            ),
+            "SRS (Active)": BarType(
+                allocation="Space Research (Active)*",
+                color="xkcd:pale purple",
+            ),
+        }
+    science_rows = science_rows | {
         "EESS (Passive)": BarType(
             allocation="Earth Exploration-Satellite (Passive)*",
             color="xkcd:soft green",
@@ -504,17 +531,19 @@ def wrc27_ai_figure(
     }
     # Identify the bars for each agenda item
     bar_buffers = {}
-    for ai, this_ai in ai_info.items():
-        bar_buffers[ai] = {key: pyfcctab.BandCollection() for key in bars}
-        for band in this_ai.frequency_bands:
-            for key, bar_info in bars.items():
+    for ai_key, this_ai_info in ai_info.items():
+        bar_buffers[ai_key] = {
+            row_key: pyfcctab.BandCollection() for row_key in science_rows
+        }
+        for band in this_ai_info.frequency_bands:
+            for row_key, row_info in science_rows.items():
                 relevant_bands = allocation_tables.itu.get_bands(
                     band.start,
                     band.stop,
-                    condition=bar_info.construct_condition(),
+                    condition=row_info.construct_condition(),
                     adjacent=True,
                 )
-                bar_buffers[ai][key] = bar_buffers[ai][key].union(
+                bar_buffers[ai_key][row_key] = bar_buffers[ai_key][row_key].union(
                     pyfcctab.BandCollection(relevant_bands)
                 )
     # Set font defaults etc.
@@ -528,39 +557,57 @@ def wrc27_ai_figure(
         # Identify the frequency range
         f_mins = []
         f_maxs = []
-        for ai, this_ai in ai_info.items():
+        for ai_key, this_ai_info in ai_info.items():
             # Gather mins/maxes for the bands in this AI
-            f_mins += [band.start for band in this_ai.frequency_bands]
-            f_maxs += [band.stop for band in this_ai.frequency_bands]
+            f_mins += [band.start for band in this_ai_info.frequency_bands]
+            f_maxs += [band.stop for band in this_ai_info.frequency_bands]
             # Now do the same for any relevant science bands
-            for key, science_bands in bar_buffers[ai].items():
+            for science_bands in bar_buffers[ai_key].values():
                 f_mins += [band.bounds[0] for band in science_bands]
                 f_maxs += [band.bounds[1] for band in science_bands]
-        if len(f_mins):
+        if len(f_mins) != 0:
             frequency_range = [min(f_mins), max(f_maxs)]
         else:
             frequency_range = [1.0 * ureg.MHz, 1.0 * ureg.GHz]
         add_daylight = True
     else:
         add_daylight = False
-    #
+    # For a comprehensive overview, have a larger range
+    if comprehensive_overview:
+        add_daylight = True
+        daylight_factor = 0.3
+    else:
+        daylight_factor = None
+    # Also for a comprehensive overview, we include all the bands regardless of adjacency
+    if comprehensive_overview:
+        new_bar_buffers = {}
+        for row_key, row_info in science_rows.items():
+            new_bar_buffers[row_key] = allocation_tables.itu.get_bands(
+                frequency_range[0],
+                frequency_range[1],
+                condition=row_info.construct_condition(),
+            )
+        for ai_key in ai_info:
+            bar_buffers[ai_key] = new_bar_buffers
+    # Setup the frequency axis, labels, etc.
     minimum_fractional_bandwidth, log_axis = setup_frequency_axis(
         ax=ax,
         frequency_range=frequency_range,
         add_daylight=add_daylight,
         log_axis=log_axis,
+        daylight_factor=daylight_factor,
     )
     # -------------------------------- Actual figure
     # OK, loop over the agenda items
     y_labels = []
-    for ai, this_ai in ai_info.items():
+    for ai_key, this_ai_info in ai_info.items():
         # If there are no specific bands for this AI, then we're done at this point
         if ai_info is None:
             continue
         # If we're not on the first one, then put a dividing line in
         if len(y_labels) > 0:
             ax.axhline(len(y_labels) - 0.5, linewidth=1.0, color="black")
-        for band in this_ai.frequency_bands:
+        for band in this_ai_info.frequency_bands:
             # Draw this particular band
             show_band_for_individual(
                 band.start,
@@ -572,18 +619,18 @@ def wrc27_ai_figure(
                 edgecolor="none",
                 status=0,
             )
-        y_labels.append(r"\textbf{" + ai + r"}")
-        for key, science_bands in bar_buffers[ai].items():
+        y_labels.append(r"\textbf{" + ai_key + r"}")
+        for row_key, science_bands in bar_buffers[ai_key].items():
             if len(science_bands) == 0:
                 continue
-            bar_info = bars[key]
+            row_info = science_rows[row_key]
             for band in science_bands:
-                # Work out what the status of this row is
+                # Work out what the status of this band is
                 status = 3
                 for allocation in band.allocations:
-                    if bar_info.allocation is None:
+                    if row_info.allocation is None:
                         continue
-                    if allocation.matches(bar_info.allocation):
+                    if allocation.matches(row_info.allocation):
                         if allocation.primary:
                             status = min(status, 0)
                         if allocation.secondary:
@@ -598,10 +645,10 @@ def wrc27_ai_figure(
                     row=len(y_labels),
                     ax=ax,
                     minimum_fractional_bandwidth=minimum_fractional_bandwidth,
-                    facecolor=bar_info.color,
+                    facecolor=row_info.color,
                     status=status,
                 )
-            y_labels.append(key)
+            y_labels.append(row_key)
     # -------------------------------- y-axis
     y_range = [len(y_labels) - 0.5, -0.5]
     ax.set_ylim(y_range[0], y_range[1])
@@ -629,6 +676,7 @@ class AIPlotConfiguration:
 
 def all_individual_figures(
     allocation_tables: Optional[pyfcctab.FCCTables] = None,
+    comprehensive_overview: Optional[bool] = False,
 ):
     """Generate all the figures for the agenda items"""
     # Get the agenda items
@@ -664,7 +712,10 @@ def all_individual_figures(
             "WRC-31 AI-2.13",
         ]
     )
-
+    if comprehensive_overview:
+        file_suffix = "-overview"
+    else:
+        file_suffix = ""
     for key, item in plot_configurations.items():
         print(key)
         wrc27_ai_figure(
@@ -673,6 +724,7 @@ def all_individual_figures(
             log_axis=item.log_axis,
             frequency_range=item.frequency_range,
             no_show=True,
+            comprehensive_overview=comprehensive_overview,
         )
-        plt.savefig(f"specific-ai-plots/SpecificAI-{key}.pdf")
+        plt.savefig(f"specific-ai-plots/SpecificAI-{key}{file_suffix}.pdf")
         plt.close()

@@ -21,7 +21,7 @@ class BandCollection:
 
     def __init__(self, *args):
         """Create a band collection and possibly fill it with bands supplied"""
-        self.data = IntervalTree()
+        self.data: IntervalTree[Band] = IntervalTree()
         self.metadata = {}
         for a in args:
             for b in a:
@@ -32,11 +32,7 @@ class BandCollection:
         # Something of a wrapper around IntervalTree.__getitem__.
         # However, while the former returns a set of Intervals, we
         # want to return a list of bands.
-        intervals = self.data.__getitem__(key)
-        result = []
-        for i in intervals:
-            result.append(i.data)
-        return sorted(result)
+        return sorted([item.data for item in self.data[key]])
 
     def __iter__(self):
         """Generate an iterable over the collected bands"""
@@ -155,8 +151,14 @@ class BandCollection:
         return result
 
     def get_bands(
-        self, f0, f1=None, condition=None, adjacent=False, margin=None, oobe=False
-    ):
+        self,
+        f0,
+        f1=None,
+        condition=None,
+        adjacent=False,
+        margin=None,
+        oobe=False,
+    ) -> list[Band]:
         """Return the bands within f0-f1 (or enclosing f0).  Optionally return from a wider range"""
         # Do some error checking
         if oobe:
@@ -231,11 +233,11 @@ class BandCollection:
         combined = core + marginal_bands + adjacent_bands
         return sorted(list(set(combined)))
 
-    def tolist(self):
+    def tolist(self) -> list[Band]:
         """Convert band collection to sorted list"""
         return sorted([b.data for b in self.data])
 
-    def stitch(self, condition=None):
+    def stitch(self, condition=None) -> "BandCollection":
         """Group adjacent/overlapping bands together in ever-larger groups provided
         condition is met"""
         # Keep a list of the bands we've got thus far
