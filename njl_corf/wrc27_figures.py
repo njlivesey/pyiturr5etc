@@ -2,10 +2,9 @@
 
 from dataclasses import dataclass
 from typing import Optional, Callable
-import warnings
-import re
 
 import matplotlib
+import matplotlib.font_manager
 import matplotlib.pyplot as plt
 import numpy as np
 import pint
@@ -14,10 +13,13 @@ from matplotlib.ticker import FuncFormatter, MaxNLocator
 
 from njl_corf import pyfcctab, ureg, wrc27_views
 
+from fontTools.ttLib import TTFont, TTLibError
+
 
 def set_nas_graphic_style():
     """Choose fonts etc. to match NAS style"""
     # Set plot defaults
+    matplotlib.rcParams["text.usetex"] = True
     matplotlib.rcParams["font.family"] = "serif"
     matplotlib.rcParams["font.serif"] = ["Palatino"]
     matplotlib.rcParams["font.size"] = 9
@@ -49,9 +51,9 @@ def minor_frequency_formatter(x, pos):
 def setup_frequency_axis(
     ax: plt.Axes,
     frequency_range: list[pint.Quantity],
-    minimum_fractional_bandwidth: float = None,
-    decadal_ticks: bool = False,
-    add_daylight: bool = False,
+    minimum_fractional_bandwidth: Optional[float] = None,
+    decadal_ticks: Optional[bool] = False,
+    add_daylight: Optional[bool] = False,
     log_axis: Optional[bool] = None,
 ):
     """Configure the frequency axis
@@ -92,7 +94,7 @@ def setup_frequency_axis(
     # Choose a default for the minimum fractional bandwidth
     if minimum_fractional_bandwidth is None:
         minimum_fractional_bandwidth = (
-            np.log10(frequency_range[1] / max(frequency_range[0], 1 * ureg.Hz)) * 0.005
+            np.log10(frequency_range[1] / max(frequency_range[0], 1 * ureg.Hz)) * 0.01
         )
     ax.set_xlim(*[f.to(ureg.Hz) for f in frequency_range])
     if log_axis:
@@ -410,6 +412,8 @@ def wrc27_overview_figure(
                 edgecolor="none",
             )
             for key, bar_info in bars.items():
+                if ai == "WRC-27 AI-1.11":
+                    print("HERE")
                 relevant_bands = allocation_tables.itu.get_bands(
                     band.start,
                     band.stop,
@@ -549,12 +553,10 @@ def wrc27_ai_figure(
     # -------------------------------- Actual figure
     # OK, loop over the agenda items
     y_labels = []
-    new_ai_labels = []
     for ai, this_ai in ai_info.items():
         # If there are no specific bands for this AI, then we're done at this point
         if ai_info is None:
             continue
-        new_ai_labels.append(len(y_labels))
         # If we're not on the first one, then put a dividing line in
         if len(y_labels) > 0:
             ax.axhline(len(y_labels) - 0.5, linewidth=1.0, color="black")
@@ -570,7 +572,7 @@ def wrc27_ai_figure(
                 edgecolor="none",
                 status=0,
             )
-        y_labels.append(ai)
+        y_labels.append(r"\textbf{" + ai + r"}")
         for key, science_bands in bar_buffers[ai].items():
             if len(science_bands) == 0:
                 continue
@@ -610,15 +612,6 @@ def wrc27_ai_figure(
     ax.tick_params(axis="y", which="both", left=False, right=False)
     # Now set the size
     fig.set_size_inches(4.4, len(y_labels) * 0.20 + 0.20)
-    # Make the AI axis labels stand out
-    yticklabels = ax.get_yticklabels()
-    for i_label in range(len(y_labels)):
-        if i_label in new_ai_labels:
-            yticklabels[i_label].set_fontweight("bold")
-            yticklabels[i_label].set_color("red")
-        else:
-            pass
-            # yticklabels[i_label].set_size(8.0)
 
     # --------------------------------- Done
     if not no_show:
