@@ -51,7 +51,6 @@ def minor_frequency_formatter(x, pos):
 def setup_frequency_axis(
     ax: plt.Axes,
     frequency_range: list[pint.Quantity],
-    minimum_fractional_bandwidth: Optional[float] = None,
     decadal_ticks: Optional[bool] = False,
     add_daylight: Optional[bool] = False,
     log_axis: Optional[bool] = None,
@@ -65,8 +64,6 @@ def setup_frequency_axis(
         The axes under consideration
     frequency_range : list[pint.Quantity]
         The frequency range to cover
-    minimum_fractional_bandwidth : float, optional
-        The smallest a band is allowed to be in the plot (to improve visibility)
     decadal_ticks : bool, optional
         If set, force major ticks to be on the decades of frequency
     add_daylight : bool, optional
@@ -97,14 +94,6 @@ def setup_frequency_axis(
             ]
             frequency_range[0] = max(frequency_range[0], 0.0 * ureg.Hz)
     # Choose a default for the minimum fractional bandwidth
-    if minimum_fractional_bandwidth is None:
-        if log_axis:
-            minimum_fractional_bandwidth = (
-                np.log10(frequency_range[1] / max(frequency_range[0], 1 * ureg.Hz))
-                * 0.002
-            )
-        else:
-            minimum_fractional_bandwidth = 0.005
     ax.set_xlim(*[f.to(ureg.Hz) for f in frequency_range])
     if log_axis:
         ax.set_xscale("log")
@@ -149,13 +138,13 @@ def setup_frequency_axis(
     ax.tick_params(axis="x", which="both", direction="out")
     # Suppress the x-axis label
     ax.set_xlabel("")
-    return minimum_fractional_bandwidth, log_axis
+    return log_axis
 
 
 def ensure_visible_bandwidth(
     start: pint.Quantity,
     stop: pint.Quantity,
-    minimum_fractional_bandwidth: float = None,
+    minimum_bandwidth_points: Optional[float] = None,
 ) -> tuple[pint.Quantity, pint.Quantity]:
     """Broadens a spectral range to ensure visibility in a plot if it's too narrow
 
@@ -168,7 +157,7 @@ def ensure_visible_bandwidth(
         Starting frequency
     stop : pint.Quantity
         Ending frequency
-    mimimum_fractional_bandwidth : float, optional
+    mimimum_graphical_bandwidth : float, optional
         Minimum fractional bandwidth to ensure.  If a band is narrower than that, then
         the code will move start and stop outwards from the center to meet this minimum
         fractional bandwidth.
@@ -178,19 +167,51 @@ def ensure_visible_bandwidth(
     tuple[pint.Quantity, pint.Quantity] - start, stop
         start and stop frequencies adjusted if/as needed.
     """
-    # Set the default
-    if minimum_fractional_bandwidth is None:
-        minimum_fractional_bandwidth = 0.02
-    # Compute the center, use geometric mean given the log scale
-    center = np.sqrt(start * stop)
-    # Compute fractional bandwidth
-    fractional_bandwidth = (stop - start) / center
-    # If we're not meeting the minimum, move start and stop outwards from the center (in
-    # a logarithmic sense).
-    if fractional_bandwidth < minimum_fractional_bandwidth:
-        start = center * (1.0 - 0.5 * minimum_fractional_bandwidth)
-        stop = center * (1.0 + 0.5 * minimum_fractional_bandwidth)
-    return start, stop
+    # Set defaults
+    if minimum_bandwidth_points is None:
+        minimum_bandwidth_points = 0.5
+    # Get the current figure and axes, work out if we're on a log-scale
+    fig = plt.gcf()
+    ax = plt.gca()
+    try:
+        log_scale = bool(["linear", "log"].index(ax.get_xscale()))
+    except ValueError as exception:
+        raise ValueError(f"Unrecognized axis x-scale {ax.get_xscale()}") from exception
+    # Work out the width of the axes in points (will be subject to minor changes, I
+    # think, when final drawing takes place.)
+    ax_width_pt = 72.0 * fig.get_figwidth() * (ax.get_position().width)
+    # Compute the width in data coordinates
+    xlim = ax.get_xlim()
+    ax_width_data = xlim[1] - xlim[0]
+    if log_scale:
+        ax_width_data = np.log10(ax_width_data)
+    # Compute the scaling ratio
+    points_per_data = ax_width_pt / ax_width_data
+    # Convert start/end to Hz for now
+    start = start.to(ureg.Hz).magnitude
+    stop = stop.to(ureg.Hz).magnitude
+    # Compute the current width of the bar
+    if log_scale:
+        current_width_data = np.log10(stop) - np.log10(start)
+    else:
+        current_width_data = stop - start
+    # Compute the current width in points
+    current_width_points = current_width_data * points_per_data
+    # Work out if a correction is needed
+    factor = minimum_bandwidth_points / current_width_points
+    # print(minimum_bandwidth_points, current_width_points)
+    if factor > 1.0:
+        new_width = factor * current_width_data
+        if log_scale:
+            f_center = 0.5 * (np.log10(start) + np.log10(stop))
+        else:
+            f_center = 0.5 * (start + stop)
+        start = f_center - 0.5 * new_width
+        stop = f_center + 0.5 * new_width
+        if log_scale:
+            start = 10.0**start
+            stop = 10.0**stop
+    return start * ureg.Hz, stop * ureg.Hz
 
 
 def show_band_for_overview(
@@ -199,7 +220,7 @@ def show_band_for_overview(
     row: int,
     ax: plt.Axes,
     slot: int = None,
-    minimum_fractional_bandwidth: float = None,
+    minimum_bandwidth_points: Optional[float] = None,
     **kwargs,
 ):
     """Show a band as a rectangle patch"""
@@ -211,7 +232,7 @@ def show_band_for_overview(
     start, stop = ensure_visible_bandwidth(
         start,
         stop,
-        minimum_fractional_bandwidth=minimum_fractional_bandwidth,
+        minimum_bandwidth_points=minimum_bandwidth_points,
     )
     start = start.to(ureg.Hz)
     stop = stop.to(ureg.Hz)
@@ -231,7 +252,7 @@ def show_band_for_individual(
     row: int,
     ax: plt.Axes,
     status: int,
-    minimum_fractional_bandwidth: float = None,
+    minimum_bandwidth_points: Optional[float] = None,
     **kwargs,
 ):
     """Show a band as a rectangle patch"""
@@ -241,7 +262,7 @@ def show_band_for_individual(
     start, stop = ensure_visible_bandwidth(
         start,
         stop,
-        minimum_fractional_bandwidth=minimum_fractional_bandwidth,
+        minimum_bandwidth_points=minimum_bandwidth_points,
     )
     start = start.to(ureg.Hz)
     stop = stop.to(ureg.Hz)
@@ -302,6 +323,7 @@ def wrc27_overview_figure(
     first_word_only: bool = False,
     multi_line: bool = False,
     include_srs: bool = False,
+    minimum_bandwidth_points: Optional[float] = False,
 ):
     """Figure reviewing WRC agenda items and associated bands
 
@@ -326,6 +348,8 @@ def wrc27_overview_figure(
         If set, split the soundbyte into two separate lines
     include_srs : bool, optional
         If set, include SRS allocations as part of RAS.
+    minimum_bandwidth_points : float, optional
+        If bar is narrower than this, make it wider
     """
     # Read the allocation tables if not supplied
     if allocation_tables is None:
@@ -375,7 +399,7 @@ def wrc27_overview_figure(
     # -------------------------------- x-axis
     if frequency_range is None:
         frequency_range = [1_000_000 * ureg.Hz, 1_000_000_000_000 * ureg.Hz]
-    minimum_fractional_bandwidth, _ = setup_frequency_axis(
+    _ = setup_frequency_axis(
         ax=ax,
         frequency_range=frequency_range,
         decadal_ticks=True,
@@ -426,8 +450,8 @@ def wrc27_overview_figure(
                 slot=0,
                 facecolor="dimgrey",
                 ax=ax,
-                minimum_fractional_bandwidth=minimum_fractional_bandwidth,
                 edgecolor="none",
+                minimum_bandwidth_points=minimum_bandwidth_points,
             )
             # Draw all the science bands we found
             for key, bar_info in bars.items():
@@ -449,7 +473,7 @@ def wrc27_overview_figure(
                     row=i_y,
                     slot=bar_info.slot,
                     ax=ax,
-                    minimum_fractional_bandwidth=minimum_fractional_bandwidth,
+                    minimum_bandwidth_points=minimum_bandwidth_points,
                     facecolor=bar_info.color,
                 )
     if not no_show:
@@ -465,6 +489,7 @@ def wrc27_ai_figure(
     log_axis: Optional[bool] = False,
     comprehensive_overview: Optional[bool] = False,
     include_srs: Optional[bool] = False,
+    minimum_bandwidth_points: Optional[float] = None,
 ):
     """Figure reviewing WRC agenda items and associated bands
 
@@ -487,6 +512,8 @@ def wrc27_ai_figure(
         If set, show all the science bands, regardless of distance, and increase the range a bit.
     include_srs : bool, optional
         If set, include the SRS entries.
+    minimum_bandwidth_points : float, optional
+        If bar is narrower than this, make it wider
     """
     # Read the allocation tables if not supplied
     if allocation_tables is None:
@@ -592,7 +619,7 @@ def wrc27_ai_figure(
         for ai_key in ai_info:
             bar_buffers[ai_key] = new_bar_buffers
     # Setup the frequency axis, labels, etc.
-    minimum_fractional_bandwidth, log_axis = setup_frequency_axis(
+    log_axis = setup_frequency_axis(
         ax=ax,
         frequency_range=frequency_range,
         add_daylight=add_daylight,
@@ -617,7 +644,7 @@ def wrc27_ai_figure(
                 row=len(y_labels),
                 facecolor="dimgrey",
                 ax=ax,
-                minimum_fractional_bandwidth=minimum_fractional_bandwidth,
+                minimum_bandwidth_points=minimum_bandwidth_points,
                 edgecolor="none",
                 status=0,
             )
@@ -646,7 +673,7 @@ def wrc27_ai_figure(
                     band.bounds[1],
                     row=len(y_labels),
                     ax=ax,
-                    minimum_fractional_bandwidth=minimum_fractional_bandwidth,
+                    minimum_bandwidth_points=minimum_bandwidth_points,
                     facecolor=row_info.color,
                     status=status,
                 )
