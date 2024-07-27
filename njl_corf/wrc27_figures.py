@@ -101,7 +101,7 @@ def setup_frequency_axis(
         if log_axis:
             minimum_fractional_bandwidth = (
                 np.log10(frequency_range[1] / max(frequency_range[0], 1 * ureg.Hz))
-                * 0.01
+                * 0.002
             )
         else:
             minimum_fractional_bandwidth = 0.005
@@ -143,7 +143,8 @@ def setup_frequency_axis(
             ax.xaxis.set_minor_formatter(FuncFormatter(minor_frequency_formatter))
         else:
             # For linear axes, the number of ticks could be reduced
-            ax.xaxis.set_major_locator(MaxNLocator(prune="both", nbins=4))
+            pass
+            # ax.xaxis.set_major_locator(MaxNLocator(prune="both", nbins=4))
     # Have the tickmarks point outwards
     ax.tick_params(axis="x", which="both", direction="out")
     # Suppress the x-axis label
@@ -541,7 +542,7 @@ def wrc27_ai_figure(
                     band.start,
                     band.stop,
                     condition=row_info.construct_condition(),
-                    adjacent=True,
+                    recursively_adjacent=True,
                 )
                 bar_buffers[ai_key][row_key] = bar_buffers[ai_key][row_key].union(
                     pyfcctab.BandCollection(relevant_bands)
@@ -586,6 +587,7 @@ def wrc27_ai_figure(
                 frequency_range[0],
                 frequency_range[1],
                 condition=row_info.construct_condition(),
+                recursively_adjacent=True,
             )
         for ai_key in ai_info:
             bar_buffers[ai_key] = new_bar_buffers

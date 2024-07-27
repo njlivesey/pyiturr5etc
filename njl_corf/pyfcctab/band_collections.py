@@ -1,7 +1,7 @@
 """Code for handling collections of bands"""
 
 import copy
-from typing import Callable
+from typing import Callable, Optional
 import pint
 import numpy as np
 
@@ -43,6 +43,14 @@ class BandCollection:
     def __len__(self):
         """Return number of bands"""
         return len(self.data)
+
+    def begin(self):
+        """Return lowest frequency"""
+        return self.data.begin()
+
+    def end(self):
+        """Return lowest frequency"""
+        return self.data.end()
 
     def append(self, band):
         """Append a band to the collection"""
@@ -152,86 +160,60 @@ class BandCollection:
 
     def get_bands(
         self,
-        f0,
-        f1=None,
-        condition=None,
-        adjacent=False,
-        margin=None,
-        oobe=False,
+        f0: pint.Quantity,
+        f1: Optional[pint.Quantity] = None,
+        condition: Optional[Callable] = None,
+        adjacent: Optional[bool] = False,
+        recursively_adjacent: Optional[bool] = False,
     ) -> list[Band]:
         """Return the bands within f0-f1 (or enclosing f0).  Optionally return from a wider range"""
-        # Do some error checking
-        if oobe:
-            if margin is not None:
-                raise ValueError("Cannot set oobe and select a margin")
-            else:
-                margin = 2.5
         # First get the band(s) that are explictly in the range discussed
         if f1 is None:
-            core = self[f0]
+            bands = self[f0]
             f1 = f0
         else:
-            core = self[f0:f1]
-        f_geom_center = np.sqrt(f0 * f1)
+            bands = self[f0:f1]
         # Apply the conditions if supplied
         if condition:
-            core = [band for band in core if condition(band)]
-        # Work out what the core range is.
-        if len(core) != 0:
-            core_min = min(min(b.bounds[0] for b in core), f0)
-            core_max = max(max(b.bounds[1] for b in core), f1)
+            bands = [band for band in bands if condition(band)]
+        # Now add any adjacent bands, possibly recursively.  The logic for this is a
+        # little contorted but should be clear enough on careful reading.
+        adjacency_pass = 0
+        band_collection = BandCollection(bands)
+        previous_collection_length = None
+        if adjacent or recursively_adjacent:
+            while (adjacent and adjacency_pass == 0) or (
+                recursively_adjacent
+                and (
+                    len(band_collection) != previous_collection_length
+                    or adjacency_pass == 0
+                )
+            ):
+                adjacency_pass += 1
+                previous_collection_length = len(band_collection)
+                # If we've got some bands already, get the range from them, otherwise
+                # resort to getting them from the inputs.
+                if len(band_collection) != 0:
+                    f_min = band_collection.begin()
+                    f_max = band_collection.end()
+                else:
+                    f_min = f0
+                    f_max = f1
+                # Look slightly above/blow this range to find adjacent bands
+                epsilon = 1e-5
+                band_collection = BandCollection(
+                    self[f_min * (1 - epsilon) : f_max * (1 + epsilon)]
+                )
+                # Make sure that the bands we found comply with our condition
+                if condition:
+                    band_collection = BandCollection(
+                        band for band in band_collection if condition(band)
+                    )
+            result = list(band_collection)
         else:
-            core_min = f0
-            core_max = f1
-        core_bandwidth = core_max - core_min
-        # Now add any bands within a given margin of the core band(s).
-        if margin is not None:
-            # Can supply as fraction of bandwidth or in frequency
-            margin_fraction = None
-            # Think about cases where margin has units of some kind
-            if hasattr(margin, "to"):
-                try:
-                    margin_frequency = margin.to(ureg.Hz)
-                except ureg.unitsConversionError:
-                    pass
-                # Now the case where margin is a fraction
-                try:
-                    margin_fraction = margin.to(ureg.dimensionless_unscaled)
-                except ureg.unitsConversionError:
-                    pass
-            else:
-                # If margin is unitless, it must be fractional
-                margin_fraction = margin
-            if margin_fraction is not None:
-                margin_frequency = (margin_fraction - 0.5) * core_bandwidth
-            full_min = core_min - margin_frequency
-            full_max = core_max + margin_frequency
-            marginal_bands = self[full_min:full_max]
-        else:
-            marginal_bands = []
-        # Apply condition to the marginal bands if supplied
-        if condition:
-            marginal_bands = [band for band in marginal_bands if condition(band)]
+            result = bands
 
-        # Now add any adjacent bands
-        if adjacent:
-            delta_f = f_geom_center * 0.0005
-            # Identify all the bands that are truely adjacent
-            truly_adjacent_bands = []
-            for f in [core_min - delta_f, core_max + delta_f]:
-                truly_adjacent_bands += self[f]
-            # Now make the span of this collection the span of what we're after.
-            adjacent_min = min(b.bounds[0] for b in truly_adjacent_bands)
-            adjacent_max = max(b.bounds[1] for b in truly_adjacent_bands)
-            adjacent_bands = self[adjacent_min:adjacent_max]
-        else:
-            adjacent_bands = []
-        # Apply condition to the adjacent bands if supplied
-        if condition:
-            adjacent_bands = [band for band in adjacent_bands if condition(band)]
-        # Now combine all the bands found, remove duplicates and sort
-        combined = core + marginal_bands + adjacent_bands
-        return sorted(list(set(combined)))
+        return sorted(list(set(result)))
 
     def tolist(self) -> list[Band]:
         """Convert band collection to sorted list"""
