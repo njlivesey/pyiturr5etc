@@ -6,6 +6,7 @@ import pathlib
 import shutil
 import warnings
 from dataclasses import dataclass
+from typing import Optional
 
 import matplotlib.pyplot as plt
 from intervaltree import IntervalTree
@@ -37,7 +38,10 @@ class _AIKernel:
     soundbyte: str = None
 
     def format_soundbyte(
-        self, first_word_only: bool = False, multi_line: bool = False
+        self,
+        first_word_only: bool = False,
+        multi_line: bool = False,
+        latex: Optional[bool] = False,
     ) -> str:
         """Return a useful string representation of the "soundbyte" attribute
 
@@ -79,6 +83,9 @@ class _AIKernel:
                 deltas = [abs(length[0] - length[1]) for length in lengths]
                 i_option = deltas.index(min(deltas))
                 result = "\n".join(options[i_option])
+        # Now prepare for latex
+        if latex:
+            result = result.replace(">", r"\textgreater")
         return result
 
 
@@ -138,7 +145,10 @@ def get_ai_info(grouped: bool = False) -> dict[AgendaItem]:
     """Populate a dictionary detailing the bands in each AI"""
     ai_info = {
         "WRC-27 AI-1.1": AgendaItem(
-            frequency_bands=[slice(47.2 * ureg.GHz, 51.4 * ureg.GHz)],
+            frequency_bands=[
+                slice(47.2 * ureg.GHz, 50.2 * ureg.GHz),
+                slice(50.4 * ureg.GHz, 51.4 * ureg.GHz),
+            ],
             soundbyte="ESIMs (aero/marine)",
         ),
         "WRC-27 AI-1.2": AgendaItem(
@@ -150,7 +160,7 @@ def get_ai_info(grouped: bool = False) -> dict[AgendaItem]:
             soundbyte="FSS NGSO uplinks",
         ),
         "WRC-27 AI-1.4": AgendaItem(
-            frequency_bands=[slice(17.3 * ureg.GHz, 17.7 * ureg.GHz)],
+            frequency_bands=[slice(17.3 * ureg.GHz, 17.8 * ureg.GHz)],
             soundbyte="FSS NGSO downlinks",
         ),
         "WRC-27 AI-1.5": AgendaItem(
@@ -271,7 +281,7 @@ def get_ai_info(grouped: bool = False) -> dict[AgendaItem]:
                 slice(158.5 * ureg.GHz, 164 * ureg.GHz),
                 slice(167.0 * ureg.GHz, 174.5 * ureg.GHz),
                 slice(191.8 * ureg.GHz, 200.0 * ureg.GHz),
-                slice(200.0 * ureg.GHz, 217.0 * ureg.GHz),
+                slice(209.0 * ureg.GHz, 217.0 * ureg.GHz),
                 slice(232.0 * ureg.GHz, 235.0 * ureg.GHz),
             ],
             soundbyte="EESS/RAS protection",

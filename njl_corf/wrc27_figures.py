@@ -411,20 +411,24 @@ def wrc27_overview_figure(
     y_tick_locations = np.arange(len(ai_info))
     ax.set_yticks(y_tick_locations, labels=y_labels)
     ax.yaxis.set_minor_locator(plt.NullLocator())
-    # Suppress the y ticks.
-    ax.tick_params(axis="y", which="both", left=False, right=False)
     # Potentially the soundbyte labels
     if include_soundbytes:
-        for i_ai, this_ai in enumerate(ai_info.values()):
-            ax.annotate(
-                " "
-                + this_ai.format_soundbyte(
+        ax2 = ax.twinx()
+        ax2.set_ylim(y_range[0], y_range[1])
+        y2_labels = []
+        for this_ai in ai_info.values():
+            y2_labels.append(
+                this_ai.format_soundbyte(
                     first_word_only=first_word_only,
                     multi_line=multi_line,
-                ),
-                [frequency_range[1], i_ai],
-                va="center",
+                    latex=True,
+                )
             )
+        ax2.set_yticks(y_tick_locations, labels=y2_labels)
+        ax2.yaxis.set_minor_locator(plt.NullLocator())
+        ax2.tick_params(axis="y", which="both", left=False, right=False)
+    # Suppress the y ticks.
+    ax.tick_params(axis="y", which="both", left=False, right=False)
     #
     # -------------------------------- Actual figure
     # OK, loop over the agenda items
@@ -576,7 +580,7 @@ def wrc27_ai_figure(
                 )
     # Set font defaults etc.
     set_nas_graphic_style()
-    # Now embark upon the figure, set up the figure itself
+    # Now embark upon the figure, set up the figure itself, start with a default width
     if ax is None:
         fig, ax = plt.subplots(layout="constrained")
 
@@ -686,9 +690,27 @@ def wrc27_ai_figure(
     ax.yaxis.set_minor_locator(plt.NullLocator())
     # Suppress the y ticks.
     ax.tick_params(axis="y", which="both", left=False, right=False)
-    # Now set the size
-    fig.set_size_inches(4.4, len(y_labels) * 0.20 + 0.20)
-
+    # --------------------------------- Sizing
+    # Now work out the size.
+    row_size_inches = 0.15
+    # Take a stab at the figure size
+    figure_width_inches = 10.6 / 2.54
+    bar_area_height_inches = len(y_labels) * row_size_inches
+    notional_extra_height_inches = 0.3533
+    initial_height = bar_area_height_inches + notional_extra_height_inches
+    fig.set_size_inches(
+        figure_width_inches, bar_area_height_inches + notional_extra_height_inches
+    )
+    # Do a first pass to get the size
+    fig.canvas.draw()
+    # Work out the actual size of the axes in inches, the remainder is the space taken
+    # up by the extra stuff
+    actual_bar_area_height_inchdes = ax.get_position().height * initial_height
+    actual_extra_height_inches = initial_height - actual_bar_area_height_inchdes
+    # Redraw at corrected height
+    final_height_inches = bar_area_height_inches + actual_extra_height_inches
+    fig.set_size_inches(figure_width_inches, final_height_inches)
+    fig.canvas.draw()
     # --------------------------------- Done
     if not no_show:
         plt.show()
