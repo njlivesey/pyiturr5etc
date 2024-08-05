@@ -43,7 +43,9 @@ class OscarEntry:
             self.bounds = slice(self.bounds.start, self.bounds.stop + delta)
 
 
-def read(filename: str = None, communications: bool = False) -> IntervalTree:
+def read(
+    filename: str = None, communications: bool = False
+) -> IntervalTree[OscarEntry]:
     """Read the OSCAR database from Excel and ingest"""
     if filename is None:
         if not communications:
