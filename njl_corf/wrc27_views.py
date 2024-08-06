@@ -192,7 +192,18 @@ def get_ai_info(grouped: bool = False) -> dict[AgendaItem]:
             soundbyte="Radiolocation",
         ),
         "WRC-27 AI-1.9": AgendaItem(
-            frequency_bands=[slice(3_025 * ureg.kHz, 18.030 * ureg.MHz)],
+            frequency_bands=[
+                slice(3_025 * ureg.kHz, 3_155 * ureg.kHz),
+                slice(3_900 * ureg.kHz, 3_950 * ureg.kHz),
+                slice(4_700 * ureg.kHz, 4_750 * ureg.kHz),
+                slice(5_680 * ureg.kHz, 5_730 * ureg.kHz),
+                slice(6_685 * ureg.kHz, 6_765 * ureg.kHz),
+                slice(8_965 * ureg.kHz, 9_040 * ureg.kHz),
+                slice(11_175 * ureg.kHz, 11_275 * ureg.kHz),
+                slice(13_200 * ureg.kHz, 13_260 * ureg.kHz),
+                slice(15_010 * ureg.kHz, 15_100 * ureg.kHz),
+                slice(17_970 * ureg.kHz, 18_030 * ureg.kHz),
+            ],
             soundbyte="Aeronautical mobile",
         ),
         "WRC-27 AI-1.10": AgendaItem(
