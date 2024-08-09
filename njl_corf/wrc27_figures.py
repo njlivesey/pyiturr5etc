@@ -567,11 +567,11 @@ def wrc27_ai_figure(
         bar_buffers[ai_key] = {
             row_key: pyfcctab.BandCollection() for row_key in science_rows
         }
-        for band in this_ai_info.frequency_bands:
+        for ai_band in this_ai_info.frequency_bands:
             for row_key, row_info in science_rows.items():
                 relevant_bands = allocation_tables.itu.get_bands(
-                    band.start,
-                    band.stop,
+                    ai_band.start,
+                    ai_band.stop,
                     condition=row_info.construct_condition(),
                     recursively_adjacent=True,
                 )
@@ -640,11 +640,11 @@ def wrc27_ai_figure(
         # If we're not on the first one, then put a dividing line in
         if len(y_labels) > 0:
             ax.axhline(len(y_labels) - 0.5, linewidth=1.0, color="black")
-        for band in this_ai_info.frequency_bands:
+        for ai_band in this_ai_info.frequency_bands:
             # Draw this particular band
             show_band_for_individual(
-                band.start,
-                band.stop,
+                ai_band.start,
+                ai_band.stop,
                 row=len(y_labels),
                 facecolor="dimgrey",
                 ax=ax,
@@ -657,10 +657,10 @@ def wrc27_ai_figure(
             if len(science_bands) == 0:
                 continue
             row_info = science_rows[row_key]
-            for band in science_bands:
+            for ai_band in science_bands:
                 # Work out what the status of this band is
                 status = 3
-                for allocation in band.allocations:
+                for allocation in ai_band.allocations:
                     if row_info.allocation is None:
                         continue
                     if allocation.matches(row_info.allocation):
@@ -673,8 +673,8 @@ def wrc27_ai_figure(
                 if status == 3:
                     status = 0
                 show_band_for_individual(
-                    band.bounds[0],
-                    band.bounds[1],
+                    ai_band.bounds[0],
+                    ai_band.bounds[1],
                     row=len(y_labels),
                     ax=ax,
                     minimum_bandwidth_points=minimum_bandwidth_points,
