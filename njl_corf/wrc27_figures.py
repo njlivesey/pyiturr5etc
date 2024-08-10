@@ -487,11 +487,10 @@ def wrc27_overview_figure(
 def wrc27_ai_figure(
     ai: str | list[str],
     allocation_tables: Optional[pyfcctab.FCCTables] = None,
-    frequency_range: Optional[list[pint.Quantity]] = None,
+    frequency_range_shown_pre_daylight: Optional[list[pint.Quantity]] = None,
     ax: Optional[plt.Axes] = None,
     no_show: Optional[bool] = False,
     log_axis: Optional[bool] = False,
-    comprehensive_overview: Optional[bool] = False,
     include_srs: Optional[bool] = False,
     minimum_bandwidth_points: Optional[float] = None,
 ):
@@ -512,8 +511,6 @@ def wrc27_ai_figure(
         If set, skip the plt.show() step.
     log_xaxis : bool, optional
         Force log or linear x-axis
-    comprehensive_overview : bool, optional
-        If set, show all the science bands, regardless of distance, and increase the range a bit.
     include_srs : bool, optional
         If set, include the SRS entries.
     minimum_bandwidth_points : float, optional
@@ -585,50 +582,52 @@ def wrc27_ai_figure(
         fig, ax = plt.subplots(layout="constrained")
 
     # -------------------------------- x-axis
-    if frequency_range is None:
+    if frequency_range_shown_pre_daylight is None:
         # Identify the frequency range
-        f_mins = []
-        f_maxs = []
+        f_mins_ai = []
+        f_maxs_ai = []
+        f_mins_science = []
+        f_maxs_science = []
         for ai_key, this_ai_info in ai_info.items():
             # Gather mins/maxes for the bands in this AI
-            f_mins += [band.start for band in this_ai_info.frequency_bands]
-            f_maxs += [band.stop for band in this_ai_info.frequency_bands]
+            f_mins_ai += [band.start for band in this_ai_info.frequency_bands]
+            f_maxs_ai += [band.stop for band in this_ai_info.frequency_bands]
             # Now do the same for any relevant science bands
             for science_bands in bar_buffers[ai_key].values():
-                f_mins += [band.bounds[0] for band in science_bands]
-                f_maxs += [band.bounds[1] for band in science_bands]
-        if len(f_mins) != 0:
-            frequency_range = [min(f_mins), max(f_maxs)]
+                f_mins_science += [band.bounds[0] for band in science_bands]
+                f_maxs_science += [band.bounds[1] for band in science_bands]
+        # Get the full range for both the AI bands and the science bands
+        if len(f_mins_ai) != 0:
+            frequency_range_shown_pre_daylight = [min(f_mins_ai), max(f_maxs_ai)]
         else:
-            frequency_range = [1.0 * ureg.MHz, 1.0 * ureg.GHz]
+            frequency_range_shown_pre_daylight = [1.0 * ureg.MHz, 1.0 * ureg.GHz]
+        if len(f_mins_science) != 0:
+            frequency_range_full = [min(f_mins_science), max(f_maxs_science)]
+        else:
+            frequency_range_full = [1.0 * ureg.MHz, 1.0 * ureg.GHz]
         add_daylight = True
     else:
         add_daylight = False
-    # For a comprehensive overview, have a larger range
-    if comprehensive_overview:
-        add_daylight = True
-        daylight_factor = 0.3
-    else:
-        daylight_factor = None
-    # Also for a comprehensive overview, we include all the bands regardless of adjacency
-    if comprehensive_overview:
-        new_bar_buffers = {}
-        for row_key, row_info in science_rows.items():
-            new_bar_buffers[row_key] = allocation_tables.itu.get_bands(
-                frequency_range[0],
-                frequency_range[1],
-                condition=row_info.construct_condition(),
-                recursively_adjacent=True,
-            )
-        for ai_key in ai_info:
-            bar_buffers[ai_key] = new_bar_buffers
+    # OK, despite having gone to the lengths of carefully identifying the science (and
+    # 5.340) bands that overlap or are directly adjacent to the bands under
+    # consideration, we're going to kind of throw all that away, and just get all the
+    # bands of interest in the range.
+    new_bar_buffers = {}
+    for row_key, row_info in science_rows.items():
+        new_bar_buffers[row_key] = allocation_tables.itu.get_bands(
+            frequency_range_full[0],
+            frequency_range_full[1],
+            condition=row_info.construct_condition(),
+            recursively_adjacent=True,
+        )
+    for ai_key in ai_info:
+        bar_buffers[ai_key] = new_bar_buffers
     # Setup the frequency axis, labels, etc.
     log_axis = setup_frequency_axis(
         ax=ax,
-        frequency_range=frequency_range,
+        frequency_range=frequency_range_shown_pre_daylight,
         add_daylight=add_daylight,
         log_axis=log_axis,
-        daylight_factor=daylight_factor,
     )
     # -------------------------------- Actual figure
     # OK, loop over the agenda items
@@ -727,7 +726,6 @@ class AIPlotConfiguration:
 
 def all_individual_figures(
     allocation_tables: Optional[pyfcctab.FCCTables] = None,
-    comprehensive_overview: Optional[bool] = False,
 ):
     """Generate all the figures for the agenda items"""
     # Get the agenda items
@@ -763,19 +761,14 @@ def all_individual_figures(
             "WRC-31 AI-2.13",
         ]
     )
-    if comprehensive_overview:
-        file_suffix = "-overview"
-    else:
-        file_suffix = ""
     for key, item in plot_configurations.items():
         print(key)
         wrc27_ai_figure(
             allocation_tables=allocation_tables,
             ai=item.ai,
             log_axis=item.log_axis,
-            frequency_range=item.frequency_range,
+            frequency_range_shown_pre_daylight=item.frequency_range,
             no_show=True,
-            comprehensive_overview=comprehensive_overview,
         )
-        plt.savefig(f"specific-ai-plots/SpecificAI-{key}{file_suffix}.pdf")
+        plt.savefig(f"specific-ai-plots/SpecificAI-{key}.pdf")
         plt.close()
