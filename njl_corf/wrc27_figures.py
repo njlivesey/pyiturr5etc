@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass
 from typing import Optional, Callable
+import functools
 
 import matplotlib
 import matplotlib.font_manager
@@ -27,19 +28,39 @@ def set_nas_graphic_style():
     matplotlib.rcParams["ps.fonttype"] = 42
 
 
-# pylint: disable-next=unused-argument
-def major_frequency_formatter(x, pos):
-    """A nice tick formatter for frequency"""
-    if x < 1e3:
-        return f"{x:.3g} Hz"
-    elif x < 1e6:
-        return f"{x / 1e3:.3g} kHz"
-    elif x < 1e9:
-        return f"{x / 1e6:.3g} MHz"
-    elif x < 1e12:
-        return f"{x / 1e9:.3g} GHz"
+def discern_ideal_unit(f: pint.Quantity | np.float64) -> pint.Unit:
+    """Return the appropriate unit to pick"""
+    if isinstance(f, pint.Quantity):
+        f = f.to(ureg.Hz).magnitude
+    if f < 1e3:
+        return ureg.Hz
+    if f < 1e6:
+        return ureg.kHz
+    if f < 1e9:
+        return ureg.MHz
+    if f < 1e12:
+        return ureg.GHz
     else:
-        return f"{x / 1e12:.3g} THz"
+        return ureg.THz
+
+
+# pylint: disable-next=unused-argument
+def major_frequency_formatter(
+    x,
+    pos,
+    force_unit: Optional[pint.Unit] = None,
+    suppress_unit: Optional[bool] = False,
+):
+    """A nice tick formatter for frequency"""
+    if force_unit is None:
+        unit = discern_ideal_unit(x)
+    else:
+        unit = force_unit
+    x = (x * ureg.Hz).to(unit)
+    if not suppress_unit:
+        return f"{x:.4g~}"
+    else:
+        return f"{x.magnitude:.4g}"
 
 
 # pylint: disable-next=unused-argument
@@ -55,6 +76,7 @@ def setup_frequency_axis(
     add_daylight: Optional[bool] = False,
     log_axis: Optional[bool] = None,
     daylight_factor: Optional[float] = None,
+    put_units_on_labels: Optional[bool] = False,
 ):
     """Configure the frequency axis
 
@@ -72,6 +94,8 @@ def setup_frequency_axis(
         Chose log vs. linear axis
     daylight_factor : float, optional
         Amount of daylight to add
+    put_units_on_labels : bool, optional
+        If set, put the units on the labels (otherwise in a x-axis label)
     """
     # Work out whether we want to have a logarithmic axis or not.
     orders = frequency_range[1] / frequency_range[0]
@@ -116,28 +140,39 @@ def setup_frequency_axis(
             for x_tick in x_ticks
             if x_tick >= frequency_range[0] and x_tick <= frequency_range[1]
         ]
-        x_tick_labels = [f"{f:.0f~H}" for f in x_ticks]
-        ax.set_xticks(x_ticks, labels=x_tick_labels)
         # Add thin vertical lines at major tick lines
         for f_line in x_ticks:
             # Skip if we're right at the left/right edge (not the confusing meaning of "in"
             # below, it's the range as a list, not a true range.
             if f_line not in frequency_range:
                 ax.axvline(f_line, color="grey", linewidth=0.5)
-    else:
-        # Create a formatter, note we need to apply to both major and minor ticks with a
-        # log axis for it to take effect.
+    # Create a formatter, note we need to apply to both major and minor ticks with a
+    # log axis for it to take effect.
+    if put_units_on_labels:
         ax.xaxis.set_major_formatter(FuncFormatter(major_frequency_formatter))
+        # Suppress the x-axis label
+        ax.set_xlabel("")
+    else:
+        # Work out what unit we're after, base it on the center frequency
         if log_axis:
-            ax.xaxis.set_minor_formatter(FuncFormatter(minor_frequency_formatter))
+            center_frequency = np.sqrt(frequency_range[0] * frequency_range[1])
         else:
-            # For linear axes, the number of ticks could be reduced
-            pass
-            # ax.xaxis.set_major_locator(MaxNLocator(prune="both", nbins=4))
+            center_frequency = 0.5 * (frequency_range[0] + frequency_range[1])
+        unit = discern_ideal_unit(center_frequency)
+        ax.xaxis.set_major_formatter(
+            FuncFormatter(
+                functools.partial(
+                    major_frequency_formatter,
+                    force_unit=unit,
+                    suppress_unit=True,
+                )
+            )
+        )
+        ax.set_xlabel(f"Frequency / {unit:~}")
+    if log_axis:
+        ax.xaxis.set_minor_formatter(FuncFormatter(minor_frequency_formatter))
     # Have the tickmarks point outwards
     ax.tick_params(axis="x", which="both", direction="out")
-    # Suppress the x-axis label
-    ax.set_xlabel("")
     return log_axis
 
 
@@ -403,6 +438,7 @@ def wrc27_overview_figure(
         ax=ax,
         frequency_range=frequency_range,
         decadal_ticks=True,
+        put_units_on_labels=True,
     )
     # -------------------------------- y-axis
     y_range = [len(ai_info) - 0.5, -0.5]
@@ -493,6 +529,7 @@ def wrc27_ai_figure(
     log_axis: Optional[bool] = False,
     include_srs: Optional[bool] = False,
     minimum_bandwidth_points: Optional[float] = None,
+    put_units_on_labels: Optional[bool] = False,
 ):
     """Figure reviewing WRC agenda items and associated bands
 
@@ -515,6 +552,8 @@ def wrc27_ai_figure(
         If set, include the SRS entries.
     minimum_bandwidth_points : float, optional
         If bar is narrower than this, make it wider
+    put_units_on_labels : float, optional
+        If set, put units on frequency labels
     """
     # Read the allocation tables if not supplied
     if allocation_tables is None:
@@ -628,6 +667,7 @@ def wrc27_ai_figure(
         frequency_range=frequency_range_shown_pre_daylight,
         add_daylight=add_daylight,
         log_axis=log_axis,
+        put_units_on_labels=put_units_on_labels,
     )
     # -------------------------------- Actual figure
     # OK, loop over the agenda items
@@ -695,7 +735,7 @@ def wrc27_ai_figure(
     # Take a stab at the figure size
     figure_width_inches = 10.6 / 2.54
     bar_area_height_inches = len(y_labels) * row_size_inches
-    notional_extra_height_inches = 0.3533
+    notional_extra_height_inches = 0.3533 + 0.18 * (not put_units_on_labels)
     initial_height = bar_area_height_inches + notional_extra_height_inches
     fig.set_size_inches(
         figure_width_inches, bar_area_height_inches + notional_extra_height_inches
@@ -721,6 +761,7 @@ class AIPlotConfiguration:
 
     ai: str | list[str]
     log_axis: Optional[bool] = None
+    put_units_on_labels: Optional[bool] = False
     frequency_range: Optional[list[pint.Quantity]] = None
 
 
@@ -730,17 +771,35 @@ def all_individual_figures(
     """Generate all the figures for the agenda items"""
     # Get the agenda items
     ai_info = wrc27_views.get_ai_info(grouped=True)
-    # Make a bunch of plots for the WRC-27 items
+    # Setup a placeholder for the configurations
     plot_configurations: dict[AIPlotConfiguration] = {}
-    solo_wrc31_items = [
-        "WRC-31 AI-2.3",
-        "WRC-31 AI-2.4",
-        "WRC-31 AI-2.8",
-        "WRC-31 AI-2.14",
-    ]
-    for key, item in ai_info.items():
-        if key.startswith("WRC-27") or key in solo_wrc31_items:
-            plot_configurations[key] = AIPlotConfiguration(key)
+    # Make a bunch of plots for the WRC-27 items
+    # fmt: off
+    plot_configurations["WRC-27 AI-1.1"] = AIPlotConfiguration("WRC-27 AI-1.1", put_units_on_labels=True)
+    plot_configurations["WRC-27 AI-1.2"] = AIPlotConfiguration("WRC-27 AI-1.2")
+    plot_configurations["WRC-27 AI-1.3"] = AIPlotConfiguration("WRC-27 AI-1.3")
+    plot_configurations["WRC-27 AI-1.4"] = AIPlotConfiguration("WRC-27 AI-1.4")
+    plot_configurations["WRC-27 AI-1.5"] = AIPlotConfiguration("WRC-27 AI-1.5")
+    plot_configurations["WRC-27 AI-1.6"] = AIPlotConfiguration("WRC-27 AI-1.6")
+    plot_configurations["WRC-27 AI-1.7"] = AIPlotConfiguration("WRC-27 AI-1.7")
+    plot_configurations["WRC-27 AI-1.8"] = AIPlotConfiguration("WRC-27 AI-1.8")
+    plot_configurations["WRC-27 AI-1.9"] = AIPlotConfiguration("WRC-27 AI-1.9", log_axis=False)
+    plot_configurations["WRC-27 AI-1.10"] = AIPlotConfiguration("WRC-27 AI-1.10")
+    plot_configurations["WRC-27 AI-1.11"] = AIPlotConfiguration("WRC-27 AI-1.11")
+    plot_configurations["WRC-27 AI-1.12"] = AIPlotConfiguration("WRC-27 AI-1.12")
+    plot_configurations["WRC-27 AI-1.13"] = AIPlotConfiguration("WRC-27 AI-1.13")
+    plot_configurations["WRC-27 AI-1.14"] = AIPlotConfiguration("WRC-27 AI-1.14")
+    plot_configurations["WRC-27 AI-1.15"] = AIPlotConfiguration("WRC-27 AI-1.15")
+    plot_configurations["WRC-27 AI-1.16"] = AIPlotConfiguration("WRC-27 AI-1.16")
+    plot_configurations["WRC-27 AI-1.17"] = AIPlotConfiguration("WRC-27 AI-1.17", log_axis=False)
+    plot_configurations["WRC-27 AI-1.18"] = AIPlotConfiguration("WRC-27 AI-1.18")
+    plot_configurations["WRC-27 AI-1.19"] = AIPlotConfiguration("WRC-27 AI-1.19")
+    # Now the simple WRC-31 ones
+    plot_configurations["WRC-31 AI-2.3"] = AIPlotConfiguration("WRC-31 AI-2.3")
+    plot_configurations["WRC-31 AI-2.4"] = AIPlotConfiguration("WRC-31 AI-2.4")
+    plot_configurations["WRC-31 AI-2.8"] = AIPlotConfiguration("WRC-31 AI-2.8")
+    plot_configurations["WRC-31 AI-2.14"] = AIPlotConfiguration("WRC-31 AI-2.14")
+    # fmt: on
     # Now do those that are in combination
     plot_configurations["WRC-31 AIs-2.1-2.2-2.6"] = AIPlotConfiguration(
         ai=[
@@ -761,6 +820,7 @@ def all_individual_figures(
             "WRC-31 AI-2.13",
         ]
     )
+    # Now go through and do them all
     for key, item in plot_configurations.items():
         print(key)
         wrc27_ai_figure(
