@@ -305,18 +305,22 @@ def views_plot(
     if isinstance(frequency_margin, pint.Quantity):
         pass
     elif frequency_margin > 0:
-        formal_bandwidth = frequency_range.stop - frequency_range.start
+        formal_bandwidth = (
+            frequency_range.frequency_band.stop - frequency_range.frequency_band.start
+        )
         frequency_margin = formal_bandwidth * frequency_margin
     else:
-        center_frequency = 0.5 * (frequency_range.start + frequency_range.stop)
+        center_frequency = 0.5 * (
+            frequency_range.frequency_band.start + frequency_range.frequency_band.stop
+        )
         frequency_margin = center_frequency * abs(frequency_margin)
     # Now apply this margin.  Ensure we don't go below zero Hz
     examined_frequency_range = slice(
         max(
-            frequency_range.start - frequency_margin,
-            0.0 * frequency_range.start.units,
+            frequency_range.frequency_band.start - frequency_margin,
+            0.0 * frequency_range.frequency_band.start.units,
         ),
-        frequency_range.stop + frequency_margin,
+        frequency_range.frequency_band.stop + frequency_margin,
     )
 
     # ----------------------------------------------- Allocations
@@ -351,7 +355,7 @@ def views_plot(
                     # secondary etc.,)
                     x_bounds = (
                         pint.Quantity.from_sequence(band.bounds)
-                        .to(frequency_range.start.units)
+                        .to(frequency_range.frequency_band.start.units)
                         .magnitude
                     )
                     thickness = 0.2
@@ -390,7 +394,7 @@ def views_plot(
         for channel in channels:
             x_bounds = (
                 pint.Quantity.from_sequence([channel.bounds.start, channel.bounds.stop])
-                .to(frequency_range.start.units)
+                .to(frequency_range.frequency_band.start.units)
                 .magnitude
             )
             if x_bounds[1] > x_bounds[0] + 1e-6:
@@ -418,7 +422,7 @@ def views_plot(
         if band.has_footnote("5.340"):
             x_bounds = (
                 pint.Quantity.from_sequence(band.bounds)
-                .to(frequency_range.start.units)
+                .to(frequency_range.frequency_band.start.units)
                 .magnitude
             )
             y_bounds = np.array(ax.get_ylim())

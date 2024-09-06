@@ -589,11 +589,8 @@ def wrc27_ai_figure(
         ),
     }
     # Identify the bars for each agenda item
-    bar_buffers = {}
+    bar_buffers = {row_key: pyfcctab.BandCollection() for row_key in science_rows}
     for ai_key, this_ai_info in ai_info.items():
-        bar_buffers[ai_key] = {
-            row_key: pyfcctab.BandCollection() for row_key in science_rows
-        }
         for ai_band in this_ai_info.frequency_bands:
             for row_key, row_info in science_rows.items():
                 relevant_bands = allocation_tables.itu.get_bands(
@@ -602,16 +599,9 @@ def wrc27_ai_figure(
                     condition=row_info.construct_condition(),
                     recursively_adjacent=True,
                 )
-                bar_buffers[ai_key][row_key] = bar_buffers[ai_key][row_key].union(
+                bar_buffers[row_key] = bar_buffers[row_key].union(
                     pyfcctab.BandCollection(relevant_bands)
                 )
-    if "early" in debug:
-        print("=" * 30 + " Early")
-        for ai_key in ai_info:
-            for row_key in science_rows:
-                print("-" * 30, ai_key, row_key)
-                for b in bar_buffers[ai_key][row_key]:
-                    print(b.compact_str())
     # Set font defaults etc.
     set_nas_graphic_style()
     # Now embark upon the figure, set up the figure itself, start with a default width
@@ -625,14 +615,14 @@ def wrc27_ai_figure(
         f_maxs_ai = []
         f_mins_science = []
         f_maxs_science = []
+        # Gather mins/maxes for the bands in each AI
         for ai_key, this_ai_info in ai_info.items():
-            # Gather mins/maxes for the bands in this AI
             f_mins_ai += [band.start for band in this_ai_info.frequency_bands]
             f_maxs_ai += [band.stop for band in this_ai_info.frequency_bands]
-            # Now do the same for any relevant science bands
-            for science_bands in bar_buffers[ai_key].values():
-                f_mins_science += [band.bounds[0] for band in science_bands]
-                f_maxs_science += [band.bounds[1] for band in science_bands]
+        # Now do the same for any relevant science bands
+        for science_bands in bar_buffers.values():
+            f_mins_science += [band.bounds[0] for band in science_bands]
+            f_maxs_science += [band.bounds[1] for band in science_bands]
         # Get the full range for both the AI bands and the science bands
         if len(f_mins_ai) != 0:
             frequency_range_shown_pre_daylight = [min(f_mins_ai), max(f_maxs_ai)]
@@ -643,12 +633,6 @@ def wrc27_ai_figure(
                 min(f_mins_science + f_mins_ai),
                 max(f_maxs_science + f_maxs_ai),
             ]
-            # Make it ever so slightly wider to get round some rounding issues.
-            # epsilon = 1e-5
-            # frequency_range_full = [
-            #     frequency_range_full[0] * (1.0 - epsilon),
-            #     frequency_range_full[1] * (1.0 + epsilon),
-            # ]
         else:
             frequency_range_full = frequency_range_shown_pre_daylight
         add_daylight = True
@@ -668,21 +652,16 @@ def wrc27_ai_figure(
     # consideration, we're going to kind of throw all that away, and just get all the
     # bands of interest in the range, but only if we identified a case for their
     # inclusion (by virtue of being adjacent or overlapping) before.
-    new_bar_buffers = {}
-    for ai_key in ai_info:
-        new_bar_buffers[ai_key] = {
-            row_key: pyfcctab.BandCollection() for row_key in science_rows
-        }
-        for row_key, row_info in science_rows.items():
-            if bar_buffers[ai_key][row_key] or include_all_encompassed_allocations:
-                new_bar_buffers[ai_key][row_key] = allocation_tables.itu.get_bands(
-                    frequency_range_full[0],
-                    frequency_range_full[1],
-                    condition=row_info.construct_condition(),
-                    recursively_adjacent=True,
-                )
-    for ai_key in ai_info:
-        bar_buffers[ai_key] = new_bar_buffers[ai_key]
+    new_bar_buffers = {row_key: pyfcctab.BandCollection() for row_key in science_rows}
+    for row_key, row_info in science_rows.items():
+        if bar_buffers[row_key] or include_all_encompassed_allocations:
+            new_bar_buffers[row_key] = allocation_tables.itu.get_bands(
+                frequency_range_full[0],
+                frequency_range_full[1],
+                condition=row_info.construct_condition(),
+                recursively_adjacent=True,
+            )
+    bar_buffers = new_bar_buffers
     # -------------------------------- Actual figure
     # OK, loop over the agenda items
     y_labels = []
@@ -690,9 +669,9 @@ def wrc27_ai_figure(
         # If there are no specific bands for this AI, then we're done at this point
         if ai_info is None:
             continue
-        # If we're not on the first one, then put a dividing line in
-        if len(y_labels) > 0:
-            ax.axhline(len(y_labels) - 0.5, linewidth=1.0, color="black")
+        # # If we're not on the first one, then put a dividing line in
+        # if len(y_labels) > 0:
+        #     ax.axhline(len(y_labels) - 0.5, linewidth=1.0, color="black")
         for ai_band in this_ai_info.frequency_bands:
             # Draw this particular band
             show_band_for_individual(
@@ -705,32 +684,33 @@ def wrc27_ai_figure(
                 edgecolor="none",
             )
         y_labels.append(r"\textbf{" + ai_key + r"}")
-        for row_key, science_bands in bar_buffers[ai_key].items():
-            if len(science_bands) == 0:
-                continue
-            row_info = science_rows[row_key]
-            for ai_band in science_bands:
-                # Work out what the status of this band is
-                status = 3
-                for allocation in ai_band.allocations:
-                    if row_info.allocation is None:
-                        status = 0
-                    if allocation.matches(row_info.allocation):
-                        if allocation.primary:
-                            status = min(status, 0)
-                        if allocation.secondary:
-                            status = min(status, 1)
-                        if allocation.footnote_mention:
-                            status = min(status, 2)
-                show_band_for_individual(
-                    ai_band.bounds[0],
-                    ai_band.bounds[1],
-                    row=len(y_labels),
-                    ax=ax,
-                    minimum_bandwidth_points=minimum_bandwidth_points,
-                    facecolor=row_info.color[status],
-                )
-            y_labels.append(row_key)
+    # Now loop over the science bands
+    for row_key, science_bands in bar_buffers.items():
+        if len(science_bands) == 0:
+            continue
+        row_info = science_rows[row_key]
+        for science_band in science_bands:
+            # Work out what the status of this band is
+            status = 3
+            for allocation in science_band.allocations:
+                if row_info.allocation is None:
+                    status = 0
+                if allocation.matches(row_info.allocation):
+                    if allocation.primary:
+                        status = min(status, 0)
+                    if allocation.secondary:
+                        status = min(status, 1)
+                    if allocation.footnote_mention:
+                        status = min(status, 2)
+            show_band_for_individual(
+                science_band.bounds[0],
+                science_band.bounds[1],
+                row=len(y_labels),
+                ax=ax,
+                minimum_bandwidth_points=minimum_bandwidth_points,
+                facecolor=row_info.color[status],
+            )
+        y_labels.append(row_key)
     # -------------------------------- y-axis
     y_range = [len(y_labels) - 0.5, -0.5]
     ax.set_ylim(y_range[0], y_range[1])
