@@ -76,14 +76,19 @@ class Allocation:
         footnote_definitions: dict[str] = None,
     ):
         """String representation of Allocation, possibly with HTML/tooltips"""
+        suffix = ""
         if self.primary:
             result = self.service.name.upper()
         elif self.secondary:
             result = self.service.name.capitalize()
+        elif self.footnote_mention:
+            result = self.service.name.lower()
+            suffix = " (by footnote)"
         else:
-            result = self.service.name.lower() + " (by footnote)"
+            raise ValueError("Confused by this allocation")
         if self.modifiers and not omit_modifiers:
             result += " " + " ".join([f"({m})" for m in self.modifiers])
+        result += suffix
         if self.footnotes and not omit_footnotes:
             if html:
                 result = (

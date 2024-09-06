@@ -309,7 +309,7 @@ def get_ai_info(grouped: bool = False) -> dict[AgendaItem]:
             soundbyte=">275 GHz",
         ),
         "WRC-31 AI-2.2": AgendaItem(
-            frequency_bands=[slice(275.0 * ureg.GHz, 325.0 * ureg.GHz)],
+            frequency_bands=None,
             soundbyte="WPT",
         ),
         "WRC-31 AI-2.3": AgendaItem(

@@ -386,6 +386,9 @@ def wrc27_overview_figure(
     minimum_bandwidth_points : float, optional
         If bar is narrower than this, make it wider
     """
+    # Pick a wider minimum bandwitdh for this figure
+    if minimum_bandwidth_points is None:
+        minimum_bandwidth_points = 1.0
     # Read the allocation tables if not supplied
     if allocation_tables is None:
         allocation_tables = pyfcctab.read()
@@ -650,15 +653,16 @@ def wrc27_ai_figure(
     # OK, despite having gone to the lengths of carefully identifying the science (and
     # 5.340) bands that overlap or are directly adjacent to the bands under
     # consideration, we're going to kind of throw all that away, and just get all the
-    # bands of interest in the range.
+    # bands of interest in the range, but only if we identified a case for inclusion before.
     new_bar_buffers = {}
     for row_key, row_info in science_rows.items():
-        new_bar_buffers[row_key] = allocation_tables.itu.get_bands(
-            frequency_range_full[0],
-            frequency_range_full[1],
-            condition=row_info.construct_condition(),
-            recursively_adjacent=True,
-        )
+        if bar_buffers[ai_key][row_key]:
+            new_bar_buffers[row_key] = allocation_tables.itu.get_bands(
+                frequency_range_full[0],
+                frequency_range_full[1],
+                condition=row_info.construct_condition(),
+                recursively_adjacent=True,
+            )
     for ai_key in ai_info:
         bar_buffers[ai_key] = new_bar_buffers
     # Setup the frequency axis, labels, etc.
@@ -831,4 +835,7 @@ def all_individual_figures(
             no_show=True,
         )
         plt.savefig(f"specific-ai-plots/SpecificAI-{key}.pdf")
+        plt.savefig(
+            f"specific-ai-plots/SpecificAI-{key}.png",
+        )
         plt.close()
