@@ -162,7 +162,11 @@ class Allocation:
         if case_sensitive:
             return fnmatch.fnmatchcase(self_str, line)
         else:
-            return fnmatch.fnmatchcase(self_str.lower(), line.lower())
+            try:
+                return fnmatch.fnmatchcase(self_str.lower(), line.lower())
+            except AttributeError:
+                # One of the arguments was not a string.
+                return False
 
     @classmethod
     def parse(cls, line):

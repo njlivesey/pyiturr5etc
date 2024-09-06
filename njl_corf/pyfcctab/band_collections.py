@@ -27,7 +27,7 @@ class BandCollection:
             for b in a:
                 self.append(b)
 
-    def __getitem__(self, key):
+    def __getitem__(self, key) -> list[Band]:
         """Get a specific item/range from the collection"""
         # Something of a wrapper around IntervalTree.__getitem__.
         # However, while the former returns a set of Intervals, we
