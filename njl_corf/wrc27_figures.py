@@ -10,7 +10,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pint
 from matplotlib.patches import Rectangle
-from matplotlib.ticker import FuncFormatter, ScalarFormatter, NullFormatter
+from matplotlib.ticker import FuncFormatter, NullFormatter
+from matplotlib.transforms import blended_transform_factory
 
 from njl_corf import pyfcctab, ureg, wrc27_views
 
@@ -50,12 +51,11 @@ def major_frequency_formatter_with_units(
 ):
     """A nice tick formatter for frequency"""
     assert not isinstance(x, pint.Quantity), "Got a pint Quantity for x"
-    print(f"Before: {x}, {pos}, {supplied_unit}")
     if supplied_unit is None:
         # It's up to us to identifty the unit, in which case, we have to assume that we
         # were given the unit in Hz.
         supplied_unit = discern_ideal_unit(x)
-    print(f"After: {x}, {pos}, {supplied_unit}")
+        x = (x * ureg.Hz).to(supplied_unit).magnitude
     x = x * supplied_unit
     return f"{x:.4g~}"
 
@@ -63,9 +63,10 @@ def major_frequency_formatter_with_units(
 def generic_log_formatter(x, pos):
     """A simple formatter for log ticks"""
     assert not isinstance(x, pint.Quantity), "Got a pint Quantity for x"
-    # if not np.isclose(np.round(x), x):
-    #     raise ValueError("Tick not an integer")
-    return f"{x}"
+    if not np.isclose(np.round(x), x):
+        return f"{x}"
+    else:
+        return f"{int(round(x))}"
 
 
 # pylint: disable-next=unused-argument
@@ -107,6 +108,9 @@ def setup_frequency_axis(
     """
     # Have the tickmarks point outwards
     ax.tick_params(axis="x", which="both", direction="out")
+    # Sort out xticks
+    if isinstance(xticks, list):
+        xticks = pint.Quantity.from_list(xticks)
     # Make the frequency range a little larger
     if add_daylight:
         if daylight_factor is None:
@@ -127,65 +131,37 @@ def setup_frequency_axis(
     # type of axis)
     if log_axis:
         ax.set_xscale("log")
+        orders = np.log10(frequency_range[1] / frequency_range[0])
         center_frequency = np.sqrt(frequency_range[0] * frequency_range[1])
     else:
         center_frequency = 0.5 * (frequency_range[0] + frequency_range[1])
-    # Work out what unit most optimally describes the frequency axis (kHz, MHz, etc.)
-    # Do things for if we're having decadal ticks
-    if decadal_ticks:
-        raise NotImplementedError("This is old code that should go")
+        orders = 0
+    # If the plot linear or over a narrow logarithmic range, identify a natural unit
+    # (MHz, GHz, etc.)
+    if not log_axis or orders < 2:
+        typical_unit = discern_ideal_unit(center_frequency)
         # Set the frequency axis to have this range in this unit
-        ax.set_xlim(*[f.to(ureg.Hz) for f in frequency_range])
-        # The user specifically asked for dicks every decade. Set typical_unit to None
-        # to get the tick formatter to pick its own.
-        typical_unit = None
-        #
-        # Do them as a list of pint Quantities so each gets an appropriate unit
-        if xticks is not None:
-            raise ValueError("Cannot supply xticks and set decadal_ticks")
-        xticks = [
-            1.0 * ureg.kHz,
-            10.0 * ureg.kHz,
-            100.0 * ureg.kHz,
-            1.0 * ureg.MHz,
-            10.0 * ureg.MHz,
-            100.0 * ureg.MHz,
-            1.0 * ureg.GHz,
-            10.0 * ureg.GHz,
-            100.0 * ureg.GHz,
-            1.0 * ureg.THz,
-        ]
-        # Subset them to those that are in our range of interest
-        xticks = [
-            xtick.to(ureg.Hz)
-            for xtick in xticks
-            if xtick >= frequency_range[0] and xtick <= frequency_range[1]
-        ]
-        # Add thin vertical lines at major tick lines
-        for f_line in xticks:
-            # Skip if we're right at the left/right edge (not the confusing meaning of "in"
-            # below, it's the range as a list, not a true range.
-            print(f_line)
-            if f_line not in frequency_range:
-                ax.axvline(f_line, color="grey", linewidth=0.5)
+        ax.set_xlim(*[f.to(typical_unit) for f in frequency_range])
     else:
-        if not log_axis or orders < 2:
-            typical_unit = discern_ideal_unit(center_frequency)
-            # Set the frequency axis to have this range in this unit
-            ax.set_xlim(*[f.to(typical_unit) for f in frequency_range])
-        else:
-            ax.set_xlim(*[f.to(ureg.Hz) for f in frequency_range])
-            typical_unit = None
-        # Otherwise, we're not doing decadal ticks, either pick our own or use the user
-        # supplied list.  If the latter, put them in appropriate units
-        if xticks is not None and typical_unit is not None:
-            # The user suppled specific ticks, convert them to the appropriate value.
-            xticks = xticks.to(typical_unit)
+        # Otherwise note that we're working over a large logarithmic range by setting
+        # typical_unit to None and force range to Hertz.
+        print("Bashing typical unit A")
+        ax.set_xlim(*[f.to(ureg.Hz) for f in frequency_range])
+        if xticks is not None:
+            xticks = [f.to(ureg.Hz) for f in xticks]
+        typical_unit = None
+    # Otherwise, we're not doing decadal ticks, either pick our own or use the user
+    # supplied list.  If the latter, put them in appropriate units
+    if xticks is not None and typical_unit is not None:
+        # The user suppled specific ticks, convert them to the appropriate value.
+        xticks = xticks.to(typical_unit)
     # Work out whether the labels have units on them, deal with that if so
     if put_units_on_labels:
         # Suppress the x-axis label
         ax.set_xlabel("")
-        # Reset the x axis range to be in hertz
+        # Reset the x axis range to be in hertz, and note that there is no "typical unit"
+        if xticks is not None:
+            xticks = [f.to(ureg.Hz) for f in xticks]
         ax.set_xlim(*[f.to(ureg.Hz) for f in frequency_range])
         # Create a tick formatter, note we need to apply to both major and minor ticks
         # with a log axis for it to take effect.
@@ -218,7 +194,6 @@ def setup_frequency_axis(
         # Now pick the specific ticks (do this last, because setting the formatter resets this)
         if xticks is not None:
             ax.set_xticks(xticks)
-
     return log_axis
 
 
@@ -473,6 +448,9 @@ def wrc27_overview_figure(
         put_units_on_labels=True,
         log_axis=True,
     )
+    # Put grey lines at major ticks
+    for x in list(ax.get_xticks())[1:-1]:
+        ax.axvline(x, color="lightgrey", zorder=0, linewidth=0.5)
     # -------------------------------- y-axis
     y_range = [len(ai_info) - 0.5, -0.5]
     ax.set_ylim(y_range[0], y_range[1])
@@ -563,9 +541,8 @@ def wrc27_ai_figure(
     include_srs: Optional[bool] = False,
     minimum_bandwidth_points: Optional[float] = None,
     put_units_on_labels: Optional[bool] = False,
-    include_all_encompassed_allocations: Optional[bool] = False,
+    include_all_encompassed_allocations: Optional[bool] = True,
     xticks: Optional[pint.Quantity] = None,
-    debug: Optional[str] = None,
 ):
     """Figure reviewing WRC agenda items and associated bands
 
@@ -591,8 +568,6 @@ def wrc27_ai_figure(
     put_units_on_labels : float, optional
         If set, put units on frequency labels
     """
-    if debug is None:
-        debug = ""
     # Read the allocation tables if not supplied
     if allocation_tables is None:
         allocation_tables = pyfcctab.read()
@@ -773,6 +748,38 @@ def wrc27_ai_figure(
     ax.yaxis.set_minor_locator(plt.NullLocator())
     # Suppress the y ticks.
     ax.tick_params(axis="y", which="both", left=False, right=False)
+    # --------------------------------- Legend
+    # Combine figure transform (for x-axis) and data transform (for y-axis)
+    legend_transform = blended_transform_factory(fig.transFigure, ax.transData)
+    # Rectangle parameters
+    box_width = 0.05
+    box_height = 1.0
+    box_x = np.arange(3) * box_width
+    box_y = np.arange(3) * box_height + len(y_labels) - 0.25
+    i_color = [[0, 1, 3], [8, 9, 11]]
+    for i_service in range(2):
+        for i_type in range(3):
+            rect = Rectangle(
+                (box_x[i_type], box_y[i_service]),
+                width=box_width * 0.9,
+                height=box_height * 0.8,
+                transform=legend_transform,
+                facecolor=color_map[i_color[i_service][i_type]],
+                edgecolor="none",
+                clip_on=False,
+            )
+            fig.patches.append(rect)
+    # Now some labels
+    labels = ["1", "2", "Fn"]
+    for i_label, label in enumerate(labels):
+        fig.text(
+            box_x[i_label] + (0.5 * box_width) * 0.9,
+            box_y[2],
+            label,
+            ha="center",
+            va="top",
+            transform=legend_transform,
+        )
     # --------------------------------- Sizing
     if not ax_supplied:
         # Now work out the size.
@@ -808,12 +815,13 @@ class AIPlotConfiguration:
     log_axis: Optional[bool] = None
     put_units_on_labels: Optional[bool] = False
     frequency_range: Optional[list[pint.Quantity]] = None
-    include_all_encompassed_allocations: Optional[bool] = False
+    include_all_encompassed_allocations: Optional[bool] = True
     xticks: Optional[pint.Quantity] = None
 
 
 def all_individual_figures(
     allocation_tables: Optional[pyfcctab.FCCTables] = None,
+    only: Optional[list[str]] = None,
 ):
     """Generate all the figures for the agenda items"""
     # Get the agenda items
@@ -821,24 +829,52 @@ def all_individual_figures(
     # Setup a placeholder for the configurations
     plot_configurations: dict[AIPlotConfiguration] = {}
     # Make a bunch of plots for the WRC-27 items
-    # fmt: off
+    # fmt: on
     plot_configurations["WRC-27 AI-1.1"] = AIPlotConfiguration("WRC-27 AI-1.1")
     plot_configurations["WRC-27 AI-1.2"] = AIPlotConfiguration("WRC-27 AI-1.2")
     plot_configurations["WRC-27 AI-1.3"] = AIPlotConfiguration("WRC-27 AI-1.3")
     plot_configurations["WRC-27 AI-1.4"] = AIPlotConfiguration("WRC-27 AI-1.4")
     plot_configurations["WRC-27 AI-1.5"] = AIPlotConfiguration("WRC-27 AI-1.5")
     plot_configurations["WRC-27 AI-1.6"] = AIPlotConfiguration("WRC-27 AI-1.6")
-    plot_configurations["WRC-27 AI-1.7"] = AIPlotConfiguration("WRC-27 AI-1.7", put_units_on_labels=True, log_axis=True)
-    plot_configurations["WRC-27 AI-1.8"] = AIPlotConfiguration("WRC-27 AI-1.8", log_axis=True)
-    plot_configurations["WRC-27 AI-1.9"] = AIPlotConfiguration("WRC-27 AI-1.9", log_axis=True)
+    plot_configurations["WRC-27 AI-1.7"] = AIPlotConfiguration(
+        "WRC-27 AI-1.7",
+        # put_units_on_labels=True,
+        # log_axis=True,
+        # xticks=[5 * ureg.GHz, 10 * ureg.GHz, 15 * ureg.GHz, 20 * ureg.GHz],
+    )
+    plot_configurations["WRC-27 AI-1.8"] = AIPlotConfiguration(
+        "WRC-27 AI-1.8",
+        # log_axis=True,
+        # xticks=[200 * ureg.GHz, 300 * ureg.GHz, 500 * ureg.GHz, 700 * ureg.GHz],
+        # put_units_on_labels=True,
+    )
+    plot_configurations["WRC-27 AI-1.9"] = AIPlotConfiguration(
+        "WRC-27 AI-1.9",
+        log_axis=True,
+        xticks=[3 * ureg.MHz, 6 * ureg.MHz, 10 * ureg.MHz, 20 * ureg.MHz],
+    )
     plot_configurations["WRC-27 AI-1.10"] = AIPlotConfiguration("WRC-27 AI-1.10")
     plot_configurations["WRC-27 AI-1.11"] = AIPlotConfiguration("WRC-27 AI-1.11")
     plot_configurations["WRC-27 AI-1.12"] = AIPlotConfiguration("WRC-27 AI-1.12")
-    plot_configurations["WRC-27 AI-1.13"] = AIPlotConfiguration("WRC-27 AI-1.13", log_axis=True)
+    plot_configurations["WRC-27 AI-1.13"] = AIPlotConfiguration(
+        "WRC-27 AI-1.13",
+        # log_axis=True,
+    )
     plot_configurations["WRC-27 AI-1.14"] = AIPlotConfiguration("WRC-27 AI-1.14")
-    plot_configurations["WRC-27 AI-1.15"] = AIPlotConfiguration("WRC-27 AI-1.15", put_units_on_labels=True, log_axis=True)
-    plot_configurations["WRC-27 AI-1.16"] = AIPlotConfiguration("WRC-27 AI-1.16", put_units_on_labels=True, log_axis=True)
-    plot_configurations["WRC-27 AI-1.17"] = AIPlotConfiguration("WRC-27 AI-1.17", put_units_on_labels=True, log_axis=True)
+    plot_configurations["WRC-27 AI-1.15"] = AIPlotConfiguration(
+        "WRC-27 AI-1.15", put_units_on_labels=True, log_axis=True
+    )
+    plot_configurations["WRC-27 AI-1.16"] = AIPlotConfiguration(
+        "WRC-27 AI-1.16",
+        log_axis=True,
+        xticks=[10 * ureg.GHz, 30 * ureg.GHz, 60 * ureg.GHz, 100 * ureg.GHz],
+    )
+    plot_configurations["WRC-27 AI-1.17"] = AIPlotConfiguration(
+        "WRC-27 AI-1.17",
+        put_units_on_labels=True,
+        log_axis=True,
+        xticks=[30 * ureg.MHz, 100 * ureg.MHz, 300 * ureg.MHz, 600 * ureg.MHz],
+    )
     plot_configurations["WRC-27 AI-1.18"] = AIPlotConfiguration("WRC-27 AI-1.18")
     plot_configurations["WRC-27 AI-1.19"] = AIPlotConfiguration("WRC-27 AI-1.19")
     # Now the simple WRC-31 ones
@@ -872,6 +908,9 @@ def all_individual_figures(
     )
     # Now go through and do them all
     for key, item in plot_configurations.items():
+        if only:
+            if key not in only:
+                continue
         print(key)
         wrc27_ai_figure(
             allocation_tables=allocation_tables,
@@ -883,9 +922,17 @@ def all_individual_figures(
             no_show=True,
             xticks=item.xticks,
         )
-        plt.savefig(f"specific-ai-plots/SpecificAI-{key}.pdf")
+        plt.savefig(
+            f"specific-ai-plots/SpecificAI-{key}.pdf",
+            bbox_inches="tight",
+            pad_inches=2.0 / 72,
+        )
         plt.savefig(
             f"specific-ai-plots/SpecificAI-{key}.png",
             dpi=600,
+            bbox_inches="tight",
+            pad_inches=2.0 / 72,
         )
+        if only:
+            plt.show()
         plt.close()
