@@ -108,6 +108,7 @@ class AgendaItem(_AIKernel):
     """
 
     frequency_bands: list[range] = None
+    detailed_bands: Optional[list[range]] = None
 
     def __post_init__(self):
         """Tidy up after creation"""
@@ -143,6 +144,22 @@ class AgendaItemSubBand(_AIKernel):
 
 def get_ai_info(grouped: bool = False) -> dict[AgendaItem]:
     """Populate a dictionary detailing the bands in each AI"""
+    itu_r_m_1036_bands = [
+        slice(450 * ureg.MHz, 470 * ureg.MHz),
+        slice(470 * ureg.MHz, 960 * ureg.MHz),
+        slice(1_427 * ureg.MHz, 1_518 * ureg.MHz),
+        slice(1_710 * ureg.MHz, 2_200 * ureg.MHz),
+        slice(2_300 * ureg.MHz, 2_400 * ureg.MHz),
+        slice(2_500 * ureg.MHz, 2_690 * ureg.MHz),
+        slice(3_300 * ureg.MHz, 3_700 * ureg.MHz),
+        slice(4_800 * ureg.MHz, 4_990 * ureg.MHz),
+        slice(24.25 * ureg.GHz, 27.5 * ureg.GHz),
+        slice(37 * ureg.GHz, 43.5 * ureg.GHz),
+        slice(45.5 * ureg.GHz, 47 * ureg.GHz),
+        slice(47.2 * ureg.GHz, 48.2 * ureg.GHz),
+        slice(66 * ureg.GHz, 71 * ureg.GHz),
+    ]
+
     ai_info = {
         "WRC-27 AI-1.1": AgendaItem(
             frequency_bands=[
@@ -235,6 +252,7 @@ def get_ai_info(grouped: bool = False) -> dict[AgendaItem]:
         ),
         "WRC-27 AI-1.13": AgendaItem(
             frequency_bands=[slice(694 * ureg.MHz, 2.7 * ureg.GHz)],
+            detailed_bands=itu_r_m_1036_bands,
             soundbyte="MSS/IMT",
         ),
         "WRC-27 AI-1.14": AgendaItem(

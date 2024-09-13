@@ -698,20 +698,38 @@ def wrc27_ai_figure(
         # If there are no specific bands for this AI, then we're done at this point
         if ai_info is None:
             continue
-        # # If we're not on the first one, then put a dividing line in
-        # if len(y_labels) > 0:
-        #     ax.axhline(len(y_labels) - 0.5, linewidth=1.0, color="black")
-        for ai_band in this_ai_info.frequency_bands:
+        # Show either the frequency bands, or the detailed bands (if present) as solid boxes
+        if this_ai_info.detailed_bands is None:
+            solid_frequency_bands = this_ai_info.frequency_bands
+            facecolor = "dimgrey"
+        else:
+            solid_frequency_bands = this_ai_info.detailed_bands
+            facecolor = "lightgrey"
+        for ai_band in solid_frequency_bands:
             # Draw this particular band
             show_band_for_individual(
                 ai_band.start,
                 ai_band.stop,
                 row=len(y_labels),
-                facecolor="dimgrey",
+                facecolor=facecolor,
                 ax=ax,
                 minimum_bandwidth_points=minimum_bandwidth_points,
                 edgecolor="none",
             )
+        # If detailed bands are present, show the frequency bands as a hollow box
+        if this_ai_info.detailed_bands is not None:
+            for ai_band in this_ai_info.frequency_bands:
+                # Draw this particular band
+                show_band_for_individual(
+                    ai_band.start,
+                    ai_band.stop,
+                    row=len(y_labels),
+                    facecolor="none",
+                    edgecolor="dimgrey",
+                    ax=ax,
+                    minimum_bandwidth_points=minimum_bandwidth_points,
+                )
+
         y_labels.append(r"\textbf{" + ai_key + r"}")
     # Now loop over the science bands
     for row_key, science_bands in bar_buffers.items():
@@ -741,8 +759,10 @@ def wrc27_ai_figure(
             )
         y_labels.append(row_key)
     # -------------------------------- y-axis
+    # Note the y-axis is upside down to facilitate indexing etc.
     y_range = [len(y_labels) - 0.5, -0.5]
-    ax.set_ylim(y_range[0], y_range[1])
+    y_margin = 0.15
+    ax.set_ylim(y_range[0] + y_margin, y_range[1] - y_margin)
     y_tick_locations = np.arange(len(y_labels))
     ax.set_yticks(y_tick_locations, labels=y_labels)
     ax.yaxis.set_minor_locator(plt.NullLocator())
@@ -786,7 +806,7 @@ def wrc27_ai_figure(
         row_size_inches = 0.15
         # Take a stab at the figure size
         figure_width_inches = 10.6 / 2.54
-        bar_area_height_inches = len(y_labels) * row_size_inches
+        bar_area_height_inches = (len(y_labels) + 2 * y_margin) * row_size_inches
         notional_extra_height_inches = 0.3533 + 0.18 * (not put_units_on_labels)
         initial_height = bar_area_height_inches + notional_extra_height_inches
         fig.set_size_inches(
