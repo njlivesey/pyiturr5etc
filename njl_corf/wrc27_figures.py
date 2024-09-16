@@ -145,7 +145,6 @@ def setup_frequency_axis(
     else:
         # Otherwise note that we're working over a large logarithmic range by setting
         # typical_unit to None and force range to Hertz.
-        print("Bashing typical unit A")
         ax.set_xlim(*[f.to(ureg.Hz) for f in frequency_range])
         if xticks is not None:
             xticks = [f.to(ureg.Hz) for f in xticks]
@@ -235,39 +234,35 @@ def ensure_visible_bandwidth(
         raise ValueError(f"Unrecognized axis x-scale {ax.get_xscale()}") from exception
     # Work out the width of the axes in points (will be subject to minor changes, I
     # think, when final drawing takes place.)
-    ax_width_pt = 72.0 * fig.get_figwidth() * (ax.get_position().width)
-    # Compute the width in data coordinates
-    xlim = ax.get_xlim()
-    ax_width_data = xlim[1] - xlim[0]
-    if log_scale:
-        ax_width_data = np.log10(ax_width_data)
-    # Compute the scaling ratio
-    points_per_data = ax_width_pt / ax_width_data
-    # Convert start/end to Hz for now
-    start = start.to(ureg.Hz).magnitude
-    stop = stop.to(ureg.Hz).magnitude
-    # Compute the current width of the bar
-    if log_scale:
-        current_width_data = np.log10(stop) - np.log10(start)
-    else:
-        current_width_data = stop - start
-    # Compute the current width in points
-    current_width_points = current_width_data * points_per_data
+    ax_width_points = 72.0 * fig.get_figwidth() * (ax.get_position().width)
+    # Compute the width of the band in axes coordinates
+    x_unit = ax.xaxis.get_units()
+    current_width_points = 0.0
+    if x_unit is None:
+        raise ValueError("NO XUNIT")
+    for sign, x in zip([-1, 1], [start, stop]):
+        if x_unit is not None:
+            p_display = ax.transData.transform([x.to(x_unit).magnitude, 0])
+        else:
+            p_display = ax.transData.transform([x, 0])
+        p_axes = ax.transAxes.inverted().transform(p_display)
+        current_width_points += sign * p_axes[0] * ax_width_points
     # Work out if a correction is needed
     factor = minimum_bandwidth_points / current_width_points
-    # print(minimum_bandwidth_points, current_width_points)
     if factor > 1.0:
-        new_width = factor * current_width_data
-        if log_scale:
-            f_center = 0.5 * (np.log10(start) + np.log10(stop))
-        else:
+        if not log_scale:
             f_center = 0.5 * (start + stop)
-        start = f_center - 0.5 * new_width
-        stop = f_center + 0.5 * new_width
-        if log_scale:
-            start = 10.0**start
-            stop = 10.0**stop
-    return start * ureg.Hz, stop * ureg.Hz
+            start = f_center - factor * (f_center - start)
+            stop = f_center + factor * (stop - f_center)
+        else:
+            log_start = np.log10(start.to(x_unit).magnitude)
+            log_stop = np.log10(stop.to(x_unit).magnitude)
+            log_center = 0.5 * (log_start + log_stop)
+            log_start = log_center - factor * (log_center - log_start)
+            log_stop = log_center + factor * (log_stop - log_center)
+            start = (10.0**log_start) * x_unit
+            stop = (10.0**log_stop) * x_unit
+    return start, stop
 
 
 def show_band_for_overview(
@@ -458,24 +453,6 @@ def wrc27_overview_figure(
     y_tick_locations = np.arange(len(ai_info))
     ax.set_yticks(y_tick_locations, labels=y_labels)
     ax.yaxis.set_minor_locator(plt.NullLocator())
-    # Potentially the soundbyte labels
-    if include_soundbytes:
-        ax2 = ax.twinx()
-        ax2.set_ylim(y_range[0], y_range[1])
-        y2_labels = []
-        for this_ai in ai_info.values():
-            y2_labels.append(
-                this_ai.format_soundbyte(
-                    first_word_only=first_word_only,
-                    multi_line=multi_line,
-                    latex=True,
-                )
-            )
-        ax2.set_yticks(y_tick_locations, labels=y2_labels)
-        ax2.yaxis.set_minor_locator(plt.NullLocator())
-        ax2.tick_params(axis="y", which="both", left=False, right=False)
-    # Suppress the y ticks.
-    ax.tick_params(axis="y", which="both", left=False, right=False)
     #
     # -------------------------------- Actual figure
     # OK, loop over the agenda items
@@ -527,6 +504,27 @@ def wrc27_overview_figure(
                     minimum_bandwidth_points=minimum_bandwidth_points,
                     facecolor=bar_info.color,
                 )
+    # -------------------------------------------------- Soundbyte labels
+    #
+    # Place this after the rest, because we don't want to mislead the plt.gca()
+    # invocation in ensure_minimum_bandwidth_points.
+    if include_soundbytes:
+        ax2 = ax.twinx()
+        ax2.set_ylim(y_range[0], y_range[1])
+        y2_labels = []
+        for this_ai in ai_info.values():
+            y2_labels.append(
+                this_ai.format_soundbyte(
+                    first_word_only=first_word_only,
+                    multi_line=multi_line,
+                    latex=True,
+                )
+            )
+        ax2.set_yticks(y_tick_locations, labels=y2_labels)
+        ax2.yaxis.set_minor_locator(plt.NullLocator())
+        ax2.tick_params(axis="y", which="both", left=False, right=False)
+    # Suppress the y ticks.
+    ax.tick_params(axis="y", which="both", left=False, right=False)
     if not no_show:
         plt.show()
 
@@ -607,7 +605,7 @@ def wrc27_ai_figure(
             allocation="Earth Exploration-Satellite (Active)*",
             color=[color_map[8], color_map[9], color_map[11]],
         ),
-        "5.340": BarType(
+        "RR 5.340": BarType(
             footnote="5.340",
             slot=3,
             color=["xkcd:melon"],
@@ -666,6 +664,7 @@ def wrc27_ai_figure(
         add_daylight = True
     else:
         add_daylight = False
+        frequency_range_full = frequency_range_shown_pre_daylight
     # Setup the frequency axis, labels, etc.
     log_axis = setup_frequency_axis(
         ax=ax,
@@ -790,7 +789,7 @@ def wrc27_ai_figure(
             )
             fig.patches.append(rect)
     # Now some labels
-    labels = ["1", "2", "Fn"]
+    labels = ["Pri.", "Sec.", "Fn."]
     for i_label, label in enumerate(labels):
         fig.text(
             box_x[i_label] + (0.5 * box_width) * 0.9,
@@ -799,6 +798,7 @@ def wrc27_ai_figure(
             ha="center",
             va="top",
             transform=legend_transform,
+            fontsize="small",
         )
     # --------------------------------- Sizing
     if not ax_supplied:
@@ -852,7 +852,9 @@ def all_individual_figures(
     # fmt: on
     plot_configurations["WRC-27 AI-1.1"] = AIPlotConfiguration("WRC-27 AI-1.1")
     plot_configurations["WRC-27 AI-1.2"] = AIPlotConfiguration("WRC-27 AI-1.2")
-    plot_configurations["WRC-27 AI-1.3"] = AIPlotConfiguration("WRC-27 AI-1.3")
+    plot_configurations["WRC-27 AI-1.3"] = AIPlotConfiguration(
+        "WRC-27 AI-1.3", frequency_range=[50.2 * ureg.GHz, 53.0 * ureg.GHz]
+    )
     plot_configurations["WRC-27 AI-1.4"] = AIPlotConfiguration("WRC-27 AI-1.4")
     plot_configurations["WRC-27 AI-1.5"] = AIPlotConfiguration("WRC-27 AI-1.5")
     plot_configurations["WRC-27 AI-1.6"] = AIPlotConfiguration("WRC-27 AI-1.6")
@@ -941,6 +943,7 @@ def all_individual_figures(
             put_units_on_labels=item.put_units_on_labels,
             no_show=True,
             xticks=item.xticks,
+            minimum_bandwidth_points=1.0,
         )
         plt.savefig(
             f"specific-ai-plots/SpecificAI-{key}.pdf",
