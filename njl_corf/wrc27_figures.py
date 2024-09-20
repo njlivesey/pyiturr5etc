@@ -238,8 +238,6 @@ def ensure_visible_bandwidth(
     # Compute the width of the band in axes coordinates
     x_unit = ax.xaxis.get_units()
     current_width_points = 0.0
-    if x_unit is None:
-        raise ValueError("NO XUNIT")
     for sign, x in zip([-1, 1], [start, stop]):
         if x_unit is not None:
             p_display = ax.transData.transform([x.to(x_unit).magnitude, 0])
