@@ -4,7 +4,7 @@ import fnmatch
 
 __all__ = ["Allocation"]
 
-from .services import Service
+from .services import identify_service, Service
 from .footnotes import footnote2html
 
 
@@ -50,19 +50,19 @@ class Allocation:
             Additional information that can be supplied by user.  Note that the parent
             Band instance has its own user_annotations attribute.
         """
-        self.service = service
-        self.modifiers = modifiers
-        self.footnotes = footnotes
-        self.primary = primary
+        self.service: Service = service
+        self.modifiers: list[str] = modifiers
+        self.footnotes: list[str] = footnotes
+        self.primary: bool = primary
         if footnote_mention is None:
             footnote_mention = False
         if secondary is None:
             secondary = (not primary) and (not footnote_mention)
-        self.secondary = secondary
-        self.footnote_mention = footnote_mention
+        self.secondary: bool = secondary
+        self.footnote_mention: bool = footnote_mention
         if user_annotations is None:
             user_annotations = {}
-        self.user_annotations = user_annotations
+        self.user_annotations: dict = user_annotations
         # Do some checking
         if self.primary and self.secondary:
             raise ValueError("Allocation cannot be both primary and secondary")
@@ -107,14 +107,14 @@ class Allocation:
         #     result = '<p><span id="fcc-allocation">' + result + '</span></p>'
         return result
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Return a string representation of an allocations"""
         return self.to_str()
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return str(self)
 
-    def __eq__(self, a):
+    def __eq__(self, a) -> bool:
         if self.service != a.service:
             return False
         if self.modifiers != a.modifiers:
@@ -129,22 +129,22 @@ class Allocation:
             return False
         return True
 
-    def __ne__(self, a):
+    def __ne__(self, a) -> bool:
         return not self == a
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(str(self))
 
-    def __gt__(self, a):
+    def __gt__(self, a) -> bool:
         return str(self) > str(a)
 
-    def __lt__(self, a):
+    def __lt__(self, a) -> bool:
         return str(self) < str(a)
 
-    def __ge__(self, a):
+    def __ge__(self, a) -> bool:
         return str(self) >= str(a)
 
-    def __le__(self, a):
+    def __le__(self, a) -> bool:
         return str(self) <= str(a)
 
     def matches(
@@ -153,7 +153,7 @@ class Allocation:
         case_sensitive: bool = False,
         omit_footnotes: bool = False,
         omit_modifiers: bool = False,
-    ):
+    ) -> bool:
         """Return true if an allocation matches a given string"""
         self_str = self.to_str(
             omit_footnotes=omit_footnotes,
@@ -169,10 +169,10 @@ class Allocation:
                 return False
 
     @classmethod
-    def parse(cls, line):
+    def parse(cls, line) -> "Allocation":
         """Take a complete line of text and turn into an Allocation"""
         # Work out which service this is.
-        service = Service.identify(line)
+        service = identify_service(line)
         # If not a service then quit
         if service is None:
             return None
