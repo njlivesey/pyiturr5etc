@@ -84,6 +84,7 @@ def setup_frequency_axis(
     daylight_factor: Optional[float] = None,
     put_units_on_labels: Optional[bool] = False,
     xticks: Optional[pint.Quantity] = None,
+    xminor: Optional[pint.Quantity] = None,
 ):
     """Configure the frequency axis
 
@@ -103,14 +104,18 @@ def setup_frequency_axis(
         Amount of daylight to add
     put_units_on_labels : bool, optional
         If set, put the units on the labels (otherwise in a x-axis label)
-    xticks : pint.Quantity, optinal
+    xticks : pint.Quantity, optional
         Locations for xticks
+    xticks : pint.Quantity, optional
+        Locations for x minor ticks
     """
     # Have the tickmarks point outwards
     ax.tick_params(axis="x", which="both", direction="out")
     # Sort out xticks
     if isinstance(xticks, list):
         xticks = pint.Quantity.from_list(xticks)
+    if isinstance(xminor, list):
+        xminor = pint.Quantity.from_list(xminor)
     # Make the frequency range a little larger
     if add_daylight:
         if daylight_factor is None:
@@ -148,12 +153,17 @@ def setup_frequency_axis(
         ax.set_xlim(*[f.to(ureg.Hz) for f in frequency_range])
         if xticks is not None:
             xticks = [f.to(ureg.Hz) for f in xticks]
+        if xminor is not None:
+            xminor = [f.to(ureg.Hz) for f in xminor]
         typical_unit = None
     # Otherwise, we're not doing decadal ticks, either pick our own or use the user
     # supplied list.  If the latter, put them in appropriate units
     if xticks is not None and typical_unit is not None:
         # The user suppled specific ticks, convert them to the appropriate value.
         xticks = xticks.to(typical_unit)
+    if xminor is not None and typical_unit is not None:
+        # The user suppled specific minor ticks, convert them to the appropriate value.
+        xminor = xminor.to(typical_unit)
     # Work out whether the labels have units on them, deal with that if so
     if put_units_on_labels:
         # Suppress the x-axis label
@@ -161,6 +171,8 @@ def setup_frequency_axis(
         # Reset the x axis range to be in hertz, and note that there is no "typical unit"
         if xticks is not None:
             xticks = [f.to(ureg.Hz) for f in xticks]
+        if xminor is not None:
+            xminor = [f.to(ureg.Hz) for f in xminor]
         ax.set_xlim(*[f.to(ureg.Hz) for f in frequency_range])
         # Create a tick formatter, note we need to apply to both major and minor ticks
         # with a log axis for it to take effect.
@@ -182,6 +194,8 @@ def setup_frequency_axis(
     if log_axis:
         if xticks is not None:
             ax.set_xticks(xticks)
+        if xminor is not None:
+            ax.set_xticks(xminor, minor=True)
         if put_units_on_labels:
             # Redo the formatter (probably more efficient organizations of this set of
             # if statements, but this one works)
@@ -193,6 +207,8 @@ def setup_frequency_axis(
         # Now pick the specific ticks (do this last, because setting the formatter resets this)
         if xticks is not None:
             ax.set_xticks(xticks)
+        if xminor is not None:
+            ax.set_xticks(xminor, minor=True)
     return log_axis
 
 
@@ -539,6 +555,7 @@ def wrc27_ai_figure(
     put_units_on_labels: Optional[bool] = False,
     include_all_encompassed_allocations: Optional[bool] = True,
     xticks: Optional[pint.Quantity] = None,
+    xminor: Optional[pint.Quantity] = None,
 ):
     """Figure reviewing WRC agenda items and associated bands
 
@@ -671,6 +688,7 @@ def wrc27_ai_figure(
         log_axis=log_axis,
         put_units_on_labels=put_units_on_labels,
         xticks=xticks,
+        xminor=xminor,
     )
 
     # OK, despite having gone to the lengths of carefully identifying the science (and
@@ -835,6 +853,7 @@ class AIPlotConfiguration:
     frequency_range: Optional[list[pint.Quantity]] = None
     include_all_encompassed_allocations: Optional[bool] = True
     xticks: Optional[pint.Quantity] = None
+    xminor: Optional[pint.Quantity] = None
 
 
 def all_individual_figures(
@@ -849,11 +868,15 @@ def all_individual_figures(
     # Make a bunch of plots for the WRC-27 items
     # fmt: on
     plot_configurations["WRC-27 AI-1.1"] = AIPlotConfiguration("WRC-27 AI-1.1")
-    plot_configurations["WRC-27 AI-1.2"] = AIPlotConfiguration("WRC-27 AI-1.2")
-    plot_configurations["WRC-27 AI-1.3"] = AIPlotConfiguration(
-        "WRC-27 AI-1.3", frequency_range=[50.2 * ureg.GHz, 53.0 * ureg.GHz]
+    plot_configurations["WRC-27 AI-1.2"] = AIPlotConfiguration(
+        "WRC-27 AI-1.2", frequency_range=[13.20 * ureg.GHz, 14.05 * ureg.GHz]
     )
-    plot_configurations["WRC-27 AI-1.4"] = AIPlotConfiguration("WRC-27 AI-1.4")
+    plot_configurations["WRC-27 AI-1.3"] = AIPlotConfiguration(
+        "WRC-27 AI-1.3", frequency_range=[50.0 * ureg.GHz, 54.4 * ureg.GHz]
+    )
+    plot_configurations["WRC-27 AI-1.4"] = AIPlotConfiguration(
+        "WRC-27 AI-1.4", frequency_range=[17.1 * ureg.GHz, 17.9 * ureg.GHz]
+    )
     plot_configurations["WRC-27 AI-1.5"] = AIPlotConfiguration("WRC-27 AI-1.5")
     plot_configurations["WRC-27 AI-1.6"] = AIPlotConfiguration("WRC-27 AI-1.6")
     plot_configurations["WRC-27 AI-1.7"] = AIPlotConfiguration(
@@ -870,10 +893,15 @@ def all_individual_figures(
     )
     plot_configurations["WRC-27 AI-1.9"] = AIPlotConfiguration(
         "WRC-27 AI-1.9",
-        log_axis=True,
-        xticks=[3 * ureg.MHz, 6 * ureg.MHz, 10 * ureg.MHz, 20 * ureg.MHz],
+        log_axis=False,
+        frequency_range=[2 * ureg.MHz, 18 * ureg.MHz],
+        # xticks=[3 * ureg.MHz, 6 * ureg.MHz, 10 * ureg.MHz, 20 * ureg.MHz],
     )
-    plot_configurations["WRC-27 AI-1.10"] = AIPlotConfiguration("WRC-27 AI-1.10")
+    plot_configurations["WRC-27 AI-1.10"] = AIPlotConfiguration(
+        "WRC-27 AI-1.10",
+        frequency_range=[70.0 * ureg.GHz, 90 * ureg.GHz],
+        xticks=np.linspace(70 * ureg.GHz, 90 * ureg.GHz, 11),
+    )
     plot_configurations["WRC-27 AI-1.11"] = AIPlotConfiguration("WRC-27 AI-1.11")
     plot_configurations["WRC-27 AI-1.12"] = AIPlotConfiguration("WRC-27 AI-1.12")
     plot_configurations["WRC-27 AI-1.13"] = AIPlotConfiguration(
@@ -882,12 +910,32 @@ def all_individual_figures(
     )
     plot_configurations["WRC-27 AI-1.14"] = AIPlotConfiguration("WRC-27 AI-1.14")
     plot_configurations["WRC-27 AI-1.15"] = AIPlotConfiguration(
-        "WRC-27 AI-1.15", put_units_on_labels=True, log_axis=True
+        "WRC-27 AI-1.15",
+        put_units_on_labels=True,
+        log_axis=True,
+        xticks=[
+            0.3 * ureg.GHz,
+            1 * ureg.GHz,
+            3 * ureg.GHz,
+            10 * ureg.GHz,
+            30 * ureg.GHz,
+        ],
+        xminor=np.array([0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 2, 4, 5, 6, 7, 8, 9, 20])
+        * ureg.GHz,
     )
     plot_configurations["WRC-27 AI-1.16"] = AIPlotConfiguration(
         "WRC-27 AI-1.16",
+        frequency_range=[5 * ureg.GHz, 140 * ureg.GHz],
         log_axis=True,
-        xticks=[10 * ureg.GHz, 30 * ureg.GHz, 60 * ureg.GHz, 100 * ureg.GHz],
+        xticks=[
+            5 * ureg.GHz,
+            10 * ureg.GHz,
+            30 * ureg.GHz,
+            60 * ureg.GHz,
+            100 * ureg.GHz,
+            160 * ureg.GHz,
+        ],
+        xminor=np.array([20, 40, 50, 70, 80, 90, 110, 120, 130, 140, 150]) * ureg.GHz,
     )
     plot_configurations["WRC-27 AI-1.17"] = AIPlotConfiguration(
         "WRC-27 AI-1.17",
@@ -904,7 +952,10 @@ def all_individual_figures(
     plot_configurations["WRC-31 AI-2.5"] = AIPlotConfiguration("WRC-31 AI-2.5")
     plot_configurations["WRC-31 AI-2.7"] = AIPlotConfiguration("WRC-31 AI-2.7")
     plot_configurations["WRC-31 AI-2.8"] = AIPlotConfiguration("WRC-31 AI-2.8")
-    plot_configurations["WRC-31 AI-2.9"] = AIPlotConfiguration("WRC-31 AI-2.9")
+    plot_configurations["WRC-31 AI-2.9"] = AIPlotConfiguration(
+        "WRC-31 AI-2.9",
+        frequency_range=[4.80 * ureg.GHz, 5.60 * ureg.GHz],
+    )
     plot_configurations["WRC-31 AI-2.14"] = AIPlotConfiguration("WRC-31 AI-2.14")
     # fmt: on
     # Now do those that are in combination
@@ -941,6 +992,7 @@ def all_individual_figures(
             put_units_on_labels=item.put_units_on_labels,
             no_show=True,
             xticks=item.xticks,
+            xminor=item.xminor,
             minimum_bandwidth_points=1.0,
         )
         plt.savefig(
