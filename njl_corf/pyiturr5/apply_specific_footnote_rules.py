@@ -44,7 +44,10 @@ def create_band_from_footnote(
     if isinstance(allocations, str):
         allocations = [allocations]
     if allocations:
-        allocations = [parse_allocation(allocation) for allocation in allocations]
+        allocations = [
+            parse_allocation(allocation, allow_arbitrary_remainder_text=True)
+            for allocation in allocations
+        ]
     if jurisdictions is not None:
         jurisdictions = [parse_jurisdiction(j) for j in jurisdictions]
     # Create and return the result

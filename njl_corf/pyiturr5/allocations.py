@@ -193,8 +193,15 @@ class Allocation:
                 return False
 
 
-def parse_allocation(line) -> Allocation:
+def parse_allocation(
+    line: str,
+    footnote_prefixes: Optional[list[str]] = None,
+    allow_arbitrary_remainder_text: Optional[bool] = False,
+) -> Allocation:
     """Take a complete line of text and turn into an Allocation"""
+    # Set defaults
+    if footnote_prefixes is None:
+        footnote_prefixes = ["5."]
     # Work out which service this is. Special case for no allocation
     if line == "(Not allocated)":
         return None
@@ -224,6 +231,13 @@ def parse_allocation(line) -> Allocation:
             break
     # Now the remainder (if anything) must be footnotes
     footnotes = remainder.split()
+    # Check footnotes
+    if not allow_arbitrary_remainder_text:
+        for footnote in footnotes:
+            for footnote_prefix in footnote_prefixes:
+                if not footnote.startswith(footnote_prefix):
+                    raise NotAllocationError(f"Illegal footnote {footnote}")
+
     # Create and return the result
     return Allocation(
         service=service,

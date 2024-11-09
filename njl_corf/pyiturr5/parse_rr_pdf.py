@@ -27,10 +27,10 @@ from .apply_specific_footnote_rules import (
     enact_5_340_us246,
 )
 
-_DEBUG = True
+_DEBUG = False
 
 
-def correct_common_mistakes(text: str) -> str:
+def correct_common_mistakes(text: str | None) -> str | None:
     """Fixes some specific errors that pdfplumber seems to make
 
     Parameters
@@ -42,6 +42,8 @@ def correct_common_mistakes(text: str) -> str:
     -------
         Output text with common mistakes fixed
     """
+    if text is None:
+        return None
     corrections = [["MARITIMEMOBILE", "MARITIME MOBILE"]]
     result = text
     for correction in corrections:
@@ -398,47 +400,55 @@ def parse_cell(
     # Drop those from the main "lines" buffer
     if footnote_only_lines:
         lines = lines[: -len(footnote_only_lines)]
-
-    # OK, now go through the lines and try to parse them into allocations.  There is a
-    # complication here that if a line is non-parseable, it probably means that it
-    # should be merged with its predecessor.
-    prior_line = None
+    # OK, we're going to do a greedy, but non eager, parsing here.  The thing is that
+    # some allocations may be split over multiple lines, some of which might look legal
+    # in their own right.
     allocations = list()
-    for line in lines:
+    buffer = []
+    i_line = 0  # Index to iterate over lines
+    while i_line < len(lines):
+        buffer.append(lines[i_line])  # Add the current line to the buffer
+        i_line += 1
+        candidate_text = join_buffer(buffer)
         if _DEBUG:
-            print("-" * 40)
-            print(f"{line=}")
+            print(f"{i_line}, trying {candidate_text=}")
+        # Try parsing the current buffer of lines
         try:
-            this_allocation = parse_allocation(line)
-            prior_line = line
+            allocation = parse_allocation(candidate_text)
             if _DEBUG:
-                print(f"Parsed to {this_allocation=}")
+                print("  succeded")
+            # If parsing succeeds, remember this allocation as a potential candidate
+            candidate_allocation = allocation
+            candidate_end_index = i_line
+            # Try expanding the buffer to include more lines
+            for j_line in range(i_line, len(lines)):
+                buffer.append(lines[j_line])
+                candidate_text = join_buffer(buffer)
+                if _DEBUG:
+                    print(f"  {j_line}, trying {candidate_text}")
+                try:
+                    # Try parsing the expanded buffer
+                    expanded_allocation = parse_allocation(candidate_text)
+                    if _DEBUG:
+                        print("    succeded")
+                    # If successful, update the candidate allocation
+                    candidate_allocation = expanded_allocation
+                    candidate_end_index = j_line + 1
+                except NotAllocationError:
+                    # If parsing fails keep trying more
+                    if _DEBUG:
+                        print("    failed, keep looking.")
+                    pass
+            # Commit the longest successful allocation found
+            if _DEBUG:
+                print(f"{i_line}, storing {candidate_allocation=}")
+            allocations.append(candidate_allocation)
+            # Reset the buffer and move the index to the end of the successful block
+            buffer = []
+            i_line = candidate_end_index
         except NotAllocationError:
-            if _DEBUG:
-                print("Failed")
-            # Perhaps we have to wait for a next line, if there is one.
-            if prior_line is None:
-                # If there isn't one, at least store this one and move on
-                prior_line = line
-                continue
-            # OK, perhaps this line is actually a suffix to the prior line of text, glob
-            # them together and parse again.
-            filler = " " if not prior_line.endswith("-") else ""
-            line = prior_line + filler + line
-            if _DEBUG:
-                print(f"Trying {line=}")
-            # Save it again, just in case it turns out it's split over three lines (or
-            # more), don't expect so, but keep safe.
-            this_allocation = parse_allocation(line)
-            prior_line = line
-            if _DEBUG:
-                print(f"Now parsed to {this_allocation=}")
-            # Delete the prior insertion of this allocation, don't think we can get here
-            # with an empty list, so I'll just let python raise the error if somehow I'm
-            # wrong.
-            allocations = allocations[:-1]
-        # Now add this allocation
-        allocations.append(this_allocation)
+            # If parsing fails, continue accumulating lines in the buffer
+            continue
     # Restrict this to the allocations that actually exist (the first and last "bands" in the table return None)
     allocations = [allocation for allocation in allocations if allocation is not None]
     # Now go through and organize the allocations
@@ -472,3 +482,24 @@ def compute_sha1(file_path):
         for chunk in iter(lambda: f.read(4096), b""):
             sha1.update(chunk)
     return sha1.hexdigest()
+
+
+def join_buffer(lines: list[str]) -> str:
+    """Join lines putting spaces between lines unless they end with a hyphen
+
+    Parameters
+    ----------
+    lines : list[str]
+        Input lines
+
+    Returns
+    -------
+    result : str
+        Lines joined with spaces (unless hyphenated)
+    """
+    result = ""
+    for line in lines:
+        result += line
+        if not result.endswith("-"):
+            result += " "
+    return result
