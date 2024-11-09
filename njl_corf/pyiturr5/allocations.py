@@ -7,6 +7,10 @@ from .services import identify_service, Service
 from .footnote_tools import footnote2html
 
 
+class NotAllocationError(Exception):
+    """Raised if a string cannot be parsed as an allocation"""
+
+
 class Allocation:
     """An entry allocating a service to a band"""
 
@@ -188,37 +192,42 @@ class Allocation:
                 # One of the arguments was not a string.
                 return False
 
-    @classmethod
-    def parse(cls, line) -> "Allocation":
-        """Take a complete line of text and turn into an Allocation"""
-        # Work out which service this is.
-        service = identify_service(line)
-        # If not a service then quit
-        if service is None:
-            return None
-        # Look at the remainder of the line
-        invocation = line[0 : len(service.name)]
-        if len(invocation) > 0:
-            first_word = invocation.split()[0]
-        else:
-            first_word = invocation
-        primary = first_word.isupper()
-        remainder = line[len(service.name) :].strip()
-        # Anyting in parentheses becomes a modifiers
-        modifiers = []
-        while len(remainder) > 0:
-            if remainder[0] == r"(":
+
+def parse_allocation(line) -> Allocation:
+    """Take a complete line of text and turn into an Allocation"""
+    # Work out which service this is. Special case for no allocation
+    if line == "(Not allocated)":
+        return None
+    service = identify_service(line)
+    # If not a service then quit
+    if service is None:
+        raise NotAllocationError(f"Unable to identify allocation: {line}")
+    # Look at the remainder of the line
+    invocation = line[: len(service.name)]
+    if len(invocation) > 0:
+        first_word = invocation.split()[0]
+    else:
+        first_word = invocation
+    primary = first_word.isupper()
+    remainder = line[len(service.name) :].strip()
+    # Anyting in parentheses becomes a modifiers
+    modifiers = []
+    while len(remainder) > 0:
+        if remainder[0] == r"(":
+            try:
                 modifier = remainder[1 : remainder.index(r")")]
-                modifiers.append(modifier)
-                remainder = remainder[len(modifier) + 2 :].strip()
-            else:
-                break
-        # Now the remainder (if anything) must be footnotes
-        footnotes = remainder.split()
-        # Create and return the result
-        return Allocation(
-            service=service,
-            modifiers=modifiers,
-            footnotes=footnotes,
-            primary=primary,
-        )
+            except ValueError:
+                raise NotAllocationError("Corrupted allocation: {line}")
+            modifiers.append(modifier)
+            remainder = remainder[len(modifier) + 2 :].strip()
+        else:
+            break
+    # Now the remainder (if anything) must be footnotes
+    footnotes = remainder.split()
+    # Create and return the result
+    return Allocation(
+        service=service,
+        modifiers=modifiers,
+        footnotes=footnotes,
+        primary=primary,
+    )

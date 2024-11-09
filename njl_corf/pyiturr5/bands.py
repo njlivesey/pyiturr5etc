@@ -33,26 +33,31 @@ class NotBandError(Exception):
 
 
 # Now a support routine.
-def parse_bounds(text: str, units: Optional[pint.Unit] = None) -> list[pint.Quantity]:
+def parse_bounds(
+    text: str, units: Optional[pint.Unit] = None, allow_extra: Optional[bool] = False
+) -> list[pint.Quantity]:
     """Turn a string giving a frequency range into a bounds object
 
     Parameters
     ----------
     text : str
         String containing frequency range
-
     units : pint.Unit, optional
         Units to apply to result if not inferrable from input text
+    allow_extra : bool, optional
+        If set, there can be more text at the end, return that text.
 
     Result
     ------
     list[pint.Quantity] :
         The result as a two-element list of Quantities
     """
-    re_float = r"[0-9_]+(?:\.[0-9_]+)?"
+    re_float = r"[0-9][0-9_ ]*(?:\.[0-9_ ]+)?"
     re_bounds = (
-        f"^({re_float})-({re_float})" r"[\s]*([kMG]Hz)?" r"[\s]*(\(Not allocated\))?$"
+        f"^({re_float})-({re_float})" r"[\s]*([kMG]Hz)?" r"[\s]*(\(Not allocated\))?"
     )
+    if not allow_extra:
+        re_bounds += "$"
     match = re.match(re_bounds, text)
     if match is not None:
         # OK, we match this rather complex wildcard
@@ -64,16 +69,21 @@ def parse_bounds(text: str, units: Optional[pint.Unit] = None) -> list[pint.Quan
         else:
             if units is None:
                 raise ValueError("No units given in string or separately")
-        return [
-            float(match.group(1)) * units,
-            float(match.group(2)) * units,
+        result = [
+            float(match.group(1).replace(" ", "")) * units,
+            float(match.group(2).replace(" ", "")) * units,
         ]
-    # Perhaps this is the "below the bottom" case.
-    re_bottom = f"^Below ({re_float})" r" \(Not Allocated\)$"
-    match = re.match(re_bottom, text)
-    if match is None:
-        raise NotBoundsError(f"Not a valid range: {text}")
-    return [0.0 * units, float(match.group(1)) * units]
+    else:
+        # Perhaps this is the "below the bottom" case.
+        re_bottom = f"^Below ({re_float})"
+        match = re.match(re_bottom, text)
+        if match is None:
+            raise NotBoundsError(f"Not a valid range: {text}")
+        result = [0.0 * units, float(match.group(1).replace(" ", "")) * units]
+    if allow_extra:
+        return result, text[match.end() :]
+    else:
+        return result
 
 
 class Band:
@@ -83,15 +93,15 @@ class Band:
         self,
         bounds: list[pint.Quantity],
         jurisdictions: list[Jurisdiction],
-        primary_allocations: list[Allocation] = None,
-        secondary_allocations: list[Allocation] = None,
-        footnote_mentions: list[Allocation] = None,
-        footnotes: list[str] = None,
-        fcc_rules: list[str] = None,
-        annotations: list[str] = None,
-        footnote_definitions: dict[str] = None,
-        metadata: dict = None,
-        user_annotations: dict = None,
+        primary_allocations: Optional[list[Allocation]] = None,
+        secondary_allocations: Optional[list[Allocation]] = None,
+        footnote_mentions: Optional[list[Allocation]] = None,
+        footnotes: Optional[list[str]] = None,
+        fcc_rules: Optional[list[str]] = None,
+        annotations: Optional[list[str]] = None,
+        footnote_definitions: Optional[dict[str]] = None,
+        metadata: Optional[dict] = None,
+        user_annotations: Optional[dict] = None,
     ):
         """Generate a Band based on inputs
 
@@ -116,7 +126,8 @@ class Band:
         footnote_definitions: dict[str], optional
             Information for defining the footnotes.
         metadata : dict, optional
-            Collection of other data (typically referring back to Word document)
+            Collection of other data (typically referring back to Word document from
+            which it came.)
         user_annotations : dict, optional
             Collection of user supplied annotations specific to the band (note that the
             individual Allocations within the band can carry user_annotations also.)

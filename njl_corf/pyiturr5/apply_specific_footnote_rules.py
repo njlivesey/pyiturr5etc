@@ -2,9 +2,9 @@
 
 import pint
 
-from njl_corf.corf_pint import ureg
+from .allocations import parse_allocation
+from .band_collections import BandCollection
 from .bands import Band, parse_bounds
-from .allocations import Allocation
 from .jurisdictions import Jurisdiction, parse_jurisdiction
 
 # from .band_collections import BandCollection
@@ -44,7 +44,7 @@ def create_band_from_footnote(
     if isinstance(allocations, str):
         allocations = [allocations]
     if allocations:
-        allocations = [Allocation.parse(allocation) for allocation in allocations]
+        allocations = [parse_allocation(allocation) for allocation in allocations]
     if jurisdictions is not None:
         jurisdictions = [parse_jurisdiction(j) for j in jurisdictions]
     # Create and return the result
@@ -146,16 +146,16 @@ def footnote_5_149():
             if words[2] != "in":
                 raise ValueError("'in' expected.")
             if words[3] == "Region":
-                jurisdictions = ["R" + words[4]]
+                jurisdictions = ["ITU-R" + words[4]]
             elif words[3] == "Regions":
                 jurisdictions = [
-                    "R" + words[4],
-                    "R" + words[6],
+                    "ITU-R" + words[4],
+                    "ITU-R" + words[6],
                 ]
             else:
                 raise ValueError(f"Unexpected word '{words[3]}'")
         else:
-            jurisdictions = ["R1", "R2", "R3"]
+            jurisdictions = ["ITU-R1", "ITU-R2", "ITU-R3"]
         bands.append(
             create_band_from_footnote(
                 bounds=bounds_str,
@@ -176,7 +176,7 @@ def footnote_5_225():
         create_band_from_footnote(
             bounds="150.05-153 MHz",
             allocations="RADIO ASTRONOMY 5.225# (Australia and India only)",
-            jurisdictions=["R3"],
+            jurisdictions=["ITU-R3"],
         )
     ]
 
@@ -191,7 +191,7 @@ def footnote_5_250():
         create_band_from_footnote(
             bounds="225-235 MHz",
             allocations="Radio astronomy 5.250# (China only)",
-            jurisdictions=["R3"],
+            jurisdictions=["ITU-R3"],
         )
     ]
 
@@ -207,7 +207,7 @@ def footnote_5_304():
         create_band_from_footnote(
             bounds="606-614 MHz",
             allocations="RADIO ASTRONOMY 5.304# (African broadcasting area)",
-            jurisdictions=["R1"],
+            jurisdictions=["ITU-R1"],
         )
     ]
 
@@ -216,13 +216,13 @@ def footnote_5_305():
     """Return band or bands corresponding to footnote 5.305
 
     Additional allocation:  in China, the band 606-614 MHz is also allocated to the
-    radio astronomy service on a primary basis. basis.
+    radio astronomy service on a primary basis.
     """
     return [
         create_band_from_footnote(
             bounds="606-614 MHz",
             allocations="RADIO ASTRONOMY 5.305# (China)",
-            jurisdictions=["R3"],
+            jurisdictions=["ITU-R3"],
         )
     ]
 
@@ -238,7 +238,7 @@ def footnote_5_306():
         create_band_from_footnote(
             bounds="608-614 MHz",
             allocations="Radio astronomy 5.306# (Not Africa)",
-            jurisdictions=["R1"],
+            jurisdictions=["ITU-R1"],
         )
     ]
 
@@ -252,8 +252,8 @@ def footnote_5_307():
     return [
         create_band_from_footnote(
             bounds="608-614 MHz",
-            allocations="Radio astronomy 5.307# (India)",
-            jurisdictions=["R1"],
+            allocations="RADIO ASTRONOMY 5.307# (India)",
+            jurisdictions=["ITU-R1"],
         )
     ]
 
@@ -280,7 +280,7 @@ def footnote_5_339():
                     "Earth exploration-satellite (passive) 5.339#",
                     "Space research (passive) 5.339#",
                 ],
-                jurisdictions=["R1", "R2", "R3"],
+                jurisdictions=["ITU-R1", "ITU-R2", "ITU-R3"],
             )
         )
     return bands
@@ -296,7 +296,7 @@ def footnote_5_385():
         create_band_from_footnote(
             bounds="1718.8-1722.2 MHz",
             allocations="Radio astronomy 5.385#",
-            jurisdictions=["R1", "R2", "R3"],
+            jurisdictions=["ITU-R1", "ITU-R2", "ITU-R3"],
         )
     ]
 
@@ -311,7 +311,7 @@ def footnote_5_437():
         create_band_from_footnote(
             bounds="4200-4400 MHz",
             allocations="Earth exploration-satellite (passive) 5.437#",
-            jurisdictions=["R1", "R2", "R3"],
+            jurisdictions=["ITU-R1", "ITU-R2", "ITU-R3"],
         )
     ]
 
@@ -333,7 +333,7 @@ def footnote_5_443():
             create_band_from_footnote(
                 bounds=this_range,
                 allocations="RADIO ASTRONOMY 5.443# (Argentina, Australia, Canada only)",
-                jurisdictions=["R2", "R3"],
+                jurisdictions=["ITU-R2", "ITU-R3"],
             )
         )
     return bands
@@ -358,7 +358,7 @@ def footnote_5_458():
             create_band_from_footnote(
                 bounds=this_range,
                 allocations="Earth exploration-satellite (passive) 5.458#",
-                jurisdictions=["R1", "R2", "R3"],
+                jurisdictions=["ITU-R1", "ITU-R2", "ITU-R3"],
             )
         )
     return bands
@@ -374,7 +374,7 @@ def footnote_5_479():
         create_band_from_footnote(
             bounds="9.975-10.025 GHz",
             allocations="Earth exploration-satellite (active) 5.479#",
-            jurisdictions=["R1", "R2", "R3"],
+            jurisdictions=["ITU-R1", "ITU-R2", "ITU-R3"],
         )
     ]
 
@@ -390,7 +390,7 @@ def footnote_5_543():
         create_band_from_footnote(
             bounds="29.95-30 GHz",
             allocations="Earth exploration-satellite (space-to-space, comms.) 5.543#",
-            jurisdictions=["R1", "R2", "R3"],
+            jurisdictions=["ITU-R1", "ITU-R2", "ITU-R3"],
         )
     ]
 
@@ -405,7 +405,7 @@ def footnote_5_555():
         create_band_from_footnote(
             bounds="48.94-49.05 GHz",
             allocations="RADIO ASTRONOMY 5.555#",
-            jurisdictions=["R1", "R2", "R3"],
+            jurisdictions=["ITU-R1", "ITU-R2", "ITU-R3"],
         )
     ]
 
@@ -427,7 +427,7 @@ def footnote_5_556():
             create_band_from_footnote(
                 bounds=this_range,
                 allocations="radio astronomy 5.556# (On a nation-by-nation basis)",
-                jurisdictions=["R1", "R2", "R3"],
+                jurisdictions=["ITU-R1", "ITU-R2", "ITU-R3"],
             )
         )
     return bands
@@ -454,7 +454,7 @@ def footnote_5_562d():
             create_band_from_footnote(
                 bounds=this_range,
                 allocations="RADIO ASTRONOMY 5.562D# (Korea, Rep. of, only)",
-                jurisdictions=["R3"],
+                jurisdictions=["ITU-R3"],
             )
         )
     return bands
@@ -471,7 +471,7 @@ def footnote_5_563b():
         create_band_from_footnote(
             bounds="237.9-238 GHz",
             allocations="Earth exploration-satellite (active) 5.563B#",
-            jurisdictions=["R1", "R2", "R3"],
+            jurisdictions=["ITU-R1", "ITU-R2", "ITU-R3"],
         )
     ]
 
@@ -548,13 +548,10 @@ def footnote_5_565():
                 create_band_from_footnote(
                     bounds=this_range,
                     allocations=allocations,
-                    jurisdictions=["R1", "R2", "R3"],
+                    jurisdictions=["ITU-R1", "ITU-R2", "ITU-R3"],
                 )
             )
     return bands
-
-
-# ------------------------------------------------------- Master routine
 
 
 def get_all_itu_footnote_based_additions() -> BandCollection:
@@ -598,8 +595,6 @@ def get_all_itu_footnote_based_additions() -> BandCollection:
 
 
 # ------------------------------------------------------- 5.340/US246
-
-
 # pylint: disable-next=too-many-locals
 def enact_5_340_us246(
     collections: dict[BandCollection],
@@ -675,7 +670,7 @@ def enact_5_340_us246(
         "226-231.5 GHz",
         "250-252 GHz",
     ]
-    itu_jurisdictions = ["R1", "R2", "R3"]  # list(collections.keys())
+    itu_jurisdictions = ["ITU-R1", "ITU-R2", "ITU-R3"]  # list(collections.keys())
     usa_jurisdictions = ["F", "NF"]
 
     # pylint: disable-next=too-many-nested-blocks
@@ -693,7 +688,7 @@ def enact_5_340_us246(
                 suffix = ""
             # Deal with any suffixes
             if suffix == "in Region 2":
-                jurisdictions = ["R2"]
+                jurisdictions = ["ITU-R2"]
             else:
                 jurisdictions = relevant_jurisdictions
             # Go through all the jurisdictions and basically do nothing when the

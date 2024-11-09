@@ -1,5 +1,6 @@
 """Code for handling collections of bands"""
 
+import itertools
 import copy
 from typing import Callable, Optional
 import pint
@@ -18,13 +19,27 @@ class BandCollection:
     This is implemented as a wrapper for (but not a subclass of) intervaltree.
     """
 
-    def __init__(self, *args: list[Band]):
+    def __init__(
+        self,
+        *args: list[Band] | list[IntervalTree],
+        metadata: Optional[dict] = None,
+    ):
         """Create a band collection and possibly fill it with bands supplied"""
+        # Sort out the metadata
+        if metadata is None:
+            metadata = {}
+        self.metadata: dict = metadata
         self.data: IntervalTree[Band] = IntervalTree()
-        self.metadata = {}
-        for a in args:
-            for b in a:
-                self.append(b)
+        if len(args) == 0:
+            return
+        # Check that all the arguments are of the same type
+        if not all(isinstance(arg, type(args[0])) for arg in args):
+            raise ValueError("Arguments must all be of the same type")
+        if isinstance(args[0], IntervalTree):
+            self.data.update(*args)
+        else:
+            for band in itertools.chain.from_iterable(args):
+                self.append(band)
 
     def __getitem__(self, key) -> list[Band]:
         """Get a specific item/range from the collection"""
@@ -32,6 +47,19 @@ class BandCollection:
         # However, while the former returns a set of Intervals, we
         # want to return a list of bands.
         return sorted([item.data for item in self.data[key]])
+
+    def __setitem__(self, key, value):
+        """Add an item to the band collection"""
+        self.data[key] = value
+
+    def append(self, band):
+        """Append a band to the collection"""
+        # This just invokes the addi method from IntervalTree.
+        self.data.addi(band.bounds[0], band.bounds[1], band)
+
+    def remove(self, band: Band):
+        """Remove an entry from the collection"""
+        self.data.removei(band.bounds[0], band.bounds[1], band)
 
     def __iter__(self):
         """Generate an iterable over the collected bands"""
@@ -51,55 +79,31 @@ class BandCollection:
         """Return lowest frequency"""
         return self.data.end()
 
-    def append(self, band):
-        """Append a band to the collection"""
-        # This just invokes the addi method from IntervalTree.
-        self.data.addi(band.bounds[0], band.bounds[1], band)
-
     def union(self, other):
         """Merge two sets of band collections without regard to their content"""
-        result = BandCollection()
-        result.data = self.data | other.data
-        return result
+        return BandCollection(self.data | other.data)
 
-    def merge(self, other, single_jurisdiction=None):
+    def merge(self, other):
         """Merge band collections, paying attention to quasi-duplicates (i.e., jurisdictions)"""
         # Build a raw lists that is the brain-dead merge of both
         interim = self.union(other)
-        # If we're doing a single jurisdiction, just go through them all and add them if appropriate
-        # Now go through and join bands together if they're the same
-        # in all but region.
+        # Now go through and join bands together if they're the same in all but region.
         result = BandCollection()
         for interim_band in interim:
-            # Do a deep copy because today's new_band becomes tomorrow's recorded_band,
-            # so if we don't the input lists will get trampled on.  Don't deep copy
-            # footnote definitions though (DOES IT DO THAT? DOESN'T SEEM TO SPEED UP IF
-            # WE STASH).
-            new_band = copy.deepcopy(interim_band)
-            add_band = True
-            if single_jurisdiction:
-                if not new_band.has_jurisdiction(single_jurisdiction):
-                    continue
-                new_band.jurisdictions = [single_jurisdiction]
-            else:
-                # See if we already have an entry that's identical in
-                # all but the jurisdiction.  If so, just note the
-                # additional jurisdiction, in the already-recorded
-                # band, if not, add this one.
-                recorded_bands = result[new_band.bounds[0] : new_band.bounds[1]]
-                add_band = True
-                for recorded_band in recorded_bands:
-                    if recorded_band.equal(new_band, ignore_jurisdictions=True):
-                        recorded_band.jurisdictions = sorted(
-                            list(
-                                set(
-                                    recorded_band.jurisdictions + new_band.jurisdictions
-                                )
-                            )
-                        )
-                        add_band = False
-            if add_band:
-                result.append(new_band)
+            new_band = copy.copy(interim_band)
+            # See if we already have an entry that's identical in all but the
+            # jurisdiction.  If so, just note the additional jurisdiction, in the
+            # already-recorded band, if not, add this one.
+            recorded_bands = result[new_band.bounds[0] : new_band.bounds[1]]
+            for recorded_band in recorded_bands:
+                if recorded_band.equal(new_band, ignore_jurisdictions=True):
+                    # Update the jurisdictions in new_band to account for the previous ones
+                    new_band.jurisdictions = sorted(
+                        list(set(recorded_band.jurisdictions + new_band.jurisdictions))
+                    )
+                    # Delete the previously-recorded entry
+                    result.remove(recorded_band)
+            result.append(new_band)
         return result
 
     def get_boundaries(self):

@@ -4,5 +4,6 @@
 # from .footnotes import *
 # from .graphics import *
 from .bands import *
-
-# from .band_collections import *
+from .parse_rr_pdf import *
+from .band_collections import *
+from .apply_specific_footnote_rules import *
