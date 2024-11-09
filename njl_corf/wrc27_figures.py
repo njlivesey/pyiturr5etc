@@ -13,7 +13,7 @@ from matplotlib.patches import Rectangle
 from matplotlib.ticker import FuncFormatter, NullFormatter
 from matplotlib.transforms import blended_transform_factory
 
-from njl_corf import pyfcctab, ureg, wrc27_views
+from njl_corf import pyiturr5 as rr, ureg, wrc27_views
 
 
 def set_nas_graphic_style():
@@ -365,7 +365,7 @@ class BarType:
 
 
 def wrc27_overview_figure(
-    allocation_tables: Optional[pyfcctab.FCCTables] = None,
+    allocation_database: Optional[rr.AllocationDatabase] = None,
     frequency_range: Optional[list[pint.Quantity]] = None,
     wrc: str = None,
     ax: Optional[plt.Axes] = None,
@@ -380,9 +380,9 @@ def wrc27_overview_figure(
 
     Parameters
     ----------
-    allocation_tables : pyfcctab.FCCTables, optional
-        FCC allocation tables from pyfcctab.  If not supplied, these are read in.
-        Having them as an optional argument enables faster debugging.
+    allocation_database : rr.AllocationDatabase, optional
+        Allocation tables from RR. If not supplied, these are read in. Having them as an
+        optional argument enables faster debugging.
     frequency_range : list[pint.Quantity], optional
         Range of frequencies to cover, expansive default assumed if not given.
     wrc : str, optional
@@ -403,8 +403,8 @@ def wrc27_overview_figure(
         If bar is narrower than this, make it wider
     """
     # Read the allocation tables if not supplied
-    if allocation_tables is None:
-        allocation_tables = pyfcctab.read()
+    if allocation_database is None:
+        allocation_database = rr.parse_rr_file()
     # Get the agenda items
     ai_info = wrc27_views.get_ai_info(grouped=True)
     # Subset them if/as necessary
@@ -482,7 +482,7 @@ def wrc27_overview_figure(
         if ai_info is None:
             continue
         # Create a buffer to hold the impacted science bands
-        bar_buffer = {key: pyfcctab.BandCollection() for key in bars}
+        bar_buffer = {key: rr.BandCollection() for key in bars}
         for ai_band in this_ai.frequency_bands:
             # Draw the bands addressed by the Agenda Item
             show_band_for_overview(
@@ -497,14 +497,14 @@ def wrc27_overview_figure(
             )
             # Draw all the science bands we found
             for key, bar_info in bars.items():
-                relevant_bands = allocation_tables.itu.get_bands(
+                relevant_bands = allocation_database.itu.get_bands(
                     ai_band.start,
                     ai_band.stop,
                     condition=bar_info.condition,
                     adjacent=True,
                 )
                 bar_buffer[key] = bar_buffer[key].union(
-                    pyfcctab.BandCollection(relevant_bands)
+                    rr.BandCollection(relevant_bands)
                 )
         for key, science_bands in bar_buffer.items():
             bar_info = bars[key]
@@ -545,7 +545,7 @@ def wrc27_overview_figure(
 
 def wrc27_ai_figure(
     ai: str | list[str],
-    allocation_tables: Optional[pyfcctab.FCCTables] = None,
+    allocation_database: Optional[rr.AllocationDatabase] = None,
     frequency_range_shown_pre_daylight: Optional[list[pint.Quantity]] = None,
     ax: Optional[plt.Axes] = None,
     no_show: Optional[bool] = False,
@@ -563,8 +563,8 @@ def wrc27_ai_figure(
     ----------
     ai : str | list[str], optional
         AI identifier or list thereof (e.g. 1.6)
-    allocation_tables : pyfcctab.FCCTables, optional
-        FCC allocation tables from pyfcctab.  If not supplied, these are read in.
+    allocation_database : rr.AllocationDatabase, optional
+        Allocation tables from rr.  If not supplied, these are read in.
         Having them as an optional argument enables faster debugging.
     frequency_range : list[pint.Quantity], optional
         Range of frequencies to cover, expansive default assumed if not given.
@@ -582,8 +582,8 @@ def wrc27_ai_figure(
         If set, put units on frequency labels
     """
     # Read the allocation tables if not supplied
-    if allocation_tables is None:
-        allocation_tables = pyfcctab.read()
+    if allocation_database is None:
+        allocation_database = rr.parse_rr_file()
     # Get the agenda items
     ai_info = wrc27_views.get_ai_info(grouped=True)
     # Subset them if/as necessary
@@ -627,18 +627,18 @@ def wrc27_ai_figure(
         ),
     }
     # Identify the bars for each agenda item
-    bar_buffers = {row_key: pyfcctab.BandCollection() for row_key in science_rows}
+    bar_buffers = {row_key: rr.BandCollection() for row_key in science_rows}
     for ai_key, this_ai_info in ai_info.items():
         for ai_band in this_ai_info.frequency_bands:
             for row_key, row_info in science_rows.items():
-                relevant_bands = allocation_tables.itu.get_bands(
+                relevant_bands = allocation_database.itu.get_bands(
                     ai_band.start,
                     ai_band.stop,
                     condition=row_info.construct_condition(),
                     recursively_adjacent=True,
                 )
                 bar_buffers[row_key] = bar_buffers[row_key].union(
-                    pyfcctab.BandCollection(relevant_bands)
+                    rr.BandCollection(relevant_bands)
                 )
     # Set font defaults etc.
     set_nas_graphic_style()
@@ -696,10 +696,10 @@ def wrc27_ai_figure(
     # consideration, we're going to kind of throw all that away, and just get all the
     # bands of interest in the range, but only if we identified a case for their
     # inclusion (by virtue of being adjacent or overlapping) before.
-    new_bar_buffers = {row_key: pyfcctab.BandCollection() for row_key in science_rows}
+    new_bar_buffers = {row_key: rr.BandCollection() for row_key in science_rows}
     for row_key, row_info in science_rows.items():
         if bar_buffers[row_key] or include_all_encompassed_allocations:
-            new_bar_buffers[row_key] = allocation_tables.itu.get_bands(
+            new_bar_buffers[row_key] = allocation_database.itu.get_bands(
                 frequency_range_full[0],
                 frequency_range_full[1],
                 condition=row_info.construct_condition(),
@@ -857,7 +857,7 @@ class AIPlotConfiguration:
 
 
 def all_individual_figures(
-    allocation_tables: Optional[pyfcctab.FCCTables] = None,
+    allocation_database: Optional[rr.AllocationDatabase] = None,
     only: Optional[list[str]] = None,
 ):
     """Generate all the figures for the agenda items"""
@@ -984,7 +984,7 @@ def all_individual_figures(
                 continue
         print(key)
         wrc27_ai_figure(
-            allocation_tables=allocation_tables,
+            allocation_database=allocation_database,
             ai=item.ai,
             log_axis=item.log_axis,
             frequency_range_shown_pre_daylight=item.frequency_range,

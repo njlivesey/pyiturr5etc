@@ -96,13 +96,17 @@ _jurisdictions = [
 ]
 
 
-def parse_jurisdiction(line: str, return_index: bool = False) -> Jurisdiction | int:
+def parse_jurisdiction(
+    line: str | Jurisdiction,
+    return_index: bool = False,
+) -> Jurisdiction | int:
     """Parse the string definition of a jurisdiction
 
     Parameters
     ----------
     line : str
-        The input string describing the jurisdiction
+        The input string describing the jurisdiction. If a Jurisdiction instance is
+        supplied, then just return that (or its index)
     return_index : bool, optional
         If set, return the index for the jurisdiction rather than the jurisdiction
         itself.
@@ -117,6 +121,8 @@ def parse_jurisdiction(line: str, return_index: bool = False) -> Jurisdiction | 
     ValueError
         _description_
     """
+    if isinstance(line, Jurisdiction):
+        return line.index if return_index else line
     ll = line.lower()
     for i, jurisdiction in enumerate(_jurisdictions):
         candidates = [jurisdiction.name] + jurisdiction.aliases

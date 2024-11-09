@@ -217,7 +217,7 @@ def parse_allocation(line) -> Allocation:
             try:
                 modifier = remainder[1 : remainder.index(r")")]
             except ValueError:
-                raise NotAllocationError("Corrupted allocation: {line}")
+                raise NotAllocationError(f"Corrupted allocation: {line}")
             modifiers.append(modifier)
             remainder = remainder[len(modifier) + 2 :].strip()
         else:

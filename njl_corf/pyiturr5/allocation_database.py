@@ -28,6 +28,7 @@ class AllocationDatabase:
         """Return the Region 1 information"""
         return self.collections["ITU-R3"]
 
+    @property
     def itu(self) -> BandCollection:
         """Return the combined ITU information"""
         return self.collections["ITU"]

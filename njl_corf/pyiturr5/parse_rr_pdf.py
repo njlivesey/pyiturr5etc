@@ -21,7 +21,32 @@ from .allocation_database import AllocationDatabase
 from .allocations import NotAllocationError, parse_allocation
 from .band_collections import BandCollection
 from .bands import Band, parse_bounds
-from .apply_specific_footnote_rules import get_all_itu_footnote_based_additions
+from .jurisdictions import parse_jurisdiction
+from .apply_specific_footnote_rules import (
+    get_all_itu_footnote_based_additions,
+    enact_5_340_us246,
+)
+
+_DEBUG = True
+
+
+def correct_common_mistakes(text: str) -> str:
+    """Fixes some specific errors that pdfplumber seems to make
+
+    Parameters
+    ----------
+    text : str
+        Input text
+
+    Returns
+    -------
+        Output text with common mistakes fixed
+    """
+    corrections = [["MARITIMEMOBILE", "MARITIME MOBILE"]]
+    result = text
+    for correction in corrections:
+        result = result.replace(correction[0], correction[1])
+    return result
 
 
 @dataclass
@@ -45,6 +70,7 @@ _rr_versions = {
 def parse_rr_file(
     filename: Optional[str] = None,
     skip_additionals: Optional[bool] = False,
+    specific_page_tags: Optional[str | list[str]] = None,
 ) -> AllocationDatabase:
     """Parses the ITU RadioRegulations file and populates an AllocationDatabase"""
     if filename is None:
@@ -63,7 +89,9 @@ def parse_rr_file(
         band_sets = []
         for page in pdf.pages[rr_version_info.page_range]:
             these_bands, these_footnote_definitions, page_tag = parse_page(
-                page, rr_version_info=rr_version_info
+                page,
+                rr_version_info=rr_version_info,
+                specific_page_tags=specific_page_tags,
             )
             print(page_tag + ", ", end="")
             if these_bands is not None:
@@ -83,14 +111,16 @@ def parse_rr_file(
     # Now possibly add alll the allocations that come in via footnotes
     if not skip_additionals:
         print("footnote-allocations, ", end="")
+        enact_5_340_us246(band_collections)
         additional_bands = get_all_itu_footnote_based_additions()
-        for jurisdiction, collection in band_collections.items():
+        for jurisdiction_name, collection in band_collections.items():
+            jurisdiction = parse_jurisdiction(jurisdiction_name)
             for new_band in additional_bands:
                 if jurisdiction in new_band.jurisdictions:
                     inserted_band = copy.copy(new_band)
                     inserted_band.jurisdictions = [jurisdiction]
                     collection.append(inserted_band)
-            band_collections[jurisdiction] = collection.flatten()
+            band_collections[jurisdiction_name] = collection.flatten()
     # Now merge all three regions together
     print("merging, ", end="")
     band_collections["ITU"] = functools.reduce(
@@ -108,6 +138,7 @@ def parse_rr_file(
 def parse_page(
     page: Page,
     rr_version_info: RRVersionInfo,
+    specific_page_tags: Optional[str | list[str]] = None,
 ) -> tuple[BandCollection, dict[str]]:
     """Parse the contents of an individual page of the RR
 
@@ -122,6 +153,9 @@ def parse_page(
     rr_verion_info : RRVerionInfo
         Information about this specific version of the RRs. Mainly contains special
         cases etc.
+    specific_page_tags : str or list[str], optional
+        If provided, only deal with pages that match this/these tags. (Used for
+        debugging special cases).
 
     Returns
     -------
@@ -135,9 +169,21 @@ def parse_page(
     # Get a the page tag (i.e., formal page number) for the page.  We need this to key
     # some special case decisions, including pages that get falsely flagged as having
     # tables.  So we do a straight forward extract_text first.
-    lines = page.extract_text(x_tolerance=x_tolerance).split("\n")
+    text = page.extract_text(x_tolerance=x_tolerance)
+    text = correct_common_mistakes(text)
+    lines = text.split("\n")
     header_words = lines[0].split(" ")
     page_tag = header_words[-1] if odd_page else header_words[0]
+    # Check that this begins with RR5-
+    if not page_tag.startswith("RR5-"):
+        raise ValueError("This page is not part of Article 5")
+    # Now, in the (typically debugging) case where we're only doing one/some pages,
+    # check that this is one of them and bail out if not.
+    if specific_page_tags is not None:
+        if isinstance(specific_page_tags, str):
+            specific_page_tags = [specific_page_tags]
+        if page_tag not in specific_page_tags:
+            return None, {}, page_tag
     # Find all the tables from the page, unless this is one of the pages that somehow
     # ends up with tables that shouldn't
     if page_tag not in rr_version_info.pages_with_spurious_tables:
@@ -161,11 +207,10 @@ def parse_page(
                 lines.append(line["text"])
     else:
         lines = page.extract_text(x_tolerance=x_tolerance).split("\n")
+    # Correct any common mistakes (potentially for a second time, but no harm done)
+    lines = [correct_common_mistakes(line) for line in lines]
     # Convert all the text to plain old ascii
     lines = [unidecode(line) for line in lines]
-    # Check that this begins with RR5-
-    if not page_tag.startswith("RR5-"):
-        raise ValueError("This page is not part of Article 5")
     # Check that the last line is a page number
     if not re.match(r"^- \d+ -$", lines[-1]):
         raise ValueError("Page does not end with a page number")
@@ -249,12 +294,17 @@ def parse_table_contents(
     jurisdictions = [f"ITU-R{i_region+1}" for i_region in range(3)]
     band_collections = {key: BandCollection() for key in jurisdictions}
     for cell_strings in rows[2:]:
+        if _DEBUG:
+            print("*" * 80)
         bands = []
         for jurisdiction, cell_text in zip(jurisdictions, cell_strings):
+            cell_text = correct_common_mistakes(cell_text)
+            if _DEBUG:
+                print("=" * 60)
             bands.append(
                 parse_cell(
                     text=cell_text,
-                    jurisdiction=jurisdiction,
+                    jurisdiction=parse_jurisdiction(jurisdiction),
                     units=frequency_range[0].units,
                     metadata={"source_page": page_tag},
                 )
@@ -289,7 +339,7 @@ def parse_table_contents(
                         warnings.warn("Unable to parse table row, missing band")
                         # raise ValueError("Unable to parse table row, missing band"
                     else:
-                        band.jurisdictions = [jurisdiction]
+                        band.jurisdictions = [parse_jurisdiction(jurisdiction)]
                     complete_bands.append(band)
         # Now add these to the band collections
         for jurisdiction, band in zip(jurisdictions, complete_bands):
@@ -325,6 +375,8 @@ def parse_cell(
     # Parse the frequency bounds.  Note that this already includes code to handle the
     # special case for the fisrt row ("Below 8.3")
     frequency_range, remainder = parse_bounds(lines[0], units=units, allow_extra=True)
+    if _DEBUG:
+        print(f"{frequency_range=}")
     # Put the remainder into lines[0]
     lines[0] = remainder.strip()
     # If there is no remainder, skip it
@@ -344,26 +396,43 @@ def parse_cell(
         else:
             break
     # Drop those from the main "lines" buffer
-    lines = lines[: -len(footnote_only_lines)]
+    if footnote_only_lines:
+        lines = lines[: -len(footnote_only_lines)]
+
     # OK, now go through the lines and try to parse them into allocations.  There is a
     # complication here that if a line is non-parseable, it probably means that it
     # should be merged with its predecessor.
     prior_line = None
     allocations = list()
     for line in lines:
+        if _DEBUG:
+            print("-" * 40)
+            print(f"{line=}")
         try:
             this_allocation = parse_allocation(line)
+            prior_line = line
+            if _DEBUG:
+                print(f"Parsed to {this_allocation=}")
         except NotAllocationError:
-            # Perhaps we have to wait for a next line
+            if _DEBUG:
+                print("Failed")
+            # Perhaps we have to wait for a next line, if there is one.
             if prior_line is None:
+                # If there isn't one, at least store this one and move on
+                prior_line = line
                 continue
             # OK, perhaps this line is actually a suffix to the prior line of text, glob
             # them together and parse again.
-            line = prior_line + line
+            filler = " " if not prior_line.endswith("-") else ""
+            line = prior_line + filler + line
+            if _DEBUG:
+                print(f"Trying {line=}")
             # Save it again, just in case it turns out it's split over three lines (or
             # more), don't expect so, but keep safe.
-            prior_line = line
             this_allocation = parse_allocation(line)
+            prior_line = line
+            if _DEBUG:
+                print(f"Now parsed to {this_allocation=}")
             # Delete the prior insertion of this allocation, don't think we can get here
             # with an empty list, so I'll just let python raise the error if somehow I'm
             # wrong.
@@ -387,7 +456,7 @@ def parse_cell(
     # OK, create a Band with the result
     return Band(
         bounds=frequency_range,
-        jurisdictions=[jurisdiction],
+        jurisdictions=[parse_jurisdiction(jurisdiction)],
         primary_allocations=primary_allocations,
         secondary_allocations=secondary_allocations,
         footnote_mentions=footnote_mentions,

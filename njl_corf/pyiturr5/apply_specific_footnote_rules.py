@@ -696,6 +696,9 @@ def enact_5_340_us246(
             # the protected band is a narrow subset of the full band, some extra steps
             # can be taken.
             for jurisdiction in jurisdictions:
+                # We'll skip out if the supplied band collection doesn't include this jurisdiction.
+                if jurisdiction not in collections:
+                    continue
                 # Create a band to denote this protection
                 this_protected_band = create_band_from_footnote(
                     bounds=range_str, jurisdictions=[jurisdiction]
