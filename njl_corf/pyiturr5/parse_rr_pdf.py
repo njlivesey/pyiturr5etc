@@ -103,7 +103,7 @@ def parse_rr_file(
     # The "bands" data is now a list of dictionaries (by region) of BandCollections.
     # Combined them together by region
     keys = band_sets[0].keys()
-    band_collections = {}
+    band_collections: dict[BandCollection] = {}
     for key in keys:
         buffer = list(
             itertools.chain.from_iterable(bands[key].to_list() for bands in band_sets)
@@ -128,7 +128,14 @@ def parse_rr_file(
     band_collections["ITU"] = functools.reduce(
         lambda a, b: a.merge(b), band_collections.values()
     )
-    print("finishing.")
+    # Now go through, and re-finalize all the bands, as well as decorating them with the
+    # footnote definitions.
+    print("finalizing, ", end="")
+    for band_collection in band_collections.values():
+        for band in band_collection:
+            band.finalize()
+            band.footnote_definitions = footnote_definitions
+    print("done.")
     # Construct and return a result
     return AllocationDatabase(
         source=f"ITU Radio Regulations version {rr_version_info.version}",
@@ -222,6 +229,14 @@ def parse_page(
     if page_tag == "RR5-6":
         # Skip the next two lines
         lines = lines[2:]
+    # A line of underscores indicates the begininning of footnotes (within footnotes, go
+    # figure), we'll ignore those as they breed confusion.
+    i_division = None
+    for i_line, line in enumerate(lines):
+        if line.startswith("___"):
+            i_division = i_line
+    if i_division is not None:
+        lines = lines[:i_division]
     # Get the allocations from the table
     if tables:
         header_line = lines[0]
@@ -242,6 +257,9 @@ def parse_page(
 
 def parse_lines_for_footnotes(lines: list[str]) -> dict[str]:
     """Extract footnote definitions from lines"""
+    if _DEBUG:
+        print("=" * 80)
+        print(lines)
     footnotes = {}
     current_footnote_key = None
     current_footnote_buffer = None
@@ -255,16 +273,18 @@ def parse_lines_for_footnotes(lines: list[str]) -> dict[str]:
             current_footnote_key, current_footnote_buffer = line.split(" ", maxsplit=1)
         elif current_footnote_key:
             # We're not starting a new footnote, but we are continuing a previous one.
-            # That said, check we've not come to the last line of the page.
-            if line != lines[-1]:
-                current_footnote_buffer += " " + line
+            filler = " " if not current_footnote_buffer.endswith("-") else ""
+            current_footnote_buffer += filler + line
         else:
-            # Just note a line we don't understand
-            warnings.warn(f"Ignoring: {line}")
-            pass
+            # Report a line we don't understand
+            raise ValueError(f"Unable to parse: {line}")
     # Store any accumulated footnote
     if current_footnote_key:
         footnotes[current_footnote_key] = current_footnote_buffer
+    if _DEBUG:
+        print("-" * 80)
+        print(footnotes)
+
     # Return the result
     return footnotes
 

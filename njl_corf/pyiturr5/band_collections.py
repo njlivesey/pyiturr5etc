@@ -2,7 +2,7 @@
 
 import itertools
 import copy
-from typing import Callable, Optional
+from typing import Callable, Optional, Iterator
 import pint
 import numpy as np
 
@@ -61,29 +61,29 @@ class BandCollection:
         """Remove an entry from the collection"""
         self.data.removei(band.bounds[0], band.bounds[1], band)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[Band]:
         """Generate an iterable over the collected bands"""
         bands = self.to_list()
         for b in bands:
             yield b
 
-    def __len__(self):
+    def __len__(self) -> int:
         """Return number of bands"""
         return len(self.data)
 
-    def begin(self):
+    def begin(self) -> pint.Quantity:
         """Return lowest frequency"""
         return self.data.begin()
 
-    def end(self):
+    def end(self) -> pint.Quantity:
         """Return lowest frequency"""
         return self.data.end()
 
-    def union(self, other):
+    def union(self, other) -> "BandCollection":
         """Merge two sets of band collections without regard to their content"""
         return BandCollection(self.data | other.data)
 
-    def merge(self, other):
+    def merge(self, other) -> "BandCollection":
         """Merge band collections, paying attention to quasi-duplicates (i.e., jurisdictions)"""
         # Build a raw lists that is the brain-dead merge of both
         interim = self.union(other)
@@ -106,11 +106,11 @@ class BandCollection:
             result.append(new_band)
         return result
 
-    def get_boundaries(self):
+    def get_boundaries(self) -> list[pint.Quantity]:
         """Return an array that gives all the band edges, in order"""
         return sorted(self.data.boundary_table)
 
-    def flatten(self):
+    def flatten(self) -> "BandCollection":
         """Where bands overlap, split them, then merge contents of bands with same spans"""
         # First loop over the bands and slice at overlap boundaries, so all overlaps are
         # complete rather than partial.  This functionality is taken from intervaltree's

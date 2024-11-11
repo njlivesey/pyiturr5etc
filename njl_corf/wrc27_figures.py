@@ -109,8 +109,6 @@ def setup_frequency_axis(
     xticks : pint.Quantity, optional
         Locations for x minor ticks
     """
-    # Have the tickmarks point outwards
-    ax.tick_params(axis="x", which="both", direction="out")
     # Sort out xticks
     if isinstance(xticks, list):
         xticks = pint.Quantity.from_list(xticks)
@@ -461,7 +459,8 @@ def wrc27_overview_figure(
     for x in list(ax.get_xticks())[1:-1]:
         ax.axvline(x, color="lightgrey", zorder=0, linewidth=0.5)
     # -------------------------------- y-axis
-    y_range = [len(ai_info) - 0.5, -0.5]
+    tick_space_height = 0.2
+    y_range = [len(ai_info) - 0.5 + tick_space_height, -0.5 - tick_space_height]
     ax.set_ylim(y_range[0], y_range[1])
     y_labels = [key.split(" ")[1][3:] for key in ai_info.keys()]
     y_tick_locations = np.arange(len(ai_info))
@@ -775,9 +774,9 @@ def wrc27_ai_figure(
         y_labels.append(row_key)
     # -------------------------------- y-axis
     # Note the y-axis is upside down to facilitate indexing etc.
-    y_range = [len(y_labels) - 0.5, -0.5]
-    y_margin = 0.15
-    ax.set_ylim(y_range[0] + y_margin, y_range[1] - y_margin)
+    tick_space_height = 0.4
+    y_range = [len(y_labels) - 0.5 + tick_space_height, -0.5 - tick_space_height]
+    ax.set_ylim(y_range[0], y_range[1])
     y_tick_locations = np.arange(len(y_labels))
     ax.set_yticks(y_tick_locations, labels=y_labels)
     ax.yaxis.set_minor_locator(plt.NullLocator())
@@ -822,8 +821,10 @@ def wrc27_ai_figure(
         row_size_inches = 0.15
         # Take a stab at the figure size
         figure_width_inches = 10.6 / 2.54
-        bar_area_height_inches = (len(y_labels) + 2 * y_margin) * row_size_inches
-        notional_extra_height_inches = 0.3533 + 0.18 * (not put_units_on_labels)
+        bar_area_height_inches = (
+            len(y_labels) + 2 * tick_space_height
+        ) * row_size_inches
+        notional_extra_height_inches = 0.25595 + 0.18 * (not put_units_on_labels)
         initial_height = bar_area_height_inches + notional_extra_height_inches
         fig.set_size_inches(
             figure_width_inches, bar_area_height_inches + notional_extra_height_inches

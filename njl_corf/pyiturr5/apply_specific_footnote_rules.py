@@ -7,12 +7,6 @@ from .band_collections import BandCollection
 from .bands import Band, parse_bounds
 from .jurisdictions import Jurisdiction, parse_jurisdiction
 
-# from .band_collections import BandCollection
-
-NOTES = """
-5.149 adds RAS at 6650-6675.2 MHz (see 5.458A), possibly others
-"""
-
 
 def create_band_from_footnote(
     bounds: str | slice | list[pint.Quantity],
@@ -38,6 +32,9 @@ def create_band_from_footnote(
     result : Band
         The newly-created band to include in a BandCollection
     """
+    # Set defaults
+    if jurisdictions is None:
+        jurisdictions = ["ITU-R1", "ITU-R2", "ITU-R3"]
     # Process the bounds
     bounds = parse_bounds(bounds)
     # Preprocess the allocations if supplied
@@ -48,9 +45,8 @@ def create_band_from_footnote(
             parse_allocation(allocation, allow_arbitrary_remainder_text=True)
             for allocation in allocations
         ]
-    if jurisdictions is not None:
-        jurisdictions = [parse_jurisdiction(j) for j in jurisdictions]
     # Create and return the result
+    jurisdictions = [parse_jurisdiction(j) for j in jurisdictions]
     if allocations:
         for allocation in allocations:
             allocation.secondary = False
@@ -63,34 +59,31 @@ def create_band_from_footnote(
     )
 
 
-# ------------------------------------------------------- Allocation-adding footnotes.
-
-
 # Footnote 5.149 is particularly complicated.  Text is more or less copy and pasted from
 # the FCC tables
 def footnote_5_149():
     """Return band or bands corresponding to footnote 5.149:
 
-    In making assignments to stations of other services to which the bands: [TABLE]
-    [Cell:] 13 360-13 410 kHz, 25 550-25 670 kHz, 37.5-38.25 MHz, 73-74.6 MHz in Regions
-    1 and 3, 150.05-153 MHz in Region 1, 322-328.6 MHz, 406.1-410 MHz, 608-614 MHz in
-    Regions 1 and 3, 1330-1400 MHz, 1610.6-1613.8 MHz, 1660-1670 MHz, 1718.8-1722.2 MHz,
-    2655-2690 MHz, 3260-3267 MHz, 3332-3339 MHz, 3345.8-3352.5 MHz, 4825-4835 MHz,
-    4950-4990 MHz, 4990-5000 MHz, 6650-6675.2 MHz, 10.6-10.68 GHz, 14.47-14.5 GHz,
-    22.01-22.21 GHz, 22.21-22.5 GHz, 22.81-22.86 GHz, [Cell:] 23.07-23.12 GHz, 31.2-31.3
-    GHz, 31.5-31.8 GHz in Regions 1 and 3, 36.43-36.5 GHz, 42.5-43.5 GHz, 48.94-49.04
-    GHz, 76-86 GHz, 92-94 GHz, 94.1-100 GHz, 102-109.5 GHz, 111.8-114.25 GHz,
-    128.33-128.59 GHz, 129.23-129.49 GHz, 130-134 GHz, 136-148.5 GHz, 151.5-158.5 GHz,
-    168.59-168.93 GHz, 171.11-171.45 GHz, 172.31-172.65 GHz, 173.52-173.85 GHz,
-    195.75-196.15 GHz, 209-226 GHz, 241-250 GHz, 252-275 GHz are allocated,
-    administrations are urged to take all practicable steps to protect the radio
-    astronomy service from harmful interference.  Emissions from spaceborne or airborne
-    stations can be particularly serious sources of interference to the radio astronomy
-    service (see Nos. 4.5 and 4.6 and Article 29).  (WRC-07)
+    In making assignments to stations of other services to which the bands: 13 360-13
+    410 kHz, 25 550-25 670 kHz, 37.5-38.25 MHz, 73-74.6 MHz in Regions 1 and 3,
+    150.05-153 MHz in Region 1, 322-328.6 MHz, 406.1-410 MHz, 608-614 MHz in Regions 1
+    and 3, 1330-1400 MHz, 1610.6-1613.8 MHz, 1660-1670 MHz, 1718.8-1722.2 MHz, 2655-2690
+    MHz, 3260-3267 MHz, 3332-3339 MHz, 3345.8-3352.5 MHz, 4825-4835 MHz, 4950-4990 MHz,
+    4990-5000 MHz, 6650-6675.2 MHz, 10.6-10.68 GHz, 14.47-14.5 GHz, 22.01-22.21 GHz,
+    22.21-22.5 GHz, 22.81-22.86 GHz, 23.07-23.12 GHz, 31.2-31.3 GHz, 31.5-31.8 GHz in
+    Regions 1 and 3, 36.43-36.5 GHz, 42.5-43.5 GHz, 48.94-49.04 GHz, 76-86 GHz, 92-94
+    GHz, 94.1-100 GHz, 102-109.5 GHz, 111.8-114.25 GHz, 128.33-128.59 GHz, 129.23-129.49
+    GHz, 130-134 GHz, 136-148.5 GHz, 151.5-158.5 GHz, 168.59-168.93 GHz, 171.11-171.45
+    GHz, 172.31-172.65 GHz, 173.52-173.85 GHz, 195.75-196.15 GHz, 209-226 GHz, 241-250
+    GHz, 252-275 GHz are allocated, administrations are urged to take all practicable
+    steps to protect the radio astronomy service from harmful interference.  Emissions
+    from spaceborne or airborne stations can be particularly serious sources of
+    interference to the radio astronomy service (see Nos. 4.5 and 4.6 and Article 29).
+    (WRC-07)
     """
     entries = [
-        "13.360-13.410 MHz",
-        "25.550-25.670 MHz",
+        "13.360-13.410 kHz",
+        "25.550-25.670 kHz",
         "37.5-38.25 MHz",
         "73-74.6 MHz in Regions 1 and 3",
         "150.05-153 MHz in Region 1",
@@ -162,8 +155,35 @@ def footnote_5_149():
         bands.append(
             create_band_from_footnote(
                 bounds=bounds_str,
-                allocations="Radio astronomy 5.149#",
+                allocations="radio astronomy 5.149#",
                 jurisdictions=jurisdictions,
+            )
+        )
+    return bands
+
+
+def footnote_5_208a():
+    """Return band or bands corresponding to footnote 5.208A
+
+    In making assignments to space stations in the mobile-satellite service in the
+    frequency bands 137-138 MHz, 387-390 MHz and 400.15-401 MHz and in the maritime
+    mobile-satellite service (space-to-Earth) in the frequency bands 157.1875-157.3375
+    MHz and 161.7875-161.9375 MHz, administrations shall take all practicable steps to
+    protect the radio astronomy service in the frequency bands 150.05-153 MHz, 322-328.6
+    MHz, 406.1-410 MHz and 608-614 MHz from harmful interference from unwanted emissions
+    as shown in the most recent version of Recommendation ITU-R RA.769. (WRC-19)"""
+    added_ranges = [
+        "150.05-153 MHz",
+        "322-328.6 MHz",
+        "406.1-410 MHz",
+        "608-614 MHz",
+    ]
+    bands = []
+    for this_range in added_ranges:
+        bands.append(
+            create_band_from_footnote(
+                bounds=this_range,
+                allocations="radio astronomy 5.208A#",
             )
         )
     return bands
@@ -233,15 +253,15 @@ def footnote_5_305():
 def footnote_5_306():
     """Return band or bands corresponding to footnote 5.306
 
-    Additional allocation:  in Region 1, except in the African Broadcasting Area (see
-    Nos. 5.10 to 5.13), and in Region 3, the band 608-614 MHz is also allocated to the
-    radio astronomy service on a secondary basis.
+    Additional allocation: in Region 1, except in the African Broadcasting Area (see
+    Nos. 5.10 to 5.13), and in Region 3, except in China and India, the band 608-614 MHz
+    is also allocated to the radio astronomy service on a secondary basis. (WRC-23)
     """
     return [
         create_band_from_footnote(
             bounds="608-614 MHz",
-            allocations="Radio astronomy 5.306# (Not Africa)",
-            jurisdictions=["ITU-R1"],
+            allocations="Radio astronomy 5.306# (Not Africa, China, or India)",
+            jurisdictions=["ITU-R1", "ITU-R3"],
         )
     ]
 
@@ -283,10 +303,47 @@ def footnote_5_339():
                     "Earth exploration-satellite (passive) 5.339#",
                     "Space research (passive) 5.339#",
                 ],
-                jurisdictions=["ITU-R1", "ITU-R2", "ITU-R3"],
             )
         )
     return bands
+
+
+def footnote_5_341():
+    """Return band or bands corresponding to footnote 5.341
+
+    In the bands 1 400-1 727 MHz, 101-120 GHz and 197-220 GHz, passive research is being
+    conducted by some countries in a programme for the search for intentional emissions
+    of extraterrestrial origin."""
+    added_ranges = [
+        "1 400-1 727 MHz",
+        "101-102 GHz",
+        "197-220 GHz",
+    ]
+    bands = []
+    for this_range in added_ranges:
+        bands.append(
+            create_band_from_footnote(
+                bounds=this_range,
+                allocations="radio astronomy 5.341#",
+            )
+        )
+    return bands
+
+
+def footnote_5_379a():
+    """Return band or bands corresponding to footnote 5.379a
+
+    Administrations are urged to give all practicable protection in the band 1 660.5-1
+    668.4 MHz for future research in radio astronomy, particularly by eliminating
+    air-to-ground transmissions in the meteorological aids service in the band 1 664.4-1
+    668.4 MHz as soon as practicable.
+    """
+    return [
+        create_band_from_footnote(
+            bounds="1 660.5-1 668.4 MHz",
+            allocations="radio astronomy 5.379a",
+        )
+    ]
 
 
 def footnote_5_385():
@@ -299,7 +356,6 @@ def footnote_5_385():
         create_band_from_footnote(
             bounds="1718.8-1722.2 MHz",
             allocations="Radio astronomy 5.385#",
-            jurisdictions=["ITU-R1", "ITU-R2", "ITU-R3"],
         )
     ]
 
@@ -314,7 +370,6 @@ def footnote_5_437():
         create_band_from_footnote(
             bounds="4200-4400 MHz",
             allocations="Earth exploration-satellite (passive) 5.437#",
-            jurisdictions=["ITU-R1", "ITU-R2", "ITU-R3"],
         )
     ]
 
@@ -360,11 +415,26 @@ def footnote_5_458():
         bands.append(
             create_band_from_footnote(
                 bounds=this_range,
-                allocations="Earth exploration-satellite (passive) 5.458#",
-                jurisdictions=["ITU-R1", "ITU-R2", "ITU-R3"],
+                allocations="earth exploration-satellite (passive) 5.458#",
             )
         )
     return bands
+
+
+def footnote_5_458a():
+    """Return band or bands corresponding to footnote 5.458a
+
+    In making assignments in the band 6 700-7 075 MHz to space stations of the
+    fixed-satellite service, administrations are urged to take all practicable steps to
+    protect spectral line observations of the radio astronomy service in the band 6
+    650-6 675.2 MHz from harmful interference from unwanted emissions.
+    """
+    return [
+        create_band_from_footnote(
+            bounds="6 650-6 675.2 MHz",
+            allocations="radio astronomy 5.458a",
+        )
+    ]
 
 
 def footnote_5_479():
@@ -377,23 +447,6 @@ def footnote_5_479():
         create_band_from_footnote(
             bounds="9.975-10.025 GHz",
             allocations="Earth exploration-satellite (active) 5.479#",
-            jurisdictions=["ITU-R1", "ITU-R2", "ITU-R3"],
-        )
-    ]
-
-
-def footnote_5_543():
-    """Return band or bands corresponding to footnote 5.543:
-
-    The band 29.95-30 GHz may be used for space-to-space links in the Earth
-    exploration-satellite service for telemetry, tracking, and control purposes, on a
-    secondary basis.
-    """
-    return [
-        create_band_from_footnote(
-            bounds="29.95-30 GHz",
-            allocations="Earth exploration-satellite (space-to-space, comms.) 5.543#",
-            jurisdictions=["ITU-R1", "ITU-R2", "ITU-R3"],
         )
     ]
 
@@ -408,9 +461,31 @@ def footnote_5_555():
         create_band_from_footnote(
             bounds="48.94-49.05 GHz",
             allocations="RADIO ASTRONOMY 5.555#",
-            jurisdictions=["ITU-R1", "ITU-R2", "ITU-R3"],
         )
     ]
+
+
+def footnote_5_555b():
+    """Return band or bands corresponding to footnote 5.555B:
+
+    The power flux-density in the band 48.94-49.04 GHz produced by any geostationary
+    space station in the fixed-satellite service (space-to-Earth) operating in the bands
+    48.2-48.54 GHz and 49.44-50.2 GHz shall not exceed -151.8 dB(W/m2) in any 500 kHz
+    band at the site of any radio astronomy station. (WRC-03)
+    """
+    added_ranges = [
+        "48.2-48.54 GHz",
+        "49.44-50.2 GHz",
+    ]
+    bands = []
+    for this_range in added_ranges:
+        bands.append(
+            create_band_from_footnote(
+                bounds=this_range,
+                allocations="radio astronomy 5.555B#",
+            )
+        )
+    return bands
 
 
 def footnote_5_556():
@@ -430,7 +505,6 @@ def footnote_5_556():
             create_band_from_footnote(
                 bounds=this_range,
                 allocations="radio astronomy 5.556# (On a nation-by-nation basis)",
-                jurisdictions=["ITU-R1", "ITU-R2", "ITU-R3"],
             )
         )
     return bands
@@ -466,15 +540,13 @@ def footnote_5_562d():
 def footnote_5_563b():
     """Return band or bands corresponding to footnote 5.563b:
 
-    The band 237.9-238 GHz is also allocated to the Earth
-    exploration-satellite service (active) and the space research service (active) for
-    spaceborne cloud radars only.
+    The band 237.9-238 GHz is also allocated to the Earth exploration-satellite service
+    (active) and the space research service (active) for spaceborne cloud radars only.
     """
     return [
         create_band_from_footnote(
             bounds="237.9-238 GHz",
             allocations="Earth exploration-satellite (active) 5.563B#",
-            jurisdictions=["ITU-R1", "ITU-R2", "ITU-R3"],
         )
     ]
 
@@ -551,50 +623,9 @@ def footnote_5_565():
                 create_band_from_footnote(
                     bounds=this_range,
                     allocations=allocations,
-                    jurisdictions=["ITU-R1", "ITU-R2", "ITU-R3"],
                 )
             )
     return bands
-
-
-def get_all_itu_footnote_based_additions() -> BandCollection:
-    """Creates a bunch of new allocations from footnotes
-
-    Calling code should then insert these allocations into the tables.
-
-    Returns
-    -------
-    BandCollection
-        The various additional allocations.
-    """
-    all_additions = []
-    routines = [
-        footnote_5_149,
-        footnote_5_225,
-        footnote_5_250,
-        footnote_5_304,
-        footnote_5_305,
-        footnote_5_306,
-        footnote_5_307,
-        footnote_5_339,
-        footnote_5_385,
-        footnote_5_437,
-        footnote_5_443,
-        footnote_5_479,
-        footnote_5_543,
-        footnote_5_458,
-        footnote_5_555,
-        footnote_5_556,
-        footnote_5_562d,
-        footnote_5_563b,
-        footnote_5_565,
-    ]
-    all_additions = BandCollection()
-    for r in routines:
-        these_bands = r()
-        for b in these_bands:
-            all_additions.append(b)
-    return all_additions
 
 
 # ------------------------------------------------------- 5.340/US246
@@ -699,7 +730,8 @@ def enact_5_340_us246(
             # the protected band is a narrow subset of the full band, some extra steps
             # can be taken.
             for jurisdiction in jurisdictions:
-                # We'll skip out if the supplied band collection doesn't include this jurisdiction.
+                # We'll skip out if the supplied band collection doesn't include this
+                # jurisdiction.
                 if jurisdiction not in collections:
                     continue
                 # Create a band to denote this protection
@@ -751,3 +783,46 @@ def enact_5_340_us246(
                             f"Band {overlapping_band.compact_str()} "
                             f"does not have footnote {trigger_footnote}"
                         )
+
+
+def get_all_itu_footnote_based_additions() -> BandCollection:
+    """Creates a bunch of new allocations from footnotes
+
+    Calling code should then insert these allocations into the tables.
+
+    Returns
+    -------
+    BandCollection
+        The various additional allocations.
+    """
+    all_additions = []
+    routines = [
+        footnote_5_149,
+        footnote_5_208a,
+        footnote_5_225,
+        footnote_5_250,
+        footnote_5_304,
+        footnote_5_305,
+        footnote_5_306,
+        footnote_5_307,
+        footnote_5_339,
+        # footnote_5_341, # Skip RR 5.341, which is SETI
+        footnote_5_379a,
+        footnote_5_385,
+        footnote_5_437,
+        footnote_5_443,
+        footnote_5_458,
+        footnote_5_458a,
+        footnote_5_479,
+        footnote_5_555,
+        footnote_5_556,
+        footnote_5_562d,
+        footnote_5_563b,
+        footnote_5_565,
+    ]
+    all_additions = BandCollection()
+    for r in routines:
+        these_bands = r()
+        for b in these_bands:
+            all_additions.append(b)
+    return all_additions
