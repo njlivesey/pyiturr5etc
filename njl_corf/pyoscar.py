@@ -6,6 +6,7 @@ The input is the CSV file generated from the OSCAR website
 import math
 from dataclasses import dataclass
 import fnmatch
+from datetime import datetime
 
 from intervaltree import IntervalTree
 import numpy as np
@@ -22,7 +23,7 @@ class OscarEntry:
     bounds: slice
     oscar_id: str
     satellite: str
-    space_agency: str
+    space_agency: str | datetime
     launch: str
     eol: str
     nominal_frequency: str
@@ -31,6 +32,41 @@ class OscarEntry:
     comment: str
     sensing_mode: str = None
     service: str = None
+    status: str = None
+
+    def _parse_date(self, date):
+        """
+        Parse date strings into datetime objects. Handles cases like "≥2025", "YYYY-MM", "YYYY", or "TBD".
+        """
+        if isinstance(date, datetime):
+            return date
+        if date == "TBD":
+            return np.nan  # Use NaN to represent unknown dates
+        if date.startswith("≥"):
+            date = date[1:]
+
+        formats = ["%Y-%m-%d", "%Y-%m", "%Y"]
+        for fmt in formats:
+            try:
+                return datetime.strptime(date, fmt)
+            except ValueError:
+                continue
+
+        raise ValueError(f"Invalid date format: {date}")
+
+    def _determine_status(self):
+        """
+        Determine status based on launch and eol dates relative to today.
+        """
+        today = datetime.now()
+        try:
+            if self.launch > today:
+                return "future"
+        except TypeError:
+            return "future"
+        if self.eol >= today:
+            return "current"
+        return "previous"
 
     def __post_init__(self):
         """Just some tidying up after definition"""
@@ -41,24 +77,33 @@ class OscarEntry:
             )
             # pylint: enable=no-member
             self.bounds = slice(self.bounds.start, self.bounds.stop + delta)
+        # Handle date-related issues
+        # self.launch = self._parse_date(self.launch)
+        # self.eol = self._parse_date(self.eol)
+        # self.mission_status = self._determine_status()
 
 
 def read(
-    filename: str = None, communications: bool = False
+    frequencies_filename: str = None,
+    missions_filename: str = None,
+    communications: bool = False,
 ) -> IntervalTree[OscarEntry]:
     """Read the OSCAR database from Excel and ingest"""
-    if filename is None:
+    if frequencies_filename is None:
         if not communications:
-            filename = (
+            frequencies_filename = (
                 "/users/livesey/corf/data/"
-                "Oscar-Satellite-Frequencies-Earth-observation-MW-frequencies-2023-11-14.xlsx"
+                "Oscar-Satellite-Frequencies-Earth-observation-MW-frequencies-2024-12-18.xlsx"
             )
         else:
-            filename = (
+            frequencies_filename = (
                 "/users/livesey/corf/data/"
                 "Oscar-Satellite-Frequencies-for-Satellite-management-2024-05-23.xlsx"
             )
-    data = pd.read_excel(filename).astype(str)
+    if missions_filename is None:
+        missions_filename = "/users/livesey/corf/data/Oscar-Satellites-2024-12-18.xlsx"
+    frequency_data = pd.read_excel(frequencies_filename).astype(str)
+    mission_data = pd.read_excel(missions_filename).astype(str)
     # Identify fields to capture
     if not communications:
         frequency_field = "Frequency (GHz)"
@@ -69,7 +114,7 @@ def read(
         frequency_unit = ureg.MHz
         bandwidth_field = "Bandwidth (kHz)"
     # Parse the frequency range information
-    frequency_ranges = data[frequency_field].str.split("-", expand=True)
+    frequency_ranges = frequency_data[frequency_field].str.split("-", expand=True)
     lower_limit = (
         frequency_ranges[0]
         .str.strip()
@@ -85,16 +130,16 @@ def read(
         .astype(float)
     )
     # Insert this new information into the table
-    data["Frequency start"] = lower_limit
-    data["Frequency stop"] = upper_limit
-    data.loc[data["Frequency stop"].isnull(), "Frequency stop"] = data[
-        "Frequency start"
-    ]
+    frequency_data["Frequency start"] = lower_limit
+    frequency_data["Frequency stop"] = upper_limit
+    frequency_data.loc[frequency_data["Frequency stop"].isnull(), "Frequency stop"] = (
+        frequency_data["Frequency start"]
+    )
     # Think about the bandwidth, first compute the one from the frequency ranges we
     # have.
     range_based_bandwidth = np.abs(upper_limit - lower_limit)
-    # Now get the one in the able, if any
-    bandwidth = data[bandwidth_field].copy().astype(str).str.strip()
+    # Now get the one in the table, if any
+    bandwidth = frequency_data[bandwidth_field].copy().astype(str).str.strip()
     bandwidth.loc[(bandwidth == "N/R") | (bandwidth == "-") | (bandwidth == "nan")] = (
         "0 MHz"
     )
@@ -105,16 +150,23 @@ def read(
     # Check that there is no confusion between the two versions of bandwidth
     questionable_row_flags = (bandwidth_value != 0) & (range_based_bandwidth > 1e-4)
     # In the cases where there is, then go with the bandwidth column as the definitive
-    # source of information. (ACTUALLY, THIS IS WRONG!)
-    data.loc[~questionable_row_flags, "Frequency start"] -= (
+    # source of information.
+    frequency_data.loc[~questionable_row_flags, "Frequency start"] -= (
         0.5 * bandwidth_value[~questionable_row_flags]
     )
-    data.loc[~questionable_row_flags, "Frequency stop"] += (
+    frequency_data.loc[~questionable_row_flags, "Frequency stop"] += (
         0.5 * bandwidth_value[~questionable_row_flags]
+    )
+    # Now do a join to get the mission status from the mission data table
+    mission_data = mission_data.rename(
+        columns={"Acronym": "Satellite", "Sat status": "Status"}
+    )
+    frequency_data = frequency_data.merge(
+        mission_data[["Satellite", "Status"]], on="Satellite", how="left"
     )
     # Now create the result and store in an IntervalTree
     result = IntervalTree()
-    for row in data.to_dict("records"):
+    for row in frequency_data.to_dict("records"):
         if not communications:
             kwargs = dict(
                 sensing_mode=row["Sensing mode"].strip(),
@@ -136,6 +188,7 @@ def read(
             bandwidth=row[bandwidth_field],
             polarization=row["Polarisation"].strip(),
             comment=row["Comment"],
+            status=row["Status"],
             **kwargs,
         )
         result[entry.bounds] = entry

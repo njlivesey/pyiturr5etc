@@ -868,7 +868,7 @@ class Band:
         # Create and return the result
         if allocations:
             for allocation in allocations:
-                allocation.secondary = False
+                # allocation.secondary = False
                 allocation.footnote_mention = True
         return cls(
             bounds=bounds,

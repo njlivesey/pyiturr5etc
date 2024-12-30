@@ -216,6 +216,11 @@ def parse_allocation(
     else:
         first_word = invocation
     primary = first_word.isupper()
+    if not primary:
+        secondary = first_word[:1].isupper()
+    else:
+        secondary = False
+    footnote_mention = (not primary) and (not secondary)
     remainder = line[len(service.name) :].strip()
     # Anyting in parentheses becomes a modifiers
     modifiers = []
@@ -244,4 +249,6 @@ def parse_allocation(
         modifiers=modifiers,
         footnotes=footnotes,
         primary=primary,
+        secondary=secondary,
+        footnote_mention=footnote_mention,
     )

@@ -12,6 +12,9 @@ import pint
 from matplotlib.patches import Rectangle
 from matplotlib.ticker import FuncFormatter, NullFormatter
 from matplotlib.transforms import blended_transform_factory
+from matplotlib.figure import Figure
+from matplotlib.axes import Axes
+from numpy.typing import ArrayLike
 
 from njl_corf import pyiturr5 as rr, ureg, wrc27_views
 
@@ -20,6 +23,9 @@ def set_nas_graphic_style():
     """Choose fonts etc. to match NAS style"""
     # Set plot defaults
     matplotlib.rcParams["text.usetex"] = True
+    matplotlib.rcParams["text.latex.preamble"] = (
+        r"\usepackage[boldweight=Bold]{fdsymbol}"
+    )
     matplotlib.rcParams["font.family"] = "serif"
     matplotlib.rcParams["font.serif"] = ["Palatino"]
     matplotlib.rcParams["font.size"] = 9
@@ -240,7 +246,6 @@ def ensure_visible_bandwidth(
     if minimum_bandwidth_points is None:
         minimum_bandwidth_points = 1.0
     # Get the current figure and axes, work out if we're on a log-scale
-    fig = plt.gcf()
     ax = plt.gca()
     try:
         log_scale = bool(["linear", "log"].index(ax.get_xscale()))
@@ -248,17 +253,9 @@ def ensure_visible_bandwidth(
         raise ValueError(f"Unrecognized axis x-scale {ax.get_xscale()}") from exception
     # Work out the width of the axes in points (will be subject to minor changes, I
     # think, when final drawing takes place.)
-    ax_width_points = 72.0 * fig.get_figwidth() * (ax.get_position().width)
     # Compute the width of the band in axes coordinates
     x_unit = ax.xaxis.get_units()
-    current_width_points = 0.0
-    for sign, x in zip([-1, 1], [start, stop]):
-        if x_unit is not None:
-            p_display = ax.transData.transform([x.to(x_unit).magnitude, 0])
-        else:
-            p_display = ax.transData.transform([x, 0])
-        p_axes = ax.transAxes.inverted().transform(p_display)
-        current_width_points += sign * p_axes[0] * ax_width_points
+    current_width_points = get_bandwidth_points(start, stop)
     # Work out if a correction is needed
     factor = minimum_bandwidth_points / current_width_points
     if factor > 1.0:
@@ -275,6 +272,66 @@ def ensure_visible_bandwidth(
             start = (10.0**log_start) * x_unit
             stop = (10.0**log_stop) * x_unit
     return start, stop
+
+
+def get_bandwidth_points(start: float, stop: float):
+    """Get the width of a bar in points"""
+    current_width_points = 0.0
+    ax = plt.gca()
+    fig = plt.gcf()
+    ax_width_points = 72.0 * fig.get_figwidth() * (ax.get_position().width)
+    x_unit = ax.xaxis.get_units()
+    for sign, x in zip([-1, 1], [start, stop]):
+        if x_unit is not None:
+            p_display = ax.transData.transform([x.to(x_unit).magnitude, 0])
+        else:
+            p_display = ax.transData.transform([x, 0])
+        p_axes = ax.transAxes.inverted().transform(p_display)
+        current_width_points += sign * p_axes[0] * ax_width_points
+    return current_width_points
+
+
+def shift_x_by_points(x, points, ax=None):
+    """Compute delta x that shifts location by points.
+
+    Parameters
+    ----------
+    x : float
+        The x-coordinate in data units.
+    points : The shift amount in points.
+    ax : Axes
+        The Axes object. If None, uses plt.gca().
+
+    Returns:
+    new_x : float
+        The adjusted x-coordinate in data units.
+    """
+    if ax is None:
+        ax = plt.gca()
+
+    # Get the figure DPI and convert points to pixels
+    points_to_pixels = points * (ax.figure.dpi / 72)  # Points to pixels conversion
+
+    # Get axis x-unit (used by Matplotlib for scaling)
+    x_unit = ax.xaxis.get_units() or x.units
+    x_in_unit = x.to(x_unit).magnitude  # Convert x to the axis unit
+
+    # Transform x to display coordinates
+    point_display_original = ax.transData.transform((x_in_unit, 0))
+    x_display_original = point_display_original[0]
+    y_display_original = point_display_original[1]
+
+    # Shift in display coordinates
+    x_display_moved = x_display_original + points_to_pixels
+
+    # Transform back to data coordinates
+    x_data_moved = ax.transData.inverted().transform(
+        (x_display_moved, y_display_original)
+    )
+
+    # Convert delta x back to original units
+    delta_x = pint.Quantity(x_data_moved[0] - x_in_unit, x_unit).to(x.units)
+    return delta_x
 
 
 def show_band_for_overview(
@@ -315,6 +372,7 @@ def show_band_for_individual(
     row: int,
     ax: plt.Axes,
     minimum_bandwidth_points: Optional[float] = None,
+    direction: Optional[float] = None,
     **kwargs,
 ):
     """Show a band as a rectangle patch"""
@@ -336,6 +394,36 @@ def show_band_for_individual(
         **kwargs,
     )
     ax.add_patch(patch)
+    if direction is not None:
+        # Get a sense of how big this bar will be, show the direction arrow within or
+        # beside the bar, accordingly
+        bandwidth_points = get_bandwidth_points(start, stop)
+        if bandwidth_points > 6.0:
+            x_anchor = 0.5 * (start + stop)
+            ha = "center"
+            color = "white"
+        else:
+            x_anchor = stop
+            ha = "left"
+            color = "black"
+            x_anchor += shift_x_by_points(x_anchor, 1.0)
+        y_center = row + 0.03 * vertical_width
+        # Now work out what symbol to show
+        if direction == -1:
+            symbol = r"{\boldmath$\downarrow$}"
+        elif direction == 1:
+            symbol = r"{\boldmath$\uparrow$}"
+        elif direction == 1j:
+            symbol = r"{\boldmath$\leftrightarrow$}"
+        elif direction == 0:
+            symbol = r"{\boldmath$\updownarrow$}"
+        ax.annotate(
+            symbol,
+            (x_anchor, y_center),
+            color=color,
+            ha=ha,
+            va="center",
+        )
 
 
 @dataclass
@@ -555,6 +643,8 @@ def wrc27_ai_figure(
     include_all_encompassed_allocations: Optional[bool] = True,
     xticks: Optional[pint.Quantity] = None,
     xminor: Optional[pint.Quantity] = None,
+    arrows_included: Optional[ArrayLike] = None,
+    custom_annotations: Optional[Callable] = None,
 ):
     """Figure reviewing WRC agenda items and associated bands
 
@@ -563,8 +653,8 @@ def wrc27_ai_figure(
     ai : str | list[str], optional
         AI identifier or list thereof (e.g. 1.6)
     allocation_database : rr.AllocationDatabase, optional
-        Allocation tables from rr.  If not supplied, these are read in.
-        Having them as an optional argument enables faster debugging.
+        Allocation tables from rr.  If not supplied, these are read in. Having them as
+        an optional argument enables faster debugging.
     frequency_range : list[pint.Quantity], optional
         Range of frequencies to cover, expansive default assumed if not given.
     ax : plt.Axes, optional
@@ -579,6 +669,21 @@ def wrc27_ai_figure(
         If bar is narrower than this, make it wider
     put_units_on_labels : float, optional
         If set, put units on frequency labels
+    include_all_encompassed_allocations : bool, optional
+        If set, show all the sciencea allocations within the frequency range encompassed
+        by the figure, otherwise only show the science/5.340 bands directly adjacent to
+        the bands under consideration in the AI.
+    xticks : pint.Quantity
+        Optional manually supplied major tick locations
+    xminor : pint.Quantity
+        Optional manually supplied minor tick locations
+    arrows_included : pint.Quanity
+        If set, show up/down/sideways arrows for Earth-to-space, space-to-Earth,
+        space-to-space allocations.
+    custom_annotations : Callable
+        If supplied, is called with the figure and axes to provide additional
+        information.  Other information needed is up to the calling routine to provide
+        (e.g., via a closure.)
     """
     # Read the allocation tables if not supplied
     if allocation_database is None:
@@ -628,7 +733,10 @@ def wrc27_ai_figure(
     # Identify the bars for each agenda item
     bar_buffers = {row_key: rr.BandCollection() for row_key in science_rows}
     for ai_key, this_ai_info in ai_info.items():
-        for ai_band in this_ai_info.frequency_bands:
+        frequency_bands = this_ai_info.frequency_bands
+        if this_ai_info.secondary_bands is not None:
+            frequency_bands += this_ai_info.secondary_bands
+        for ai_band in frequency_bands:
             for row_key, row_info in science_rows.items():
                 relevant_bands = allocation_database.itu.get_bands(
                     ai_band.start,
@@ -719,7 +827,11 @@ def wrc27_ai_figure(
         else:
             solid_frequency_bands = this_ai_info.detailed_bands
             facecolor = "lightgrey"
-        for ai_band in solid_frequency_bands:
+        for i_band, ai_band in enumerate(solid_frequency_bands):
+            direction = ai_band.step
+            if arrows_included is not None:
+                if not arrows_included[i_band]:
+                    direction = None
             # Draw this particular band
             show_band_for_individual(
                 ai_band.start,
@@ -729,6 +841,7 @@ def wrc27_ai_figure(
                 ax=ax,
                 minimum_bandwidth_points=minimum_bandwidth_points,
                 edgecolor="none",
+                direction=direction,
             )
         # If detailed bands are present, show the frequency bands as a hollow box
         if this_ai_info.detailed_bands is not None:
@@ -742,6 +855,21 @@ def wrc27_ai_figure(
                     edgecolor="dimgrey",
                     ax=ax,
                     minimum_bandwidth_points=minimum_bandwidth_points,
+                    direction=ai_band.step,
+                )
+        # Now do any secondary bands
+        if this_ai_info.secondary_bands is not None:
+            for ai_band in this_ai_info.secondary_bands:
+                # Draw this particular band
+                show_band_for_individual(
+                    ai_band.start,
+                    ai_band.stop,
+                    row=len(y_labels),
+                    facecolor="lightgrey",
+                    ax=ax,
+                    minimum_bandwidth_points=minimum_bandwidth_points,
+                    edgecolor="none",
+                    direction=ai_band.step,
                 )
 
         y_labels.append(r"\textbf{" + ai_key + r"}")
@@ -839,6 +967,9 @@ def wrc27_ai_figure(
         final_height_inches = bar_area_height_inches + actual_extra_height_inches
         fig.set_size_inches(figure_width_inches, final_height_inches)
         fig.canvas.draw()
+    # --------------------------------- Any custom annotation
+    if custom_annotations:
+        custom_annotations(ax=ax)
     # --------------------------------- Done
     if not no_show:
         plt.show()
@@ -855,6 +986,8 @@ class AIPlotConfiguration:
     include_all_encompassed_allocations: Optional[bool] = True
     xticks: Optional[pint.Quantity] = None
     xminor: Optional[pint.Quantity] = None
+    arrows_included: Optional[ArrayLike] = None
+    custom_annotations: Optional[Callable] = None
 
 
 def all_individual_figures(
@@ -868,7 +1001,10 @@ def all_individual_figures(
     plot_configurations: dict[AIPlotConfiguration] = {}
     # Make a bunch of plots for the WRC-27 items
     # fmt: on
-    plot_configurations["WRC-27 AI-1.1"] = AIPlotConfiguration("WRC-27 AI-1.1")
+    plot_configurations["WRC-27 AI-1.1"] = AIPlotConfiguration(
+        "WRC-27 AI-1.1",
+        custom_annotations=functools.partial(rr5_340_49_ghz_annotation, side="left"),
+    )
     plot_configurations["WRC-27 AI-1.2"] = AIPlotConfiguration(
         "WRC-27 AI-1.2", frequency_range=[13.20 * ureg.GHz, 14.05 * ureg.GHz]
     )
@@ -879,7 +1015,10 @@ def all_individual_figures(
         "WRC-27 AI-1.4", frequency_range=[17.1 * ureg.GHz, 17.9 * ureg.GHz]
     )
     plot_configurations["WRC-27 AI-1.5"] = AIPlotConfiguration("WRC-27 AI-1.5")
-    plot_configurations["WRC-27 AI-1.6"] = AIPlotConfiguration("WRC-27 AI-1.6")
+    plot_configurations["WRC-27 AI-1.6"] = AIPlotConfiguration(
+        "WRC-27 AI-1.6",
+        custom_annotations=functools.partial(rr5_340_49_ghz_annotation, side="left"),
+    )
     plot_configurations["WRC-27 AI-1.7"] = AIPlotConfiguration(
         "WRC-27 AI-1.7",
         # put_units_on_labels=True,
@@ -903,7 +1042,9 @@ def all_individual_figures(
         frequency_range=[70.0 * ureg.GHz, 90 * ureg.GHz],
         xticks=np.linspace(70 * ureg.GHz, 90 * ureg.GHz, 11),
     )
-    plot_configurations["WRC-27 AI-1.11"] = AIPlotConfiguration("WRC-27 AI-1.11")
+    plot_configurations["WRC-27 AI-1.11"] = AIPlotConfiguration(
+        "WRC-27 AI-1.11", arrows_included=[False, True, False, False, True, True]
+    )
     plot_configurations["WRC-27 AI-1.12"] = AIPlotConfiguration("WRC-27 AI-1.12")
     plot_configurations["WRC-27 AI-1.13"] = AIPlotConfiguration(
         "WRC-27 AI-1.13",
@@ -970,7 +1111,8 @@ def all_individual_figures(
         ai=[
             "WRC-31 AI-2.10",
             "WRC-31 AI-2.11",
-        ]
+        ],
+        custom_annotations=functools.partial(rr5_340_49_ghz_annotation, side="left"),
     )
     plot_configurations["WRC-31 AIs-2.12-2.13"] = AIPlotConfiguration(
         ai=[
@@ -995,6 +1137,8 @@ def all_individual_figures(
             xticks=item.xticks,
             xminor=item.xminor,
             minimum_bandwidth_points=1.0,
+            arrows_included=item.arrows_included,
+            custom_annotations=item.custom_annotations,
         )
         plt.savefig(
             f"specific-ai-plots/SpecificAI-{key}.pdf",
@@ -1010,3 +1154,35 @@ def all_individual_figures(
         if only:
             plt.show()
         plt.close()
+
+
+def rr5_340_49_ghz_annotation(
+    ax: Axes,
+    side: str,
+):
+    """A specific annotation for one of the 5.340 bands in AI-1.1"""
+    # We want to annotate the bottom row (5.340), work out where that is and move up a
+    # little.
+    y, _ = ax.get_ylim()
+    y = y - 0.85
+    if side == "left":
+        x = 48.94 * ureg.GHz
+        ha = "right"
+        margin_sign = -1
+    elif side == "right":
+        x = 49.04 * ureg.GHz
+        ha = "left"
+        margin_sign = 1
+    else:
+        raise ValueError(f"Argument 'side' must be 'left', or 'right', not '{side}")
+    ax.annotate(
+        "No airborne\nemissions",
+        xy=(x, y),
+        xycoords="data",
+        xytext=(3 * margin_sign, 0),
+        textcoords="offset points",
+        ha=ha,
+        va="center",
+        fontsize="small",
+        linespacing=0.9,
+    )

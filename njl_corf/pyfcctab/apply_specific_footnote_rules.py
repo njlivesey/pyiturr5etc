@@ -237,7 +237,7 @@ def footnote_5_339():
 def footnote_5_385():
     """Return band or bands corresponding to footnote 5.385
 
-    Additional allocation:  the band 1718.8-1722.2 MHz is also allocated to the radio
+    Additional allocation: the band 1718.8-1722.2 MHz is also allocated to the radio
     astronomy service on a secondary basis for spectral line observations.
     """
     return [
