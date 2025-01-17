@@ -49,7 +49,6 @@ def create_band_from_footnote(
     jurisdictions = [parse_jurisdiction(j) for j in jurisdictions]
     if allocations:
         for allocation in allocations:
-            # allocation.secondary = False
             allocation.footnote_mention = True
     return Band(
         bounds=bounds,
