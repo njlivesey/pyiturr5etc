@@ -12,11 +12,12 @@ import pint
 from matplotlib.patches import Rectangle
 from matplotlib.ticker import FuncFormatter, NullFormatter
 from matplotlib.transforms import blended_transform_factory
-from matplotlib.figure import Figure
 from matplotlib.axes import Axes
 from numpy.typing import ArrayLike
 
 from njl_corf import pyiturr5 as rr, ureg, wrc27_views
+
+from .wrc27_figure_colors import get_wrc_color_scheme
 
 
 def set_nas_graphic_style():
@@ -84,7 +85,6 @@ def minor_frequency_formatter(x, pos):
 def setup_frequency_axis(
     ax: plt.Axes,
     frequency_range: list[pint.Quantity],
-    decadal_ticks: Optional[bool] = False,
     add_daylight: Optional[bool] = False,
     log_axis: Optional[bool] = None,
     daylight_factor: Optional[float] = None,
@@ -100,8 +100,6 @@ def setup_frequency_axis(
         The axes under consideration
     frequency_range : list[pint.Quantity]
         The frequency range to cover
-    decadal_ticks : bool, optional
-        If set, force major ticks to be on the decades of frequency
     add_daylight : bool, optional
         If set, add some daylight either side of the frequency range
     log_axis : bool, optional
@@ -160,8 +158,8 @@ def setup_frequency_axis(
         if xminor is not None:
             xminor = [f.to(ureg.Hz) for f in xminor]
         typical_unit = None
-    # Otherwise, we're not doing decadal ticks, either pick our own or use the user
-    # supplied list.  If the latter, put them in appropriate units
+    # Otherwise either pick our own ticks or use the user supplied list.  If the latter,
+    # put them in appropriate units
     if xticks is not None and typical_unit is not None:
         # The user suppled specific ticks, convert them to the appropriate value.
         xticks = xticks.to(typical_unit)
@@ -400,13 +398,11 @@ def show_band_for_individual(
         bandwidth_points = get_bandwidth_points(start, stop)
         if bandwidth_points > 6.0:
             x_anchor = 0.5 * (start + stop)
-            ha = "center"
             color = "white"
         else:
             x_anchor = stop
-            ha = "left"
             color = "black"
-            x_anchor += shift_x_by_points(x_anchor, 1.0)
+            x_anchor += shift_x_by_points(x_anchor, 3.0 + (5.0 * (direction == 1j)))
         y_center = row + 0.03 * vertical_width
         # Now work out what symbol to show
         if direction == -1:
@@ -417,13 +413,25 @@ def show_band_for_individual(
             symbol = r"{\boldmath$\leftrightarrow$}"
         elif direction == 0:
             symbol = r"{\boldmath$\updownarrow$}"
+        else:
+            raise ValueError("Do not know what symbol to use")
         ax.annotate(
             symbol,
             (x_anchor, y_center),
             color=color,
-            ha=ha,
+            ha="center",
             va="center",
         )
+        # Now, if we put the annotation in the center, put some thin white lines at the
+        # edges so that distinct bands are separated.
+        if color == "white":
+            for x in [start, stop]:
+                ax.plot(
+                    pint.Quantity.from_list([x, x]),
+                    [y_bottom, y_bottom + vertical_width],
+                    color="white",
+                    linewidth=0.5,
+                )
 
 
 @dataclass
@@ -461,6 +469,7 @@ def wrc27_overview_figure(
     multi_line: bool = False,
     include_srs: bool = False,
     minimum_bandwidth_points: Optional[float] = None,
+    color_scheme: Optional[str] = None,
 ):
     """Figure reviewing WRC agenda items and associated bands
 
@@ -500,6 +509,8 @@ def wrc27_overview_figure(
                 f"Ivalid WRC specification ({wrc}), must be WRC-27 or WRC-31"
             )
         ai_info = {key: item for key, item in ai_info.items() if key.startswith(wrc)}
+    # Get the color information
+    figure_colors = get_wrc_color_scheme(color_scheme)
     # Define the science allocations we're interested in.
     bars = {
         "RAS": BarType(
@@ -512,7 +523,7 @@ def wrc27_overview_figure(
                 )
             ),
             slot=1,
-            color="xkcd:dark sky blue",
+            color=figure_colors["RAS Overview"],
         ),
         "EESS": BarType(
             condition=lambda band: band.has_allocation(
@@ -520,12 +531,12 @@ def wrc27_overview_figure(
             )
             or band.has_allocation("Earth Exploration-Satellite (Active)*"),
             slot=2,
-            color="xkcd:soft green",
+            color=figure_colors["EESS Overview"],
         ),
         "5.340": BarType(
             condition=lambda band: band.has_footnote("5.340"),
             slot=3,
-            color="xkcd:melon",
+            color=figure_colors["5.340"],
         ),
     }
     # Set font defaults etc.
@@ -577,7 +588,7 @@ def wrc27_overview_figure(
                 ai_band.stop,
                 row=i_y,
                 slot=0,
-                facecolor="dimgrey",
+                facecolor=figure_colors["AI"],
                 ax=ax,
                 edgecolor="none",
                 minimum_bandwidth_points=minimum_bandwidth_points,
@@ -645,6 +656,9 @@ def wrc27_ai_figure(
     xminor: Optional[pint.Quantity] = None,
     arrows_included: Optional[ArrayLike] = None,
     custom_annotations: Optional[Callable] = None,
+    color_scheme: Optional[str] = None,
+    include_5340_legend: Optional[bool] = False,
+    include_quilt_y_labels: Optional[bool] = False,
 ):
     """Figure reviewing WRC agenda items and associated bands
 
@@ -678,12 +692,15 @@ def wrc27_ai_figure(
     xminor : pint.Quantity
         Optional manually supplied minor tick locations
     arrows_included : pint.Quanity
-        If set, show up/down/sideways arrows for Earth-to-space, space-to-Earth,
-        space-to-space allocations.
+        If provided, gives band-by-band flags indicating whether show up/down/sideways
+        arrows for Earth-to-space, space-to-Earth, space-to-space allocations should be
+        shown.
     custom_annotations : Callable
         If supplied, is called with the figure and axes to provide additional
         information.  Other information needed is up to the calling routine to provide
         (e.g., via a closure.)
+    color_scheme : Optional[str]
+        Name of color scheme to use
     """
     # Read the allocation tables if not supplied
     if allocation_database is None:
@@ -695,12 +712,12 @@ def wrc27_ai_figure(
         ai = [ai]
     ai_info = {ai_key: ai_info[ai_key] for ai_key in ai}
     # Get the colormap we like
-    color_map = plt.get_cmap("tab20c").colors
+    figure_colors = get_wrc_color_scheme(color_scheme)
     # Define the science allocations we're interested in.
     science_rows = {
         "RAS": BarType(
             allocation="Radio Astronomy*",
-            color=[color_map[0], color_map[1], color_map[3]],
+            color=figure_colors["RAS"],
         ),
     }
     # Define the bars we're going to show
@@ -708,26 +725,26 @@ def wrc27_ai_figure(
         science_rows = science_rows | {
             "SRS (Passive)": BarType(
                 allocation="Space Research (Passive)*",
-                color=[color_map[12], color_map[13], color_map[14]],
+                color=figure_colors["SRS (Passive)"],
             ),
             "SRS (Active)": BarType(
                 allocation="Space Research (Active)*",
-                color=[color_map[12], color_map[13], color_map[14]],
+                color=figure_colors["SRS (Active)"],
             ),
         }
     science_rows = science_rows | {
         "EESS (Passive)": BarType(
             allocation="Earth Exploration-Satellite (Passive)*",
-            color=[color_map[8], color_map[9], color_map[11]],
+            color=figure_colors["EESS (Passive)"],
         ),
         "EESS (Active)": BarType(
             allocation="Earth Exploration-Satellite (Active)*",
-            color=[color_map[8], color_map[9], color_map[11]],
+            color=figure_colors["EESS (Active)"],
         ),
         "RR 5.340": BarType(
             footnote="5.340",
             slot=3,
-            color=["xkcd:melon"],
+            color=[figure_colors["5.340"]],
         ),
     }
     # Identify the bars for each agenda item
@@ -755,6 +772,7 @@ def wrc27_ai_figure(
         fig, ax = plt.subplots(layout="constrained")
     else:
         ax_supplied = True
+        fig = ax.figure
 
     # -------------------------------- x-axis
     if frequency_range_shown_pre_daylight is None:
@@ -823,10 +841,10 @@ def wrc27_ai_figure(
         # Show either the frequency bands, or the detailed bands (if present) as solid boxes
         if this_ai_info.detailed_bands is None:
             solid_frequency_bands = this_ai_info.frequency_bands
-            facecolor = "dimgrey"
+            facecolor = figure_colors["AI"]
         else:
             solid_frequency_bands = this_ai_info.detailed_bands
-            facecolor = "lightgrey"
+            facecolor = figure_colors["AI-extra"]
         for i_band, ai_band in enumerate(solid_frequency_bands):
             direction = ai_band.step
             if arrows_included is not None:
@@ -852,7 +870,7 @@ def wrc27_ai_figure(
                     ai_band.stop,
                     row=len(y_labels),
                     facecolor="none",
-                    edgecolor="dimgrey",
+                    edgecolor=figure_colors["AI"],
                     ax=ax,
                     minimum_bandwidth_points=minimum_bandwidth_points,
                     direction=ai_band.step,
@@ -865,7 +883,7 @@ def wrc27_ai_figure(
                     ai_band.start,
                     ai_band.stop,
                     row=len(y_labels),
-                    facecolor="lightgrey",
+                    facecolor=figure_colors["AI-extra"],
                     ax=ax,
                     minimum_bandwidth_points=minimum_bandwidth_points,
                     edgecolor="none",
@@ -914,19 +932,25 @@ def wrc27_ai_figure(
     # Combine figure transform (for x-axis) and data transform (for y-axis)
     legend_transform = blended_transform_factory(fig.transFigure, ax.transData)
     # Rectangle parameters
-    box_width = 0.05
-    box_height = 1.0
-    box_x = np.arange(3) * box_width
-    box_y = np.arange(3) * box_height + len(y_labels) - 0.25
-    i_color = [[0, 1, 3], [8, 9, 11]]
+    if include_quilt_y_labels:
+        x_rail_left = 0.07
+    else:
+        x_rail_left = 0.00
+    box_pitch_x = 0.05
+    box_pitch_y = 1.0
+    box_width = box_pitch_x * 0.9
+    box_height = box_pitch_y * 0.8
+    box_x = np.arange(3) * box_pitch_x + x_rail_left
+    box_y = np.arange(3) * box_pitch_y + len(y_labels) - 0.25
+    quilt_colors = [figure_colors["RAS"], figure_colors["EESS (Passive)"]]
     for i_service in range(2):
         for i_type in range(3):
             rect = Rectangle(
                 (box_x[i_type], box_y[i_service]),
-                width=box_width * 0.9,
-                height=box_height * 0.8,
+                width=box_width,
+                height=box_height,
                 transform=legend_transform,
-                facecolor=color_map[i_color[i_service][i_type]],
+                facecolor=quilt_colors[i_service][i_type],
                 edgecolor="none",
                 clip_on=False,
             )
@@ -935,11 +959,47 @@ def wrc27_ai_figure(
     labels = ["Pri.", "Sec.", "Fn."]
     for i_label, label in enumerate(labels):
         fig.text(
-            box_x[i_label] + (0.5 * box_width) * 0.9,
+            box_x[i_label] + (0.5 * box_pitch_x) * 0.9,
             box_y[2],
             label,
             ha="center",
             va="top",
+            transform=legend_transform,
+            fontsize="small",
+        )
+    if include_quilt_y_labels:
+        labels = ["RAS", "EESS"]
+        y_legend_nudge = 0.005
+        for i_label, label in enumerate(labels):
+            fig.text(
+                x_rail_left - y_legend_nudge,
+                box_y[i_label] + 0.5,
+                label,
+                ha="right",
+                va="center",
+                transform=legend_transform,
+                fontsize="small",
+            )
+    # Now the 5.340 legend
+    if include_5340_legend:
+        x_rail_right = 0.99
+        y_5350_daylight = 0.5
+        rect = Rectangle(
+            (x_rail_right - box_width, box_y[1] + y_5350_daylight),
+            width=box_width,
+            height=box_height,
+            transform=legend_transform,
+            facecolor=figure_colors["5.340"],
+            edgecolor="none",
+            clip_on=False,
+        )
+        fig.patches.append(rect)
+        fig.text(
+            x_rail_right - box_width - y_legend_nudge,
+            box_y[1] + 0.5 + y_5350_daylight,
+            "5.340",
+            ha="right",
+            va="center",
             transform=legend_transform,
             fontsize="small",
         )
@@ -993,6 +1053,9 @@ class AIPlotConfiguration:
 def all_individual_figures(
     allocation_database: Optional[rr.AllocationDatabase] = None,
     only: Optional[list[str]] = None,
+    skip_pdf: Optional[bool] = False,
+    skip_png: Optional[bool] = False,
+    **kwargs,
 ):
     """Generate all the figures for the agenda items"""
     # Get the agenda items
@@ -1139,18 +1202,21 @@ def all_individual_figures(
             minimum_bandwidth_points=1.0,
             arrows_included=item.arrows_included,
             custom_annotations=item.custom_annotations,
+            **kwargs,
         )
-        plt.savefig(
-            f"specific-ai-plots/SpecificAI-{key}.pdf",
-            bbox_inches="tight",
-            pad_inches=2.0 / 72,
-        )
-        plt.savefig(
-            f"specific-ai-plots/SpecificAI-{key}.png",
-            dpi=600,
-            bbox_inches="tight",
-            pad_inches=2.0 / 72,
-        )
+        if not skip_pdf:
+            plt.savefig(
+                f"specific-ai-plots/SpecificAI-{key}.pdf",
+                bbox_inches="tight",
+                pad_inches=2.0 / 72,
+            )
+        if not skip_png:
+            plt.savefig(
+                f"specific-ai-plots/SpecificAI-{key}.png",
+                dpi=600,
+                bbox_inches="tight",
+                pad_inches=2.0 / 72,
+            )
         if only:
             plt.show()
         plt.close()
