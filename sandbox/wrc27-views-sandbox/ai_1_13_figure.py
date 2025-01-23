@@ -9,7 +9,7 @@ from dataclasses import dataclass
 
 import pint
 from njl_corf import ureg
-from njl_corf.wrc27_figures import (
+from njl_corf.wrc27_overview_figures import (
     set_nas_graphic_style,
     major_frequency_formatter_with_units,
 )
