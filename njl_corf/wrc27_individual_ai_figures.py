@@ -40,7 +40,7 @@ def wrc27_ai_figure(
     arrows_included: Optional[ArrayLike] = None,
     custom_annotations: Optional[Callable] = None,
     color_scheme: Optional[str] = None,
-    legend_style: Optional[str] = None,
+    include_legend: Optional[bool] = True,
     selective_legend: Optional[bool] = False,
 ):
     """Figure reviewing WRC agenda items and associated bands
@@ -84,12 +84,11 @@ def wrc27_ai_figure(
         (e.g., via a closure.)
     color_scheme : Optional[str]
         Name of color scheme to use
+    include_legend : Optional[bool], default True
+        If set, include a legend for the figure
     selective_legend : Optional[bool], default False
         If set, only include in the legend things that are actually in the figure
     """
-    # Get defaults
-    if legend_style is None:
-        legend_style = "none"
     # Read the allocation tables if not supplied
     if allocation_database is None:
         allocation_database = rr.parse_rr_file()
@@ -263,7 +262,7 @@ def wrc27_ai_figure(
             included_features |= direction_inclusion_map.get(direction, set())
         # If detailed bands are present, show the frequency bands as a hollow box
         if this_ai_info.detailed_bands is not None:
-            for ai_band in this_ai_info.frequency_bands:
+            for i_band, ai_band in enumerate(this_ai_info.frequency_bands):
                 # Draw this particular band
                 if arrows_included is not None:
                     if not arrows_included[i_band]:
@@ -282,7 +281,7 @@ def wrc27_ai_figure(
                 included_features |= direction_inclusion_map.get(direction, set())
         # Now do any secondary bands
         if this_ai_info.secondary_bands is not None:
-            for ai_band in this_ai_info.secondary_bands:
+            for i_band, ai_band in enumerate(this_ai_info.secondary_bands):
                 # Draw this particular band
                 if arrows_included is not None:
                     if not arrows_included[i_band]:
@@ -351,15 +350,15 @@ def wrc27_ai_figure(
     # Suppress the y ticks.
     ax.tick_params(axis="y", which="both", left=False, right=False)
     # --------------------------------- Legend
-    wrc_ai_figure_legend(
-        fig=fig,
-        ax=ax,
-        n_rows=len(y_labels),
-        figure_colors=figure_colors,
-        style=legend_style,
-        selective_legend=selective_legend,
-        included_features=included_features,
-    )
+    if include_legend:
+        wrc_ai_figure_legend(
+            fig=fig,
+            ax=ax,
+            n_rows=len(y_labels),
+            figure_colors=figure_colors,
+            selective_legend=selective_legend,
+            included_features=included_features,
+        )
     # --------------------------------- Sizing
     if not ax_supplied:
         # Now work out the size.
@@ -505,7 +504,6 @@ def wrc_ai_figure_legend(
     ax: Axes,
     n_rows: int,
     figure_colors: dict,
-    style: str,
     selective_legend: bool,
     included_features: set[str],
 ):
@@ -517,20 +515,8 @@ def wrc_ai_figure_legend(
     box_pitch_y = 1.0
     box_width = box_pitch_x * 0.9
     box_height = box_pitch_y * 0.8
-    # Set things up based on the style
-    if style == "none":
-        return
-    if style == "lower-left-a":
-        include_quilt_y_labels = True
-        include_5340_legend = True
-        include_arrow_legend = True
-    else:
-        raise ValueError(f"Unrecognized style {style}")
     # Rectangle parameters
-    if include_quilt_y_labels:
-        x_rail_left = 0.07
-    else:
-        x_rail_left = 0.00
+    x_rail_left = 0.07
 
     box_x = np.arange(4) * box_pitch_x + x_rail_left
     box_y = np.arange(4) * box_pitch_y + n_rows + 1.6
@@ -572,46 +558,41 @@ def wrc_ai_figure_legend(
             transform=legend_transform,
             fontsize="small",
         )
-    if include_quilt_y_labels:
-        labels = ["RAS", "EESS"]
-        y_legend_nudge = 0.005
-        for i_label, label in enumerate(labels):
-            fig.text(
-                x_rail_left - y_legend_nudge,
-                box_y[i_label] + 0.5,
-                label,
-                ha="right",
-                va="center",
-                transform=legend_transform,
-                fontsize="small",
-            )
-    # Now the 5.340 legend
-    if include_5340_legend:
-        include_5340_legend = not selective_legend or ("5.340" in included_features)
-    if include_5340_legend:
-        x_rail_right = 0.30
-        y_5350_daylight = 0.5
-        rect = Rectangle(
-            # (x_rail_right, box_y[2]),
-            (box_x[0], box_y[3]),
-            width=box_width,
-            height=box_height,
-            transform=legend_transform,
-            facecolor=figure_colors["5.340"],
-            edgecolor="none",
-            clip_on=False,
-        )
-        fig.patches.append(rect)
+    labels = ["RAS", "EESS"]
+    y_legend_nudge = 0.005
+    for i_label, label in enumerate(labels):
         fig.text(
-            # x_rail_right - y_legend_nudge,
             x_rail_left - y_legend_nudge,
-            box_y[3] + 0.5,
-            "5.340",
+            box_y[i_label] + 0.5,
+            label,
             ha="right",
             va="center",
             transform=legend_transform,
             fontsize="small",
         )
+    # Now the 5.340 legend
+    rect = Rectangle(
+        # (x_rail_right, box_y[2]),
+        (box_x[0], box_y[3]),
+        width=box_width,
+        height=box_height,
+        transform=legend_transform,
+        facecolor=figure_colors["5.340"],
+        edgecolor="none",
+        clip_on=False,
+    )
+    fig.patches.append(rect)
+    fig.text(
+        # x_rail_right - y_legend_nudge,
+        x_rail_left - y_legend_nudge,
+        box_y[3] + 0.5,
+        "5.340",
+        ha="right",
+        va="center",
+        transform=legend_transform,
+        fontsize="small",
+    )
+    # Now the arrow legends
     arrow_legends = {
         -1: (r"{\boldmath$\downarrow$}", "space-to-Earth"),
         1: (r"{\boldmath$\uparrow$}", "Earth-to-space"),
