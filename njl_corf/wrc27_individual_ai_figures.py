@@ -308,6 +308,8 @@ def wrc27_ai_figure(
         "RR 5.340": "5.340",
     }
     for row_key, science_bands in bar_buffers.items():
+        if not science_bands:
+            continue
         inclusion_prefix = row_key_inclusion_map[row_key]
         row_info = science_rows[row_key]
         for science_band in science_bands:
