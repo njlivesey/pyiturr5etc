@@ -40,8 +40,8 @@ def wrc27_ai_figure(
     arrows_included: Optional[ArrayLike] = None,
     custom_annotations: Optional[Callable] = None,
     color_scheme: Optional[str] = None,
-    include_5340_legend: Optional[bool] = False,
-    include_quilt_y_labels: Optional[bool] = False,
+    legend_style: Optional[str] = None,
+    selective_legend: Optional[bool] = False,
 ):
     """Figure reviewing WRC agenda items and associated bands
 
@@ -84,7 +84,12 @@ def wrc27_ai_figure(
         (e.g., via a closure.)
     color_scheme : Optional[str]
         Name of color scheme to use
+    selective_legend : Optional[bool], default False
+        If set, only include in the legend things that are actually in the figure
     """
+    # Get defaults
+    if legend_style is None:
+        legend_style = "none"
     # Read the allocation tables if not supplied
     if allocation_database is None:
         allocation_database = rr.parse_rr_file()
@@ -198,6 +203,8 @@ def wrc27_ai_figure(
         xticks=xticks,
         xminor=xminor,
     )
+    # Move the axis label a bit higher
+    ax.xaxis.labelpad = 1.0
 
     # OK, despite having gone to the lengths of carefully identifying the science (and
     # 5.340) bands that overlap or are directly adjacent to the bands under
@@ -215,6 +222,14 @@ def wrc27_ai_figure(
             )
     bar_buffers = new_bar_buffers
     # -------------------------------- Actual figure
+    # Keep a track of all the features we include (for the selective legend option)
+    included_features = set()
+    direction_inclusion_map = {
+        -1: set(["space-to-Earth"]),
+        1: set(["Earth-to-space"]),
+        0: set(["Earth-to-space", "space-to-Earth"]),
+        1j: set(["space-to-space"]),
+    }
     # OK, loop over the agenda items
     y_labels = []
     for ai_key, this_ai_info in ai_info.items():
@@ -244,10 +259,15 @@ def wrc27_ai_figure(
                 edgecolor="none",
                 direction=direction,
             )
+            # Note what we included
+            included_features |= direction_inclusion_map.get(direction, set())
         # If detailed bands are present, show the frequency bands as a hollow box
         if this_ai_info.detailed_bands is not None:
             for ai_band in this_ai_info.frequency_bands:
                 # Draw this particular band
+                if arrows_included is not None:
+                    if not arrows_included[i_band]:
+                        direction = None
                 show_band_for_individual(
                     ai_band.start,
                     ai_band.stop,
@@ -256,12 +276,17 @@ def wrc27_ai_figure(
                     edgecolor=figure_colors["AI"],
                     ax=ax,
                     minimum_bandwidth_points=minimum_bandwidth_points,
-                    direction=ai_band.step,
+                    direction=direction,
                 )
+                # Note what we included
+                included_features |= direction_inclusion_map.get(direction, set())
         # Now do any secondary bands
         if this_ai_info.secondary_bands is not None:
             for ai_band in this_ai_info.secondary_bands:
                 # Draw this particular band
+                if arrows_included is not None:
+                    if not arrows_included[i_band]:
+                        direction = None
                 show_band_for_individual(
                     ai_band.start,
                     ai_band.stop,
@@ -272,12 +297,18 @@ def wrc27_ai_figure(
                     edgecolor="none",
                     direction=ai_band.step,
                 )
-
+                # Note what we included
+                included_features |= direction_inclusion_map.get(direction, set())
         y_labels.append(r"\textbf{" + ai_key + r"}")
     # Now loop over the science bands
+    row_key_inclusion_map = {
+        "RAS": "RAS",
+        "EESS (Passive)": "EESS",
+        "EESS (Active)": "EESS",
+        "RR 5.340": "5.340",
+    }
     for row_key, science_bands in bar_buffers.items():
-        if len(science_bands) == 0:
-            continue
+        inclusion_prefix = row_key_inclusion_map[row_key]
         row_info = science_rows[row_key]
         for science_band in science_bands:
             # Work out what the status of this band is
@@ -292,6 +323,10 @@ def wrc27_ai_figure(
                         status = min(status, 1)
                     if allocation.footnote_mention:
                         status = min(status, 2)
+                    included_features.add(
+                        inclusion_prefix
+                        + [" Primary", " Secondary", " Footnote"][status]
+                    )
             show_band_for_individual(
                 science_band.bounds[0],
                 science_band.bounds[1],
@@ -300,6 +335,8 @@ def wrc27_ai_figure(
                 minimum_bandwidth_points=minimum_bandwidth_points,
                 facecolor=row_info.color[status],
             )
+            if inclusion_prefix == "5.340":
+                included_features.add("5.340")
         y_labels.append(row_key)
     # -------------------------------- y-axis
     # Note the y-axis is upside down to facilitate indexing etc.
@@ -317,8 +354,9 @@ def wrc27_ai_figure(
         ax=ax,
         n_rows=len(y_labels),
         figure_colors=figure_colors,
-        include_quilt_y_labels=include_quilt_y_labels,
-        include_5340_legend=include_5340_legend,
+        style=legend_style,
+        selective_legend=selective_legend,
+        included_features=included_features,
     )
     # --------------------------------- Sizing
     if not ax_supplied:
@@ -339,12 +377,12 @@ def wrc27_ai_figure(
         # Work out the actual size of the axes in inches, the remainder is the space taken
         # up by the extra stuff
         actual_bar_area_height_inches = ax.get_position().height * initial_height
-        print(f"{bar_area_height_inches=}, {actual_bar_area_height_inches=}")
         actual_extra_height_inches = initial_height - actual_bar_area_height_inches
-        print(
-            f"{actual_extra_height_inches=}, "
-            f"correction={actual_extra_height_inches-notional_extra_height_inches}"
-        )
+        # print(f"{bar_area_height_inches=}, {actual_bar_area_height_inches=}")
+        # print(
+        #     f"{actual_extra_height_inches=}, "
+        #     f"correction={actual_extra_height_inches-notional_extra_height_inches}"
+        # )
         # Redraw at corrected height
         final_height_inches = bar_area_height_inches + actual_extra_height_inches
         fig.set_size_inches(figure_width_inches, final_height_inches)
@@ -355,6 +393,7 @@ def wrc27_ai_figure(
     # --------------------------------- Done
     if not no_show:
         plt.show()
+    print(included_features)
 
 
 def show_band_for_individual(
@@ -464,41 +503,66 @@ def wrc_ai_figure_legend(
     ax: Axes,
     n_rows: int,
     figure_colors: dict,
-    include_quilt_y_labels: bool,
-    include_5340_legend: bool,
+    style: str,
+    selective_legend: bool,
+    included_features: set[str],
 ):
     """Generates legend for the individual AI figure"""
     # Combine figure transform (for x-axis) and data transform (for y-axis)
     legend_transform = blended_transform_factory(fig.transFigure, ax.transData)
+    # Define some parameters that are (thus far) common to all versions of the legend.
+    box_pitch_x = 0.05
+    box_pitch_y = 1.0
+    box_width = box_pitch_x * 0.9
+    box_height = box_pitch_y * 0.8
+    # Set things up based on the style
+    if style == "none":
+        return
+    if style == "lower-left-a":
+        include_quilt_y_labels = True
+        include_5340_legend = True
+        include_arrow_legend = True
+    else:
+        raise ValueError(f"Unrecognized style {style}")
     # Rectangle parameters
     if include_quilt_y_labels:
         x_rail_left = 0.07
     else:
         x_rail_left = 0.00
-    box_pitch_x = 0.05
-    box_pitch_y = 1.0
-    box_width = box_pitch_x * 0.9
-    box_height = box_pitch_y * 0.8
+
     box_x = np.arange(4) * box_pitch_x + x_rail_left
-    box_y = np.arange(5) * box_pitch_y + n_rows + 1.2
+    box_y = np.arange(4) * box_pitch_y + n_rows + 1.6
     quilt_colors = [figure_colors["RAS"], figure_colors["EESS (Passive)"]]
+    service_inclusion_keys = ["RAS", "EESS"]
+    type_inclusion_keys = ["Primary", "Secondary", "Footnote"]
     for i_service in range(2):
         for i_type in range(3):
+            show_box = (not selective_legend) or (
+                service_inclusion_keys[i_service] + " " + type_inclusion_keys[i_type]
+                in included_features
+            )
+            if show_box:
+                facecolor = quilt_colors[i_service][i_type]
+                edgecolor = "none"
+            else:
+                facecolor = "none"
+                edgecolor = "lightgrey"
             rect = Rectangle(
                 (box_x[i_type], box_y[i_service]),
                 width=box_width,
                 height=box_height,
                 transform=legend_transform,
-                facecolor=quilt_colors[i_service][i_type],
-                edgecolor="none",
+                facecolor=facecolor,
+                edgecolor=edgecolor,
                 clip_on=False,
+                linewidth=0.4,
             )
             fig.patches.append(rect)
     # Now some labels
     labels = ["Pri.", "Sec.", "Fn."]
     for i_label, label in enumerate(labels):
         fig.text(
-            box_x[i_label] + (0.5 * box_pitch_x) * 0.9,
+            box_x[i_label] + 0.5 * box_width,
             box_y[2],
             label,
             ha="center",
@@ -521,10 +585,12 @@ def wrc_ai_figure_legend(
             )
     # Now the 5.340 legend
     if include_5340_legend:
-        x_rail_right = 0.99
+        include_5340_legend = not selective_legend or ("5.340" in included_features)
+    if include_5340_legend:
+        x_rail_right = 0.30
         y_5350_daylight = 0.5
         rect = Rectangle(
-            # (x_rail_right - box_width, box_y[1] + y_5350_daylight),
+            # (x_rail_right, box_y[2]),
             (box_x[0], box_y[3]),
             width=box_width,
             height=box_height,
@@ -535,13 +601,50 @@ def wrc_ai_figure_legend(
         )
         fig.patches.append(rect)
         fig.text(
-            x_rail_right - box_width - y_legend_nudge,
-            box_y[1] + 0.5 + y_5350_daylight,
+            # x_rail_right - y_legend_nudge,
+            x_rail_left - y_legend_nudge,
+            box_y[3] + 0.5,
             "5.340",
             ha="right",
             va="center",
             transform=legend_transform,
             fontsize="small",
+        )
+    arrow_legends = {
+        -1: (r"{\boldmath$\downarrow$}", "space-to-Earth"),
+        1: (r"{\boldmath$\uparrow$}", "Earth-to-space"),
+        1j: (r"{\boldmath$\leftrightarrow$}", "space-to-space"),
+    }
+    if selective_legend:
+        keys = []
+        if "space-to-Earth" in included_features:
+            keys.append(-1)
+        if "Earth-to-space" in included_features:
+            keys.append(1)
+        if "space-to-space" in included_features:
+            keys.append(1j)
+        arrow_legends = {key: arrow_legends[key] for key in keys}
+    x = box_x[-1] + 1.0 * box_pitch_x
+    x_daylight = 0.004
+    for i_row, (symbol, label) in enumerate(arrow_legends.values()):
+        y = box_y[0] + 1.0 * box_height + 0.8 * i_row
+        fig.text(
+            x - x_daylight,
+            y,
+            symbol,
+            ha="right",
+            va="center",
+            fontsize="small",
+            transform=legend_transform,
+        )
+        fig.text(
+            x + x_daylight,
+            y,
+            "= " + label,
+            ha="left",
+            va="center",
+            fontsize="small",
+            transform=legend_transform,
         )
 
 
@@ -630,7 +733,7 @@ def all_individual_figures(
     plot_configurations["WRC-27 AI-1.14"] = AIPlotConfiguration("WRC-27 AI-1.14")
     plot_configurations["WRC-27 AI-1.15"] = AIPlotConfiguration(
         "WRC-27 AI-1.15",
-        put_units_on_labels=True,
+        # put_units_on_labels=True,
         log_axis=True,
         xticks=[
             0.3 * ureg.GHz,
@@ -658,9 +761,16 @@ def all_individual_figures(
     )
     plot_configurations["WRC-27 AI-1.17"] = AIPlotConfiguration(
         "WRC-27 AI-1.17",
-        put_units_on_labels=True,
+        # put_units_on_labels=True,
         log_axis=True,
-        xticks=[30 * ureg.MHz, 100 * ureg.MHz, 300 * ureg.MHz, 600 * ureg.MHz],
+        xticks=[
+            30 * ureg.MHz,
+            60 * ureg.MHz,
+            100 * ureg.MHz,
+            200 * ureg.MHz,
+            400 * ureg.MHz,
+            600 * ureg.MHz,
+        ],
     )
     plot_configurations["WRC-27 AI-1.18"] = AIPlotConfiguration("WRC-27 AI-1.18")
     plot_configurations["WRC-27 AI-1.19"] = AIPlotConfiguration("WRC-27 AI-1.19")
