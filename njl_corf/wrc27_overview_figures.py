@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pint
 from matplotlib.patches import Rectangle
+from matplotlib.axes import Axes
+from matplotlib.lines import Line2D
 
 from njl_corf import pyiturr5 as rr
 from njl_corf import ureg, wrc27_views
@@ -192,6 +194,9 @@ def wrc27_overview_figure(
         ax2.tick_params(axis="y", which="both", left=False, right=False)
     # Suppress the y ticks.
     ax.tick_params(axis="y", which="both", left=False, right=False)
+    # -------------------------------------------------- Legend
+    wrc_overview_figure_legend(ax=ax, figure_colors=figure_colors)
+    # -------------------------------------------------- Finish
     if not no_show:
         plt.show()
 
@@ -226,3 +231,35 @@ def show_band_for_overview(
         **kwargs,
     )
     ax.add_patch(patch)
+
+
+def wrc_overview_figure_legend(ax: Axes, figure_colors: dict):
+    """Add a legend for the overview figure"""
+    # Create custom Line2D objects for the legend
+    entries = {
+        "AI": figure_colors["AI"],
+        "RAS": figure_colors["RAS Overview"],
+        "EESS": figure_colors["EESS Overview"],
+        "5.340": figure_colors["5.340"],
+    }
+    legend_elements = [
+        Line2D([0], [0], color=color, linewidth=1.5, label=label)
+        for label, color in entries.items()
+    ]
+    # Add the legend to the Axes
+    delta_x = 0.022
+    delta_y = 0.036
+    legend = ax.legend(
+        handles=legend_elements,
+        loc="upper left",
+        frameon=True,
+        fontsize="small",
+        bbox_to_anchor=(0.0 + delta_x, 1.0 - delta_y),
+        borderpad=0.3,
+        labelspacing=0.3,
+    )
+    # Tweak the legend a bit
+    frame = legend.get_frame()
+    frame.set_alpha(1.0)
+    frame.set_linewidth(0.5)
+    frame.set_boxstyle("Square")

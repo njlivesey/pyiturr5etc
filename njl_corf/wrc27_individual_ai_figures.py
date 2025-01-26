@@ -203,7 +203,7 @@ def wrc27_ai_figure(
         xminor=xminor,
     )
     # Move the axis label a bit higher
-    ax.xaxis.labelpad = 1.0
+    ax.xaxis.labelpad = 2.0
 
     # OK, despite having gone to the lengths of carefully identifying the science (and
     # 5.340) bands that overlap or are directly adjacent to the bands under
@@ -349,17 +349,8 @@ def wrc27_ai_figure(
     ax.yaxis.set_minor_locator(plt.NullLocator())
     # Suppress the y ticks.
     ax.tick_params(axis="y", which="both", left=False, right=False)
-    # --------------------------------- Legend
-    if include_legend:
-        wrc_ai_figure_legend(
-            fig=fig,
-            ax=ax,
-            n_rows=len(y_labels),
-            figure_colors=figure_colors,
-            selective_legend=selective_legend,
-            included_features=included_features,
-        )
     # --------------------------------- Sizing
+    # This is done in to passes
     if not ax_supplied:
         # Now work out the size.
         row_size_inches = 0.15
@@ -375,6 +366,34 @@ def wrc27_ai_figure(
         )
         # Do a first pass to get the size
         fig.canvas.draw()
+
+    # --------------------------------- Legend
+    if include_legend:
+        wrc_ai_figure_legend(
+            fig=fig,
+            ax=ax,
+            n_rows=len(y_labels),
+            figure_colors=figure_colors,
+            selective_legend=selective_legend,
+            included_features=included_features,
+        )
+        # Tweak x-axis label location to accommodate legend
+        x_axis_label = ax.xaxis.label
+        current_x_axis_label_position = ax.transAxes.transform(
+            x_axis_label.get_position()
+        )
+        # Move the label to the right (in Display coordinates)
+        new_x_axis_label_position = (
+            current_x_axis_label_position[0] - 46.0,
+            current_x_axis_label_position[1],
+        )
+        # Convert the new position back to Axes coordinates and set it
+        x_axis_label.set_position(
+            ax.transAxes.inverted().transform(new_x_axis_label_position)
+        )
+
+    # --------------------------------- Sizing again
+    if not ax_supplied:
         # Work out the actual size of the axes in inches, the remainder is the space taken
         # up by the extra stuff
         actual_bar_area_height_inches = ax.get_position().height * initial_height
@@ -394,7 +413,6 @@ def wrc27_ai_figure(
     # --------------------------------- Done
     if not no_show:
         plt.show()
-    print(included_features)
 
 
 def show_band_for_individual(
@@ -510,33 +528,56 @@ def wrc_ai_figure_legend(
     """Generates legend for the individual AI figure"""
     # Combine figure transform (for x-axis) and data transform (for y-axis)
     legend_transform = blended_transform_factory(fig.transFigure, ax.transData)
-    # Define some parameters that are (thus far) common to all versions of the legend.
+    right_hand_edge = ax.figure.transFigure.inverted().transform(
+        ax.transAxes.transform((1, 0))
+    )[0]
+    # Work out what we're doing
+    show_5340 = (not selective_legend) or "5.340" in included_features
+    # Degine some geometry
     box_pitch_x = 0.05
     box_pitch_y = 1.0
     box_width = box_pitch_x * 0.9
     box_height = box_pitch_y * 0.8
     # Rectangle parameters
-    x_rail_left = 0.07
-
-    box_x = np.arange(4) * box_pitch_x + x_rail_left
-    box_y = np.arange(4) * box_pitch_y + n_rows + 1.6
-    quilt_colors = [figure_colors["RAS"], figure_colors["EESS (Passive)"]]
-    service_inclusion_keys = ["RAS", "EESS"]
-    type_inclusion_keys = ["Primary", "Secondary", "Footnote"]
-    for i_service in range(2):
+    x_column = (
+        right_hand_edge
+        - 3 * box_pitch_x
+        + 0.5 * (box_pitch_x - box_width)
+        + np.arange(4) * box_pitch_x
+    )
+    x_rail_left = x_column[0]
+    y_row = np.arange(3 + int(show_5340)) * box_pitch_y + n_rows + 1.4
+    # Set up some information
+    color_mapping = {
+        "RAS": figure_colors["RAS"],
+        "EESS": figure_colors["EESS (Passive)"],
+        "5.340": [None, None, figure_colors["5.340"]],
+    }
+    # Now the "quilt" part
+    i_row = 0
+    for row in ["RAS", "EESS", "5.340"]:
+        quilt_colors = color_mapping[row]
+        type_inclusion_keys = ["Primary", "Secondary", "Footnote"]
         for i_type in range(3):
-            show_box = (not selective_legend) or (
-                service_inclusion_keys[i_service] + " " + type_inclusion_keys[i_type]
-                in included_features
-            )
+            if row == "5.340" and not show_5340:
+                continue
+            if row == "5.340":
+                # Skip the first to cells for the 5.340 row
+                if i_type != 2:
+                    continue
+                show_box = True
+            else:
+                show_box = (not selective_legend) or (
+                    row + " " + type_inclusion_keys[i_type] in included_features
+                )
             if show_box:
-                facecolor = quilt_colors[i_service][i_type]
+                facecolor = quilt_colors[i_type]
                 edgecolor = "none"
             else:
                 facecolor = "none"
                 edgecolor = "lightgrey"
             rect = Rectangle(
-                (box_x[i_type], box_y[i_service]),
+                (x_column[i_type], y_row[i_row]),
                 width=box_width,
                 height=box_height,
                 transform=legend_transform,
@@ -546,52 +587,32 @@ def wrc_ai_figure_legend(
                 linewidth=0.4,
             )
             fig.patches.append(rect)
+        i_row += 1
     # Now some labels
-    labels = ["Pri.", "Sec.", "Fn."]
-    for i_label, label in enumerate(labels):
+    column_labels = ["Pri.", "Sec.", "Fn."]
+    for i_label, label in enumerate(column_labels):
         fig.text(
-            box_x[i_label] + 0.5 * box_width,
-            box_y[2],
+            x_column[i_label] + 0.5 * box_width,
+            y_row[2 + int(show_5340)],
             label,
             ha="center",
             va="top",
             transform=legend_transform,
             fontsize="small",
         )
-    labels = ["RAS", "EESS"]
-    y_legend_nudge = 0.005
-    for i_label, label in enumerate(labels):
+    row_labels = ["RAS", "EESS"]
+    if show_5340:
+        row_labels.append("5.340")
+    for i_label, label in enumerate(row_labels):
         fig.text(
-            x_rail_left - y_legend_nudge,
-            box_y[i_label] + 0.5,
+            x_rail_left - 0.005,
+            y_row[i_label] + 0.5,
             label,
             ha="right",
             va="center",
             transform=legend_transform,
             fontsize="small",
         )
-    # Now the 5.340 legend
-    rect = Rectangle(
-        # (x_rail_right, box_y[2]),
-        (box_x[0], box_y[3]),
-        width=box_width,
-        height=box_height,
-        transform=legend_transform,
-        facecolor=figure_colors["5.340"],
-        edgecolor="none",
-        clip_on=False,
-    )
-    fig.patches.append(rect)
-    fig.text(
-        # x_rail_right - y_legend_nudge,
-        x_rail_left - y_legend_nudge,
-        box_y[3] + 0.5,
-        "5.340",
-        ha="right",
-        va="center",
-        transform=legend_transform,
-        fontsize="small",
-    )
     # Now the arrow legends
     arrow_legends = {
         -1: (r"{\boldmath$\downarrow$}", "space-to-Earth"),
@@ -607,16 +628,16 @@ def wrc_ai_figure_legend(
         if "space-to-space" in included_features:
             keys.append(1j)
         arrow_legends = {key: arrow_legends[key] for key in keys}
-    x = box_x[-1] + 1.0 * box_pitch_x
-    x_daylight = 0.004
+    x = 0.026
+    x_daylight = 0.002
     for i_row, (symbol, label) in enumerate(arrow_legends.values()):
-        y = box_y[0] + 1.0 * box_height + 0.8 * i_row
+        y = y_row[1] + 0.85 * i_row
         fig.text(
             x - x_daylight,
             y,
             symbol,
             ha="right",
-            va="center",
+            va="top",
             fontsize="small",
             transform=legend_transform,
         )
@@ -625,7 +646,7 @@ def wrc_ai_figure_legend(
             y,
             "= " + label,
             ha="left",
-            va="center",
+            va="top",
             fontsize="small",
             transform=legend_transform,
         )
