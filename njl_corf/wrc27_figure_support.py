@@ -340,10 +340,10 @@ def get_wrc_color_scheme(name: Optional[str] = None):
             "AI": "dimgrey",
             "AI-extra": "lightgrey",
             "RAS": [color_map[0], color_map[1], color_map[3]],
-            "SRS (Passive)": [color_map[12], color_map[13], color_map[14]],
-            "SRS (Active)": [color_map[12], color_map[13], color_map[14]],
-            "EESS (Passive)": [color_map[8], color_map[9], color_map[11]],
-            "EESS (Active)": [color_map[8], color_map[9], color_map[11]],
+            "SRS (passive)": [color_map[12], color_map[13], color_map[14]],
+            "SRS (active)": [color_map[12], color_map[13], color_map[14]],
+            "EESS (passive)": [color_map[8], color_map[9], color_map[11]],
+            "EESS (active)": [color_map[8], color_map[9], color_map[11]],
         }
     elif name == "R&S-a":
         figure_colors = {
@@ -353,8 +353,8 @@ def get_wrc_color_scheme(name: Optional[str] = None):
             "AI": "dimgrey",
             "AI-extra": "lightgrey",
             "RAS": ["#31437e", "#03a1bf", "#96d1de"],
-            "EESS (Passive)": ["#317e43", "#03bfa1", "#96ded1"],
-            "EESS (Active)": ["#317e43", "#03bfa1", "#96ded1"],
+            "EESS (passive)": ["#317e43", "#03bfa1", "#96ded1"],
+            "EESS (active)": ["#317e43", "#03bfa1", "#96ded1"],
         }
     elif name == "new-a":
         figure_colors = {
@@ -368,7 +368,7 @@ def get_wrc_color_scheme(name: Optional[str] = None):
                 "xkcd:deep sky blue",
                 "xkcd:light sky blue",
             ],
-            "EESS (Passive)": [
+            "EESS (passive)": [
                 "xkcd:forest green",
                 "xkcd:grass green",
                 "xkcd:pale green",
@@ -386,7 +386,7 @@ def get_wrc_color_scheme(name: Optional[str] = None):
                 "xkcd:light purple",
                 "xkcd:light pink",
             ],
-            "EESS (Passive)": [
+            "EESS (passive)": [
                 "xkcd:pine green",
                 "xkcd:grass green",
                 "xkcd:very light green",
@@ -395,12 +395,12 @@ def get_wrc_color_scheme(name: Optional[str] = None):
     else:
         raise ValueError(f"Unrecognized color scheme: {name}")
     # Clean up
-    if "EESS (Active)" not in figure_colors:
-        figure_colors["EESS (Active)"] = figure_colors["EESS (Passive)"]
-    if "SRS (Active)" not in figure_colors:
-        figure_colors["SRS (Active)"] = figure_colors["RAS"]
-    if "SRS (Passive)" not in figure_colors:
-        figure_colors["SRS (Passive)"] = figure_colors["RAS"]
+    if "EESS (active)" not in figure_colors:
+        figure_colors["EESS (active)"] = figure_colors["EESS (passive)"]
+    if "SRS (active)" not in figure_colors:
+        figure_colors["SRS (active)"] = figure_colors["RAS"]
+    if "SRS (passive)" not in figure_colors:
+        figure_colors["SRS (passive)"] = figure_colors["RAS"]
     return figure_colors
 
 

@@ -221,7 +221,7 @@ def get_ai_info(grouped: bool = False) -> dict[AgendaItem]:
                 slice(13_200 * ureg.kHz, 13_260 * ureg.kHz),
                 slice(15_010 * ureg.kHz, 15_100 * ureg.kHz),
                 slice(17_970 * ureg.kHz, 18_030 * ureg.kHz),
-        ],
+            ],
             soundbyte="Aeronautical mobile",
         ),
         "WRC-27 AI-1.10": AgendaItem(
@@ -321,7 +321,7 @@ def get_ai_info(grouped: bool = False) -> dict[AgendaItem]:
                 slice(4_200 * ureg.MHz, 4_400 * ureg.MHz),
                 slice(8_400 * ureg.MHz, 8_500 * ureg.MHz),
             ],
-            soundbyte="EESS_(Passive)",
+            soundbyte="EESS_(passive)",
         ),
         "WRC-31 AI-2.1": AgendaItem(
             frequency_bands=[slice(275.0 * ureg.GHz, 325.0 * ureg.GHz)],
@@ -399,13 +399,13 @@ def get_ai_info(grouped: bool = False) -> dict[AgendaItem]:
                 slice(3_000 * ureg.MHz, 3_100 * ureg.MHz, -1),
                 slice(3_300 * ureg.MHz, 3_400 * ureg.MHz, -1),
             ],
-            soundbyte="EESS (Active)",
+            soundbyte="EESS (active)",
         ),
         "WRC-31 AI-2.13": AgendaItem(
             frequency_bands=[
                 slice(9_200 * ureg.MHz, 10_400 * ureg.MHz, -1),
             ],
-            soundbyte="EESS (Active)",
+            soundbyte="EESS (active)",
         ),
         "WRC-31 AI-2.14": AgendaItem(
             frequency_bands=[

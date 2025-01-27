@@ -110,23 +110,23 @@ def wrc27_ai_figure(
     # Define the bars we're going to show
     if include_srs:
         science_rows = science_rows | {
-            "SRS (Passive)": fs.BarType(
-                allocation="Space Research (Passive)*",
-                color=figure_colors["SRS (Passive)"],
+            "SRS (passive)": fs.BarType(
+                allocation="Space Research (passive)*",
+                color=figure_colors["SRS (passive)"],
             ),
-            "SRS (Active)": fs.BarType(
-                allocation="Space Research (Active)*",
-                color=figure_colors["SRS (Active)"],
+            "SRS (active)": fs.BarType(
+                allocation="Space Research (active)*",
+                color=figure_colors["SRS (active)"],
             ),
         }
     science_rows = science_rows | {
-        "EESS (Passive)": fs.BarType(
-            allocation="Earth Exploration-Satellite (Passive)*",
-            color=figure_colors["EESS (Passive)"],
+        "EESS (passive)": fs.BarType(
+            allocation="Earth Exploration-Satellite (passive)*",
+            color=figure_colors["EESS (passive)"],
         ),
-        "EESS (Active)": fs.BarType(
-            allocation="Earth Exploration-Satellite (Active)*",
-            color=figure_colors["EESS (Active)"],
+        "EESS (active)": fs.BarType(
+            allocation="Earth Exploration-Satellite (active)*",
+            color=figure_colors["EESS (active)"],
         ),
         "RR 5.340": fs.BarType(
             footnote="5.340",
@@ -302,8 +302,8 @@ def wrc27_ai_figure(
     # Now loop over the science bands
     row_key_inclusion_map = {
         "RAS": "RAS",
-        "EESS (Passive)": "EESS",
-        "EESS (Active)": "EESS",
+        "EESS (passive)": "EESS",
+        "EESS (active)": "EESS",
         "RR 5.340": "5.340",
     }
     for row_key, science_bands in bar_buffers.items():
@@ -550,7 +550,7 @@ def wrc_ai_figure_legend(
     # Set up some information
     color_mapping = {
         "RAS": figure_colors["RAS"],
-        "EESS": figure_colors["EESS (Passive)"],
+        "EESS": figure_colors["EESS (passive)"],
         "5.340": [None, None, figure_colors["5.340"]],
     }
     # Now the "quilt" part

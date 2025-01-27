@@ -75,8 +75,8 @@ def wrc27_overview_figure(
             or (
                 include_srs
                 and (
-                    band.has_allocation("Space Research (Passive)*")
-                    or band.has_allocation("Space Research (Active)*")
+                    band.has_allocation("Space Research (passive)*")
+                    or band.has_allocation("Space Research (active)*")
                 )
             ),
             slot=1,
@@ -84,9 +84,9 @@ def wrc27_overview_figure(
         ),
         "EESS": fs.BarType(
             condition=lambda band: band.has_allocation(
-                "Earth Exploration-Satellite (Passive)*"
+                "Earth Exploration-Satellite (passive)*"
             )
-            or band.has_allocation("Earth Exploration-Satellite (Active)*"),
+            or band.has_allocation("Earth Exploration-Satellite (active)*"),
             slot=2,
             color=figure_colors["EESS Overview"],
         ),
