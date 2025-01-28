@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2024.2.8)  27 JAN 2025 21:15
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2024.2.8)  28 JAN 2025 13:28
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -44,7 +44,27 @@ Package: iftex 2022/02/03 v1.0f TeX engine tests
 \Gm@layouthoffset=\dimen147
 \Gm@layoutvoffset=\dimen148
 \Gm@dimlist=\toks17
-) (/usr/local/texlive/2023/texmf-dist/tex/latex/pgf/frontendlayer/tikz.sty (/usr/local/texlive/2023/texmf-dist/tex/latex/pgf/basiclayer/pgf.sty (/usr/local/texlive/2023/texmf-dist/tex/latex/pgf/utilities/pgfrcs.sty (/usr/local/texlive/2023/texmf-dist/tex/generic/pgf/utilities/pgfutil-common.tex
+) (/usr/local/texlive/2023/texmf-dist/tex/latex/xcolor/xcolor.sty
+Package: xcolor 2022/06/12 v2.14 LaTeX color extensions (UK)
+ (/usr/local/texlive/2023/texmf-dist/tex/latex/graphics-cfg/color.cfg
+File: color.cfg 2016/01/02 v1.6 sample color configuration
+)
+Package xcolor Info: Driver file: pdftex.def on input line 227.
+ (/usr/local/texlive/2023/texmf-dist/tex/latex/graphics-def/pdftex.def
+File: pdftex.def 2022/09/22 v1.2b Graphics/color driver for pdftex
+) (/usr/local/texlive/2023/texmf-dist/tex/latex/graphics/mathcolor.ltx)
+Package xcolor Info: Model `cmy' substituted by `cmy0' on input line 1353.
+Package xcolor Info: Model `hsb' substituted by `rgb' on input line 1357.
+Package xcolor Info: Model `RGB' extended on input line 1369.
+Package xcolor Info: Model `HTML' substituted by `rgb' on input line 1371.
+Package xcolor Info: Model `Hsb' substituted by `hsb' on input line 1372.
+Package xcolor Info: Model `tHsb' substituted by `hsb' on input line 1373.
+Package xcolor Info: Model `HSB' substituted by `hsb' on input line 1374.
+Package xcolor Info: Model `Gray' substituted by `gray' on input line 1375.
+Package xcolor Info: Model `wave' substituted by `hsb' on input line 1376.
+ (/usr/local/texlive/2023/texmf-dist/tex/latex/xcolor/svgnam.def
+File: svgnam.def 2022/06/12 v2.14 Predefined colors according to SVG 1.1 (UK)
+)) (/usr/local/texlive/2023/texmf-dist/tex/latex/pgf/frontendlayer/tikz.sty (/usr/local/texlive/2023/texmf-dist/tex/latex/pgf/basiclayer/pgf.sty (/usr/local/texlive/2023/texmf-dist/tex/latex/pgf/utilities/pgfrcs.sty (/usr/local/texlive/2023/texmf-dist/tex/generic/pgf/utilities/pgfutil-common.tex
 \pgfutil@everybye=\toks18
 \pgfutil@tempdima=\dimen149
 \pgfutil@tempdimb=\dimen150
@@ -64,9 +84,7 @@ Package: trig 2021/08/11 v1.11 sin cos tan (DPC)
 File: graphics.cfg 2016/06/04 v1.11 sample graphics configuration
 )
 Package graphics Info: Driver file: pdftex.def on input line 107.
- (/usr/local/texlive/2023/texmf-dist/tex/latex/graphics-def/pdftex.def
-File: pdftex.def 2022/09/22 v1.2b Graphics/color driver for pdftex
-))
+)
 \Gin@req@height=\dimen151
 \Gin@req@width=\dimen152
 ) (/usr/local/texlive/2023/texmf-dist/tex/latex/pgf/systemlayer/pgfsys.sty (/usr/local/texlive/2023/texmf-dist/tex/generic/pgf/systemlayer/pgfsys.code.tex
@@ -111,23 +129,7 @@ File: pgfsyssoftpath.code.tex 2023-01-15 v3.1.10 (3.1.10)
 \pgfsyssoftpath@bigbuffer@items=\count268
 ) (/usr/local/texlive/2023/texmf-dist/tex/generic/pgf/systemlayer/pgfsysprotocol.code.tex
 File: pgfsysprotocol.code.tex 2023-01-15 v3.1.10 (3.1.10)
-)) (/usr/local/texlive/2023/texmf-dist/tex/latex/xcolor/xcolor.sty
-Package: xcolor 2022/06/12 v2.14 LaTeX color extensions (UK)
- (/usr/local/texlive/2023/texmf-dist/tex/latex/graphics-cfg/color.cfg
-File: color.cfg 2016/01/02 v1.6 sample color configuration
-)
-Package xcolor Info: Driver file: pdftex.def on input line 227.
- (/usr/local/texlive/2023/texmf-dist/tex/latex/graphics/mathcolor.ltx)
-Package xcolor Info: Model `cmy' substituted by `cmy0' on input line 1353.
-Package xcolor Info: Model `hsb' substituted by `rgb' on input line 1357.
-Package xcolor Info: Model `RGB' extended on input line 1369.
-Package xcolor Info: Model `HTML' substituted by `rgb' on input line 1371.
-Package xcolor Info: Model `Hsb' substituted by `hsb' on input line 1372.
-Package xcolor Info: Model `tHsb' substituted by `hsb' on input line 1373.
-Package xcolor Info: Model `HSB' substituted by `hsb' on input line 1374.
-Package xcolor Info: Model `Gray' substituted by `gray' on input line 1375.
-Package xcolor Info: Model `wave' substituted by `hsb' on input line 1376.
-) (/usr/local/texlive/2023/texmf-dist/tex/generic/pgf/basiclayer/pgfcore.code.tex
+)) (/usr/local/texlive/2023/texmf-dist/tex/generic/pgf/basiclayer/pgfcore.code.tex
 Package: pgfcore 2023-01-15 v3.1.10 (3.1.10)
  (/usr/local/texlive/2023/texmf-dist/tex/generic/pgf/math/pgfmath.code.tex (/usr/local/texlive/2023/texmf-dist/tex/generic/pgf/math/pgfmathutil.code.tex) (/usr/local/texlive/2023/texmf-dist/tex/generic/pgf/math/pgfmathparser.code.tex
 \pgfmath@dimen=\dimen163
@@ -289,7 +291,9 @@ LaTeX Info: Redefining \addtolength on input line 81.
 \contentwidth=\skip68
 \useablecontentwidth=\skip69
 \mycolumnwidth=\skip70
- (/usr/local/texlive/2023/texmf-dist/tex/latex/tcolorbox/tcolorbox.sty
+ (/usr/local/texlive/2023/texmf-dist/tex/latex/setspace/setspace.sty
+Package: setspace 2022/12/04 v6.7b set line spacing
+) (/usr/local/texlive/2023/texmf-dist/tex/latex/tcolorbox/tcolorbox.sty
 Package: tcolorbox 2023/02/12 version 6.0.1 text color boxes
  (/usr/local/texlive/2023/texmf-dist/tex/latex/tools/verbatim.sty
 Package: verbatim 2022-07-02 v1.5u LaTeX2e package for verbatim enhancements
@@ -451,38 +455,78 @@ Package: lipsum 2021-09-20 v2.7 150 paragraphs of Lorem Ipsum dummy text
 \g__lipsum_par_int=\count302
 \l__lipsum_a_int=\count303
 \l__lipsum_b_int=\count304
- (/usr/local/texlive/2023/texmf-dist/tex/latex/lipsum/lipsum.ltd.tex)) (/usr/local/texlive/2023/texmf-dist/tex/latex/titlesec/titlesec.sty
+ (/usr/local/texlive/2023/texmf-dist/tex/latex/lipsum/lipsum.ltd.tex)) (/usr/local/texlive/2023/texmf-dist/tex/latex/qrcode/qrcode.sty
+Package: qrcode 2015/01/08 v1.51 QR code generation
+ (/usr/local/texlive/2023/texmf-dist/tex/latex/xkeyval/xkeyval.sty
+Package: xkeyval 2022/06/16 v2.9 package option processing (HA)
+ (/usr/local/texlive/2023/texmf-dist/tex/generic/xkeyval/xkeyval.tex (/usr/local/texlive/2023/texmf-dist/tex/generic/xkeyval/xkvutils.tex
+\XKV@toks=\toks35
+\XKV@tempa@toks=\toks36
+)
+\XKV@depth=\count305
+File: xkeyval.tex 2014/12/03 v2.7a key=value parser (HA)
+))
+\c@qr@i=\count306
+\c@qr@j=\count307
+\qr@a=\count308
+\qr@b=\count309
+\qr@c=\count310
+\qr@for@depth=\count311
+\qr@for@maxdepth=\count312
+\qr@for@start=\count313
+\qr@for@end=\count314
+\qr@for@step=\count315
+\qr@newforcount=\count316
+\qr@newforcount=\count317
+\qr@desiredheight=\skip72
+\qr@modulesize=\skip73
+\qr@minipagewidth=\skip74
+\c@maski=\count318
+\c@maskj=\count319
+\c@totalones=\count320
+\c@penaltyi=\count321
+\c@penaltyii=\count322
+\c@penaltyiii=\count323
+\c@penaltyiv=\count324
+\c@qr@hexchars=\count325
+\qr@newforcount=\count326
+\c@qr@divisionsremaining=\count327
+)
+(/usr/local/texlive/2023/texmf-dist/tex/latex/titlesec/titlesec.sty
 Package: titlesec 2021/07/05 v2.14 Sectioning titles
 \ttl@box=\box71
-\beforetitleunit=\skip72
-\aftertitleunit=\skip73
+\beforetitleunit=\skip75
+\aftertitleunit=\skip76
 \ttl@plus=\dimen263
 \ttl@minus=\dimen264
-\ttl@toksa=\toks35
+\ttl@toksa=\toks37
 \titlewidth=\dimen265
 \titlewidthlast=\dimen266
 \titlewidthfirst=\dimen267
-) (./summary-tabloid-content-wrc-27.tex) (./summary-tabloid.aux)
+) (./summary-tabloid-content-wrc-27.tex)
+\captionwidth=\skip77
+ (./summary-tabloid.aux <Reading QR code for "https://www.nationalacademies.org/our-work/views-on-the-world-radiocommunication-conference-2027" at level 6-M from aux file.>
+)
 \openout1 = `summary-tabloid.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 85.
-LaTeX Font Info:    ... okay on input line 85.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 85.
-LaTeX Font Info:    ... okay on input line 85.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 85.
-LaTeX Font Info:    ... okay on input line 85.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 85.
-LaTeX Font Info:    ... okay on input line 85.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 85.
-LaTeX Font Info:    ... okay on input line 85.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 85.
-LaTeX Font Info:    ... okay on input line 85.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 85.
-LaTeX Font Info:    ... okay on input line 85.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 85.
-LaTeX Font Info:    ... okay on input line 85.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 85.
-LaTeX Font Info:    ... okay on input line 85.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 103.
+LaTeX Font Info:    ... okay on input line 103.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 103.
+LaTeX Font Info:    ... okay on input line 103.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 103.
+LaTeX Font Info:    ... okay on input line 103.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 103.
+LaTeX Font Info:    ... okay on input line 103.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 103.
+LaTeX Font Info:    ... okay on input line 103.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 103.
+LaTeX Font Info:    ... okay on input line 103.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 103.
+LaTeX Font Info:    ... okay on input line 103.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 103.
+LaTeX Font Info:    ... okay on input line 103.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 103.
+LaTeX Font Info:    ... okay on input line 103.
 
 *geometry* driver: auto-detecting
 *geometry* detected driver: pdftex
@@ -520,17 +564,17 @@ LaTeX Font Info:    ... okay on input line 85.
 
 (/usr/local/texlive/2023/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
-\scratchcounter=\count305
+\scratchcounter=\count328
 \scratchdimen=\dimen268
 \scratchbox=\box72
-\nofMPsegments=\count306
-\nofMParguments=\count307
-\everyMPshowfont=\toks36
-\MPscratchCnt=\count308
+\nofMPsegments=\count329
+\nofMParguments=\count330
+\everyMPshowfont=\toks38
+\MPscratchCnt=\count331
 \MPscratchDim=\dimen269
-\MPnumerator=\count309
-\makeMPintoPDFobject=\count310
-\everyMPtoPDFconversion=\toks37
+\MPnumerator=\count332
+\makeMPintoPDFobject=\count333
+\everyMPtoPDFconversion=\toks39
 ) (/usr/local/texlive/2023/texmf-dist/tex/latex/epstopdf-pkg/epstopdf-base.sty
 Package: epstopdf-base 2020-01-24 v2.11 Base part for package epstopdf
 Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 485.
@@ -538,186 +582,295 @@ Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 48
 File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Live
 ))
 \big@size=\dimen270
-Package hyperref Info: Link coloring OFF on input line 85.
+Package hyperref Info: Link coloring OFF on input line 103.
  (./summary-tabloid.out) (./summary-tabloid.out)
 \@outlinefile=\write4
 \openout4 = `summary-tabloid.out'.
 
-\contentheight=\skip74
+\contentheight=\skip78
 
-Underfull \hbox (badness 10000) in paragraph at lines 111--111
+Underfull \hbox (badness 10000) in paragraph at lines 129--129
 []\T1/ppl/b/n/10 AI-1.1: Aero-nau-ti-cal/Marine Earth Sta-tions in Mo-tion
  []
 
 </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.1.pdf, id=7, 299.59122pt x 79.52486pt>
 File: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.1.pdf Graphic file (type pdf)
 <use /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.1.pdf>
-Package pdftex.def Info: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.1.pdf  used on input line 111.
+Package pdftex.def Info: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.1.pdf  used on input line 129.
 (pdftex.def)             Requested size: 256.41827pt x 68.07088pt.
 </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.2.pdf, id=8, 299.59122pt x 57.84386pt>
 File: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.2.pdf Graphic file (type pdf)
 <use /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.2.pdf>
-Package pdftex.def Info: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.2.pdf  used on input line 112.
+Package pdftex.def Info: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.2.pdf  used on input line 130.
 (pdftex.def)             Requested size: 256.41827pt x 49.5126pt.
 
-Underfull \hbox (badness 10000) in paragraph at lines 113--113
+Underfull \hbox (badness 10000) in paragraph at lines 131--131
 []\T1/ppl/b/n/10 AI-1.3: Fixed up-links to non-geostationary satel-lites at
  []
 
 </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.3.pdf, id=9, 299.59122pt x 79.52486pt>
 File: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.3.pdf Graphic file (type pdf)
 <use /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.3.pdf>
-Package pdftex.def Info: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.3.pdf  used on input line 113.
+Package pdftex.def Info: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.3.pdf  used on input line 131.
 (pdftex.def)             Requested size: 256.41827pt x 68.07088pt.
 </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.4.pdf, id=10, 299.59122pt x 57.84386pt>
 File: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.4.pdf Graphic file (type pdf)
 <use /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.4.pdf>
-Package pdftex.def Info: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.4.pdf  used on input line 114.
+Package pdftex.def Info: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.4.pdf  used on input line 132.
 (pdftex.def)             Requested size: 256.41827pt x 49.5126pt.
 
-Underfull \hbox (badness 10000) in paragraph at lines 115--115
+Underfull \hbox (badness 10000) in paragraph at lines 133--133
 []\T1/ppl/b/n/10 AI-1.5: Lim-it-ing unau-tho-rized non-geostationary
  []
 
 </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.5.pdf, id=11, 299.59122pt x 68.68436pt>
 File: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.5.pdf Graphic file (type pdf)
 <use /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.5.pdf>
-Package pdftex.def Info: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.5.pdf  used on input line 115.
+Package pdftex.def Info: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.5.pdf  used on input line 133.
 (pdftex.def)             Requested size: 256.41827pt x 58.79175pt.
 
-Underfull \hbox (badness 10000) in paragraph at lines 116--116
+Underfull \hbox (badness 10000) in paragraph at lines 134--134
 []\T1/ppl/b/n/10 AI-1.6: Eq-ui-table ac-cess to fixed satel-lite ser-vice in se-
  []
 
 </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.6.pdf, id=12, 299.59122pt x 79.52486pt>
 File: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.6.pdf Graphic file (type pdf)
 <use /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.6.pdf>
-Package pdftex.def Info: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.6.pdf  used on input line 116.
+Package pdftex.def Info: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.6.pdf  used on input line 134.
 (pdftex.def)             Requested size: 256.41827pt x 68.07088pt.
 
-Underfull \hbox (badness 10000) in paragraph at lines 120--120
+Underfull \hbox (badness 10000) in paragraph at lines 138--138
 []\T1/ppl/b/n/10 AI-1.7: Al-lo-ca-tions to In-ter-na-tional Mo-bile Telecom-mu-
  []
 
 </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.7.pdf, id=13, 299.59122pt x 90.36536pt>
 File: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.7.pdf Graphic file (type pdf)
 <use /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.7.pdf>
-Package pdftex.def Info: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.7.pdf  used on input line 120.
+Package pdftex.def Info: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.7.pdf  used on input line 138.
 (pdftex.def)             Requested size: 256.41827pt x 77.35004pt.
 </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.8.pdf, id=14, 299.59122pt x 90.36536pt>
 File: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.8.pdf Graphic file (type pdf)
 <use /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.8.pdf>
-Package pdftex.def Info: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.8.pdf  used on input line 121.
+Package pdftex.def Info: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.8.pdf  used on input line 139.
 (pdftex.def)             Requested size: 256.41827pt x 77.35004pt.
 
-Underfull \hbox (badness 10000) in paragraph at lines 122--122
+Underfull \hbox (badness 10000) in paragraph at lines 140--140
 []\T1/ppl/b/n/10 AI-1.9: Up-dat-ing Ap-pendix 26 for mod-ern-iza-tion of
  []
 
 </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.9.pdf, id=15, 299.59122pt x 57.84386pt>
 File: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.9.pdf Graphic file (type pdf)
 <use /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.9.pdf>
-Package pdftex.def Info: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.9.pdf  used on input line 122.
+Package pdftex.def Info: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.9.pdf  used on input line 140.
 (pdftex.def)             Requested size: 256.41827pt x 49.5126pt.
 
-Underfull \hbox (badness 10000) in paragraph at lines 123--123
+Underfull \hbox (badness 10000) in paragraph at lines 141--141
 []\T1/ppl/b/n/10 AI-1.10: Power lim-its for satel-lites in 71^^U76 and
  []
 
 </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.10.pdf, id=16, 299.59122pt x 79.52486pt>
 File: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.10.pdf Graphic file (type pdf)
 <use /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.10.pdf>
-Package pdftex.def Info: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.10.pdf  used on input line 123.
+Package pdftex.def Info: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.10.pdf  used on input line 141.
 (pdftex.def)             Requested size: 256.41827pt x 68.07088pt.
 </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.11.pdf, id=17, 299.59122pt x 57.84386pt>
 File: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.11.pdf Graphic file (type pdf)
 <use /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.11.pdf>
-Package pdftex.def Info: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.11.pdf  used on input line 124.
+Package pdftex.def Info: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.11.pdf  used on input line 142.
 (pdftex.def)             Requested size: 256.41827pt x 49.5126pt.
 </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.12.pdf, id=18, 299.59122pt x 79.52486pt>
 File: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.12.pdf Graphic file (type pdf)
 <use /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.12.pdf>
-Package pdftex.def Info: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.12.pdf  used on input line 125.
+Package pdftex.def Info: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.12.pdf  used on input line 143.
 (pdftex.def)             Requested size: 256.41827pt x 68.07088pt.
-\shortcontentheight=\skip75
+\shortcontentheight=\skip79
 
-Underfull \hbox (badness 10000) in paragraph at lines 132--132
+Underfull \hbox (badness 10000) in paragraph at lines 150--150
 []\T1/ppl/b/n/10 AI-1.13: Di-rect satel-lite to cell-phone com-mu-ni-ca-tions in
  []
 
 </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.13.pdf, id=19, 299.59122pt x 90.36536pt>
 File: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.13.pdf Graphic file (type pdf)
 <use /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.13.pdf>
-Package pdftex.def Info: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.13.pdf  used on input line 132.
+Package pdftex.def Info: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.13.pdf  used on input line 150.
 (pdftex.def)             Requested size: 256.41827pt x 77.35004pt.
 </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.14.pdf, id=20, 299.59122pt x 47.00336pt>
 File: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.14.pdf Graphic file (type pdf)
 <use /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.14.pdf>
-Package pdftex.def Info: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.14.pdf  used on input line 133.
+Package pdftex.def Info: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.14.pdf  used on input line 151.
 (pdftex.def)             Requested size: 256.41827pt x 40.23346pt.
 </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.15.pdf, id=21, 299.59122pt x 90.36536pt>
 File: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.15.pdf Graphic file (type pdf)
 <use /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.15.pdf>
-Package pdftex.def Info: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.15.pdf  used on input line 134.
+Package pdftex.def Info: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.15.pdf  used on input line 152.
 (pdftex.def)             Requested size: 256.41827pt x 77.35004pt.
 </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.16.pdf, id=22, 299.59122pt x 90.36536pt>
 File: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.16.pdf Graphic file (type pdf)
 <use /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.16.pdf>
-Package pdftex.def Info: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.16.pdf  used on input line 135.
+Package pdftex.def Info: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.16.pdf  used on input line 153.
 (pdftex.def)             Requested size: 256.41827pt x 77.35004pt.
 
-Underfull \hbox (badness 10000) in paragraph at lines 139--139
+Underfull \hbox (badness 10000) in paragraph at lines 154--154
+[]\T1/ppl/m/n/10 Figures show the ra-dio bands un-der con-sid-er-a-tion in var-i-ous WRC-27 ``Agenda Items'' along
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 154--154
+\T1/ppl/m/n/10 with bands al-lo-cated to and/or af-forded some form of pro-tec-tion for sci-en-tific use in the In-ter-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 154--154
+\T1/ppl/m/n/10 na-tional Telecom-mu-ni-ca-tions Union (ITU) Ra-dio Reg-u-la-tions (RR). The top row in each fig-ure
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 154--154
+\T1/ppl/m/n/10 notes the band(s) un-der con-sid-er-a-tion in the Agenda Item (grey). Rows be-neath de-note bands
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 154--154
+\T1/ppl/m/n/10 within the same spec-tral re-gion that are al-lo-cated to (or af-forded some level of ac-knowl-edge-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 154--154
+\T1/ppl/m/n/10 ment/protection for) sci-en-tific ob-ser-va-tions, ei-ther for ra-dio as-tron-omy (the Ra-dio As-tron-omy
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 154--154
+\T1/ppl/m/n/10 Ser-vice, RAS, pur-ples/pinks) or Earth ob-ser-va-tion (the Earth Ex-plo-ration Satel-lite Ser-vice,
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 154--154
+\T1/ppl/m/n/10 EESS, pas-sive or ac-tive, greens). Any bands af-forded ``all emis-sions pro-hib-ited'' pro-tec-tion
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 154--154
+\T1/ppl/m/n/10 un-der RR Foot-note 5.340 will be in-di-cated (in or-ange) in the bot-tom-most row. RAS and/or
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 154--154
+\T1/ppl/m/n/10 EESS bands shown in strong col-ors are pri-mary al-lo-ca-tions (an-no-tated with a ``Pri.'' in the leg-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 154--154
+\T1/ppl/m/n/10 end above), those shown with paler col-ors are sec-ondary al-lo-ca-tions (an-no-tated with a ``Sec.''
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 154--154
+\T1/ppl/m/n/10 in the leg-end), and bands shown in the palest col-ors are af-forded pro-tec-tions (or oth-er-wise
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 154--154
+\T1/ppl/m/n/10 iden-ti-fied) in a spe-cific foot-note of the, such as RR 5.149 (an-no-tated with ``Fn.'' in the leg-end).
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 154--154
+\T1/ppl/m/n/10 Ar-rows are placed within (or be-side for very nar-row bands) bands un-der con-sid-er-a-tion in an
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 154--154
+\T1/ppl/m/n/10 Agenda Item de-note cases where trans-mis-sions are space-to-Earth, Earth-to-space, and/or
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 154--154
+\T1/ppl/m/n/10 space-to-space. For clar-ity, par-tic-u-larly nar-row bands that would oth-er-wise not be vis-i-ble on
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 158--158
 []\T1/ppl/b/n/10 AI-1.17: Al-lo-ca-tions for receive-only space weather
  []
 
 </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.17.pdf, id=23, 299.59122pt x 68.68436pt>
 File: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.17.pdf Graphic file (type pdf)
 <use /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.17.pdf>
-Package pdftex.def Info: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.17.pdf  used on input line 139.
+Package pdftex.def Info: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.17.pdf  used on input line 158.
 (pdftex.def)             Requested size: 256.41827pt x 58.79175pt.
 
-Underfull \hbox (badness 10000) in paragraph at lines 140--140
+Underfull \hbox (badness 10000) in paragraph at lines 159--159
 []\T1/ppl/b/n/10 AI-1.18: Pro-tec-tion of EESS (pas-sive) and RAS in bands
  []
 
 </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.18.pdf, id=24, 299.59122pt x 90.36536pt>
 File: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.18.pdf Graphic file (type pdf)
 <use /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.18.pdf>
-Package pdftex.def Info: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.18.pdf  used on input line 140.
+Package pdftex.def Info: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.18.pdf  used on input line 159.
 (pdftex.def)             Requested size: 256.41827pt x 77.35004pt.
 </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.19.pdf, id=25, 299.59122pt x 79.52486pt>
 File: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.19.pdf Graphic file (type pdf)
 <use /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.19.pdf>
-Package pdftex.def Info: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.19.pdf  used on input line 141.
+Package pdftex.def Info: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.19.pdf  used on input line 160.
 (pdftex.def)             Requested size: 256.41827pt x 68.07088pt.
 </Users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/stand-alone-legend.pdf, id=26, 313.90015pt x 68.56958pt>
 File: /Users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/stand-alone-legend.pdf Graphic file (type pdf)
 <use /Users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/stand-alone-legend.pdf>
-Package pdftex.def Info: /Users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/stand-alone-legend.pdf  used on input line 142.
-(pdftex.def)             Requested size: 85.35826pt x 52.76529pt.
+Package pdftex.def Info: /Users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/stand-alone-legend.pdf  used on input line 161.
+(pdftex.def)             Requested size: 71.13188pt x 43.97098pt.
 File: /Users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/stand-alone-legend.pdf Graphic file (type pdf)
 <use /Users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/stand-alone-legend.pdf>
-Package pdftex.def Info: /Users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/stand-alone-legend.pdf  used on input line 152.
-(pdftex.def)             Requested size: 284.52756pt x 119.15742pt.
-[1
+Package pdftex.def Info: /Users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/stand-alone-legend.pdf  used on input line 161.
+(pdftex.def)             Requested size: 85.35826pt x 35.7471pt.
+<draft-report-cover.png, id=29, 372.64218pt x 511.15968pt>
+File: draft-report-cover.png Graphic file (type png)
+<use draft-report-cover.png>
+Package pdftex.def Info: draft-report-cover.png  used on input line 168.
+(pdftex.def)             Requested size: 121.05138pt x 166.04692pt.
 
-{/Users/livesey/Library/texlive/2023/texmf-var/fonts/map/pdftex/updmap/pdftex.map}{/usr/local/texlive/2023/texmf-dist/fonts/enc/dvips/base/8r.enc} </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.1.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.2.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.3.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.4.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.5.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.6.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.7.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.8.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.9.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.10.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.11.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.12.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.13.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.14.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.15.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.16.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.17.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.18.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.19.pdf> </Users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/stand-alone-legend.pdf>] (./summary-tabloid.aux)
+
+<QR code requested for "https://www.nationalacademies.org/our-work/views-on-the-world-radiocommunication-conference-2027" in version 0-M.>
+<Copying the QR code for "https://www.nationalacademies.org/our-work/views-on-the-world-radiocommunication-conference-2027" in version 6-M as previously calculated.>
+LaTeX Font Info:    Trying to load font information for OT1+ppl on input line 168.
+(/usr/local/texlive/2023/texmf-dist/tex/latex/psnfss/ot1ppl.fd
+File: ot1ppl.fd 2001/06/04 font definitions for OT1/ppl.
+)
+LaTeX Font Info:    Trying to load font information for OML+zplm on input line 168.
+ (/usr/local/texlive/2023/texmf-dist/tex/latex/psnfss/omlzplm.fd
+File: omlzplm.fd 2002/09/08 Fontinst v1.914 font definitions for OML/zplm.
+)
+LaTeX Font Info:    Trying to load font information for OMS+zplm on input line 168.
+ (/usr/local/texlive/2023/texmf-dist/tex/latex/psnfss/omszplm.fd
+File: omszplm.fd 2002/09/08 Fontinst v1.914 font definitions for OMS/zplm.
+)
+LaTeX Font Info:    Trying to load font information for OMX+zplm on input line 168.
+ (/usr/local/texlive/2023/texmf-dist/tex/latex/psnfss/omxzplm.fd
+File: omxzplm.fd 2002/09/08 Fontinst v1.914 font definitions for OMX/zplm.
+)
+LaTeX Font Info:    Trying to load font information for OT1+zplm on input line 168.
+ (/usr/local/texlive/2023/texmf-dist/tex/latex/psnfss/ot1zplm.fd
+File: ot1zplm.fd 2002/09/08 Fontinst v1.914 font definitions for OT1/zplm.
+) [1
+
+{/Users/livesey/Library/texlive/2023/texmf-var/fonts/map/pdftex/updmap/pdftex.map}{/usr/local/texlive/2023/texmf-dist/fonts/enc/dvips/base/8r.enc} </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.1.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.2.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.3.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.4.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.5.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.6.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.7.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.8.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.9.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.10.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.11.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.12.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.13.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.14.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.15.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.16.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.17.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.18.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.19.pdf> <./draft-report-cover.png> </Users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/stand-alone-legend.pdf>] (./summary-tabloid.aux <Reading QR code for "https://www.nationalacademies.org/our-work/views-on-the-world-radiocommunication-conference-2027" at level 6-M from aux file.>
+)
 Package rerunfilecheck Info: File `summary-tabloid.out' has not changed.
 (rerunfilecheck)             Checksum: D41D8CD98F00B204E9800998ECF8427E;0.
  ) 
 Here is how much of TeX's memory you used:
- 23178 strings out of 476025
- 466721 string characters out of 5790018
- 1888388 words of memory out of 5000000
- 43251 multiletter control sequences out of 15000+600000
- 518653 words of font info for 40 fonts, out of 8000000 for 9000
+ 25175 strings out of 476025
+ 496305 string characters out of 5790018
+ 2003388 words of memory out of 5000000
+ 45203 multiletter control sequences out of 15000+600000
+ 524998 words of font info for 56 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 102i,11n,104p,850b,952s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 102i,11n,104p,2036b,952s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/local/texlive/2023/texmf-dist/fonts/type1/public/fdsymbol/FdSymbolC-Bold.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/urw/palatino/uplb8a.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/urw/palatino/uplr8a.pfb>
-Output written on summary-tabloid.pdf (1 page, 194057 bytes).
+Output written on summary-tabloid.pdf (1 page, 660570 bytes).
 PDF statistics:
- 224 PDF objects out of 1000 (max. 8388607)
- 192 compressed objects within 2 object streams
+ 228 PDF objects out of 1000 (max. 8388607)
+ 194 compressed objects within 2 object streams
  2 named destinations out of 1000 (max. 500000)
- 125 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 130 words of extra memory for PDF output out of 10000 (max. 10000000)
 

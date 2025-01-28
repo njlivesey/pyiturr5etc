@@ -8,6 +8,7 @@
     margin=0in,
     ]{geometry}
 % ---------------------------------- Tikz
+\usepackage[svgnames]{xcolor}
 \usepackage{tikz}
 \usetikzlibrary{calc, positioning}
 % ---------------------------------- Layout
@@ -27,6 +28,8 @@
 \setlength{\useablecontentwidth}{\contentwidth-3\columnsep}
 \newlength{\mycolumnwidth}
 \setlength{\mycolumnwidth}{0.25\useablecontentwidth}
+%
+\usepackage{setspace}
 % ---------------------------------- Boxes
 \usepackage{tcolorbox}
 % ---------------------------------- Fonts
@@ -40,6 +43,7 @@
 \usepackage{lipsum}
 % ---------------------------------- Graphics
 \usepackage{graphicx}
+\usepackage{qrcode}
 % ---------------------------------- Section headings
 \usepackage{titlesec}
 \titleformat{\section}[block] % Format for \section
@@ -81,6 +85,20 @@
 clip=true, trim=76mm 2.7mm 12mm 7.6mm]%
 {/Users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/%
 specific-ai-plots-no-legend/stand-alone-legend.pdf}}
+\newcommand{\ArrowLegend}[1]{\includegraphics[width=#1,
+clip=true, trim=2.4mm 3.5mm 85mm 11mm]%
+{/Users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/%
+specific-ai-plots-no-legend/stand-alone-legend.pdf}}
+%
+% ---------------------------------- Caption
+\newlength{\captionwidth}
+\setlength{\captionwidth}{5.8in}
+\newcommand{\PosterCaption}{
+\parbox[b]{\captionwidth}{%
+\setstretch{1.05}
+Figures show the radio bands under consideration in various WRC-27 ``Agenda Items'' along with bands allocated to and/or afforded some form of protection for scientific use in the International Telecommunications Union (ITU) Radio Regulations (RR). The top row in each figure notes the band(s) under consideration in the Agenda Item (grey). Rows beneath denote bands within the same spectral region that are allocated to (or afforded some level of acknowledgement/protection for) scientific observations, either for radio astronomy (the Radio Astronomy Service, RAS, purples/pinks) or Earth observation (the Earth Exploration Satellite Service, EESS, passive or active, greens). Any bands afforded ``all emissions prohibited'' protection under RR Footnote 5.340 will be indicated (in orange) in the bottommost row. RAS and/or EESS bands shown in strong colors are primary allocations (annotated with a ``Pri.\@'' in the legend above), those shown with paler colors are secondary allocations (annotated with a ``Sec\@.'' in the legend), and bands shown in the palest colors are afforded protections (or otherwise identified) in a specific footnote of the, such as RR~5.149 (annotated with ``Fn.'' in the legend).  Arrows are placed within (or beside for very narrow bands) bands under consideration in an Agenda Item denote cases where transmissions are space-to-Earth, Earth-to-space, and/or space-to-space. For clarity, particularly narrow bands that would otherwise not be visible on the page are shown with exaggerated bandwidth.}}
+
+
 % ---------------------------------- Main document
 \begin{document}
 \begin{tikzpicture}[inner sep=0pt]
@@ -96,7 +114,7 @@ specific-ai-plots-no-legend/stand-alone-legend.pdf}}
 %
 \coordinate (Center) at ($ (ContentBottomLeft)!0.5!(ContentTopRight) $);
 %
-\node (Title) [font=\LARGE\bfseries, anchor=north west] at (ContentTopLeft){Agenda Items for the World Radiocommunications Conference 2027 --- Potential implications for scientific usage of the radio spectrum};
+\node (Title) [font=\LARGE\bfseries, anchor=north west] at (ContentTopLeft){Agenda Items for the World Radiocommunications Conference 2027 (WRC-27) --- Potential implications for scientific usage of the radio spectrum};
 %
 \node (Subtitle) [font=\large, anchor=north west, yshift=-10pt] at (Title.south west){Figures taken from the ``Views of the National Academies of Sciences, Engineering, and Medicine on Agenda Items at Issue for the World Radiocommunication Conference -- 2027'' report};
 %
@@ -125,35 +143,36 @@ specific-ai-plots-no-legend/stand-alone-legend.pdf}}
      \AIentry{l}}};
 %
 \newlength{\shortcontentheight}
-\setlength{\shortcontentheight}{0.6\contentheight}
+\setlength{\shortcontentheight}{0.67\contentheight}
 %
 \node [anchor=north west, xshift=2\mycolumnwidth+2\columnsep] at (BodyTopLeft) {%
-\vbox to \shortcontentheight{
+\vbox to \contentheight{
      \AIentry{m}\vfill
      \AIentry{n}\vfill
      \AIentry{o}\vfill
-     \AIentry{p}}};
+     \AIentry{p}\vfill
+     \PosterCaption}};
 %
 \node [anchor=north west, xshift=3\mycolumnwidth+3\columnsep] at (BodyTopLeft) {%
 \vbox to \shortcontentheight{
      \AIentry{q}\vfill
      \AIentry{r}\vfill
      \AIentry{s}\vfill
-     \QuiltLegend{3cm}}};
+     \parbox[b]{\mycolumnwidth}{\QuiltLegend{2.5cm}\par\vspace{\baselineskip}\ArrowLegend{3cm}}}};
 %
-% \draw [very thick, purple] (BodyTopRail) -- ++(0, -\contentheight);
-%
-% \node (Overview) [anchor=south east] at (ContentBottomRight) {%
-% \includegraphics[width=6in]{/Users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/wrc-summary-figure-WRC-27.pdf}};
-\node [anchor=south east, inner sep=0pt, draw] at (ContentBottomRight) {%
-  \includegraphics[width=10cm,
-clip=true, trim=2.4mm 3.5mm 85mm 11mm]%
-{/Users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/%
-specific-ai-plots-no-legend/stand-alone-legend.pdf}};
+\node (Report) [anchor=south east] at (ContentBottomRight) {%
+\parbox{2\mycolumnwidth-\captionwidth}{
+\includegraphics[width=\linewidth]{draft-report-cover.png}\par
+\vspace{2\baselineskip}
+\null\hfill{\qrcode[hyperlink, height=0.75\linewidth]{https://www.nationalacademies.org/our-work/views-on-the-world-radiocommunication-conference-2027}}
+}};
+%   \begin{tcolorbox}[box align=bottom, nobeforeafter, width=2\mycolumnwidth+\columnsep, left=3pt, right=3pt, top=3pt, bottom=3pt, boxrule=1pt]%
+%   \lipsum[1-3]
+%   \end{tcolorbox}%
+% };
 
 \pgfresetboundingbox
 \path [use as bounding box] (PageBottomLeft) rectangle (PageTopRight);
-
 %
 \end{tikzpicture}
 \end{document}
