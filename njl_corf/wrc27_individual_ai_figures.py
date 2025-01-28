@@ -42,6 +42,7 @@ def wrc27_ai_figure(
     color_scheme: Optional[str] = None,
     include_legend: Optional[bool] = True,
     selective_legend: Optional[bool] = False,
+    for_poster: Optional[bool] = False,
 ):
     """Figure reviewing WRC agenda items and associated bands
 
@@ -88,6 +89,8 @@ def wrc27_ai_figure(
         If set, include a legend for the figure
     selective_legend : Optional[bool], default False
         If set, only include in the legend things that are actually in the figure
+    for_poster : Optional[bool], default False
+        If set, change background etc. for inclusion in a poster.
     """
     # Read the allocation tables if not supplied
     if allocation_database is None:
@@ -410,6 +413,12 @@ def wrc27_ai_figure(
     # --------------------------------- Any custom annotation
     if custom_annotations:
         custom_annotations(ax=ax)
+    # --------------------------------- Any specifics for posters
+    if for_poster:
+        # Set axis facecolor to opaque white
+        ax.set_facecolor("white")
+        # Set figure transparency by adjusting the facecolor alpha
+        fig.patch.set_alpha(0.0)  # Fully transparent figure background
     # --------------------------------- Done
     if not no_show:
         plt.show()
@@ -523,7 +532,7 @@ def wrc_ai_figure_legend(
     n_rows: int,
     figure_colors: dict,
     selective_legend: bool,
-    included_features: set[str],
+    included_features: Optional[set[str]] = None,
 ):
     """Generates legend for the individual AI figure"""
     # Combine figure transform (for x-axis) and data transform (for y-axis)
@@ -678,9 +687,13 @@ def all_individual_figures(
     only: Optional[list[str]] = None,
     skip_pdf: Optional[bool] = False,
     skip_png: Optional[bool] = False,
+    output_path: Optional[str] = None,
     **kwargs,
 ):
     """Generate all the figures for the agenda items"""
+    # Setup defaults
+    if output_path is None:
+        output_path = "specific-ai-plots"
     # Setup a placeholder for the configurations
     plot_configurations: dict[AIPlotConfiguration] = {}
     # Make a bunch of plots for the WRC-27 items
@@ -834,13 +847,13 @@ def all_individual_figures(
         )
         if not skip_pdf:
             plt.savefig(
-                f"specific-ai-plots/SpecificAI-{key}.pdf",
+                f"{output_path}/SpecificAI-{key}.pdf",
                 bbox_inches="tight",
                 pad_inches=2.0 / 72,
             )
         if not skip_png:
             plt.savefig(
-                f"specific-ai-plots/SpecificAI-{key}.png",
+                f"{output_path}/SpecificAI-{key}.png",
                 dpi=600,
                 bbox_inches="tight",
                 pad_inches=2.0 / 72,

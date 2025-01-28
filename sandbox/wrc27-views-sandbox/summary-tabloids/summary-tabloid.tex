@@ -1,0 +1,159 @@
+\documentclass[10pt]{article}
+% ---------------------------------- Geometry
+\usepackage[
+    paperwidth=17in,
+    paperheight=11in,
+    % paperwidth=11in,
+    % paperheight=17in,
+    margin=0in,
+    ]{geometry}
+% ---------------------------------- Tikz
+\usepackage{tikz}
+\usetikzlibrary{calc, positioning}
+% ---------------------------------- Layout
+\setlength{\parindent}{0pt}
+\usepackage{ragged2e}
+\RaggedRight
+\pagestyle{empty}
+\usepackage{calc}
+\newlength{\margin}
+\setlength{\margin}{0.5in}
+%
+\newlength{\contentwidth}
+\setlength{\contentwidth}{\paperwidth-2\margin}
+\setlength{\columnsep}{0.35in}
+%
+\newlength{\useablecontentwidth}
+\setlength{\useablecontentwidth}{\contentwidth-3\columnsep}
+\newlength{\mycolumnwidth}
+\setlength{\mycolumnwidth}{0.25\useablecontentwidth}
+% ---------------------------------- Boxes
+\usepackage{tcolorbox}
+% ---------------------------------- Fonts
+\usepackage{mathpazo} % Palatino for text and math
+\usepackage[T1]{fontenc} % Output fonts in T1 encoding
+\usepackage{textcomp} % Additional text symbols
+\usepackage[utf8]{inputenc} % For UTF-8 input (not needed in modern engines)
+% ---------------------------------- Hyperlinks etc.
+\usepackage[hidelinks]{hyperref}
+% ---------------------------------- Random text
+\usepackage{lipsum}
+% ---------------------------------- Graphics
+\usepackage{graphicx}
+% ---------------------------------- Section headings
+\usepackage{titlesec}
+\titleformat{\section}[block] % Format for \section
+  {\large\rmfamily}          % Apply \large size, no bold (roman font)
+  {}                         % No label for unnumbered sections
+  {0pt}                      % No space between label and title (not used here)
+  {}                         % Code before the title
+\titlespacing*{\section} % Only affects unnumbered sections
+  {0pt} % Left indentation
+  {10pt} % Space above the title
+  {5pt} % Space below the title
+% ---------------------------------- WRC-specific macros
+% \newenvironment{AI}[1]{\begin{minipage}{\linewidth}\section{#1}}{\end{minipage}\par}
+\newenvironment{AIbox}[1]{%
+    %\begin{minipage}{\mycolumnwidth}
+    \begin{tcolorbox}[box align=bottom, nobeforeafter, width=\mycolumnwidth, title=#1, left=3pt, right=3pt, top=3pt, bottom=3pt, fonttitle=\bfseries, boxrule=1pt]%
+}{%
+    \end{tcolorbox}%
+    %\end{minipage}%
+}
+\newcommand{\AItext}[1]{\parbox{\linewidth}{\footnotesize #1}}
+\renewcommand{\AItext}[1]{}
+\newcommand{\AIfigure}[1]{%
+    \includegraphics[width=\linewidth]{#1}%
+}%
+%
+\newcommand{\AIentry}[1]{%
+\vbox{\begin{AIbox}{\csname AI#1Title\endcsname}%
+\AItext{\csname AI#1Text\endcsname}%
+\AIfigure{\csname AI#1Figure\endcsname}%
+\end{AIbox}}}
+%
+% Populate all the data
+\input{summary-tabloid-content-wrc-27.tex}%
+%
+\newcommand{\emptyblock}[1]{\rule{1pt}{#1}}
+%
+\newcommand{\QuiltLegend}[1]{\includegraphics[width=#1,
+clip=true, trim=76mm 2.7mm 12mm 7.6mm]%
+{/Users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/%
+specific-ai-plots-no-legend/stand-alone-legend.pdf}}
+% ---------------------------------- Main document
+\begin{document}
+\begin{tikzpicture}[inner sep=0pt]
+\coordinate (PageBottomLeft) at (0,0);
+\coordinate (PageTopRight) at (\textwidth, \textheight);
+\coordinate (PageTopLeft) at (PageBottomLeft|-PageTopRight);
+\coordinate (PageBottomRight) at (PageBottomLeft-|PageTopRight);
+%
+\coordinate (ContentBottomLeft) at (\margin, \margin);
+\coordinate (ContentTopRight) at (\textwidth-\margin, \textheight-\margin);
+\coordinate (ContentTopLeft) at (ContentBottomLeft|-ContentTopRight);
+\coordinate (ContentBottomRight) at (ContentBottomLeft-|ContentTopRight);
+%
+\coordinate (Center) at ($ (ContentBottomLeft)!0.5!(ContentTopRight) $);
+%
+\node (Title) [font=\LARGE\bfseries, anchor=north west] at (ContentTopLeft){Agenda Items for the World Radiocommunications Conference 2027 --- Potential implications for scientific usage of the radio spectrum};
+%
+\node (Subtitle) [font=\large, anchor=north west, yshift=-10pt] at (Title.south west){Figures taken from the ``Views of the National Academies of Sciences, Engineering, and Medicine on Agenda Items at Issue for the World Radiocommunication Conference -- 2027'' report};
+%
+\coordinate (BodyTopRail) at ($ (Subtitle.south west) - (0, 10pt) $);
+\coordinate (BodyTopLeft) at (BodyTopRail-|ContentTopLeft);
+%
+\newlength{\contentheight}
+\path let \p0=($ (BodyTopRail) - (ContentBottomLeft) $) in node at (Center) {\setlength{\global\contentheight}{\y0}};
+%
+\node [anchor=north west] at (BodyTopLeft) {%
+\vbox to \contentheight{
+     \AIentry{a}\vfill
+     \AIentry{b}\vfill
+     \AIentry{c}\vfill
+     \AIentry{d}\vfill
+     \AIentry{e}\vfill
+     \AIentry{f}}};
+     %
+\node [anchor=north west, xshift=\mycolumnwidth+\columnsep] at (BodyTopLeft) {%
+\vbox to \contentheight{
+     \AIentry{g}\vfill
+     \AIentry{h}\vfill
+     \AIentry{i}\vfill
+     \AIentry{j}\vfill
+     \AIentry{k}\vfill
+     \AIentry{l}}};
+%
+\newlength{\shortcontentheight}
+\setlength{\shortcontentheight}{0.6\contentheight}
+%
+\node [anchor=north west, xshift=2\mycolumnwidth+2\columnsep] at (BodyTopLeft) {%
+\vbox to \shortcontentheight{
+     \AIentry{m}\vfill
+     \AIentry{n}\vfill
+     \AIentry{o}\vfill
+     \AIentry{p}}};
+%
+\node [anchor=north west, xshift=3\mycolumnwidth+3\columnsep] at (BodyTopLeft) {%
+\vbox to \shortcontentheight{
+     \AIentry{q}\vfill
+     \AIentry{r}\vfill
+     \AIentry{s}\vfill
+     \QuiltLegend{3cm}}};
+%
+% \draw [very thick, purple] (BodyTopRail) -- ++(0, -\contentheight);
+%
+% \node (Overview) [anchor=south east] at (ContentBottomRight) {%
+% \includegraphics[width=6in]{/Users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/wrc-summary-figure-WRC-27.pdf}};
+\node [anchor=south east, inner sep=0pt, draw] at (ContentBottomRight) {%
+  \includegraphics[width=10cm,
+clip=true, trim=2.4mm 3.5mm 85mm 11mm]%
+{/Users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/%
+specific-ai-plots-no-legend/stand-alone-legend.pdf}};
+
+\pgfresetboundingbox
+\path [use as bounding box] (PageBottomLeft) rectangle (PageTopRight);
+
+%
+\end{tikzpicture}
+\end{document}

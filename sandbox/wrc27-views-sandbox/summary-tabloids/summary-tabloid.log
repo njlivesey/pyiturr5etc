@@ -1,0 +1,723 @@
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2024.2.8)  27 JAN 2025 21:15
+entering extended mode
+ restricted \write18 enabled.
+ file:line:error style messages enabled.
+ %&-line parsing enabled.
+**/Users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/summary-tabloids/summary-tabloid.tex
+(/Users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/summary-tabloids/summary-tabloid.tex
+LaTeX2e <2022-11-01> patch level 1
+L3 programming layer <2023-02-22> (/usr/local/texlive/2023/texmf-dist/tex/latex/base/article.cls
+Document Class: article 2022/07/02 v1.4n Standard LaTeX document class
+(/usr/local/texlive/2023/texmf-dist/tex/latex/base/size10.clo
+File: size10.clo 2022/07/02 v1.4n Standard LaTeX file (size option)
+)
+\c@part=\count185
+\c@section=\count186
+\c@subsection=\count187
+\c@subsubsection=\count188
+\c@paragraph=\count189
+\c@subparagraph=\count190
+\c@figure=\count191
+\c@table=\count192
+\abovecaptionskip=\skip48
+\belowcaptionskip=\skip49
+\bibindent=\dimen140
+) (/usr/local/texlive/2023/texmf-dist/tex/latex/geometry/geometry.sty
+Package: geometry 2020/01/02 v5.9 Page Geometry
+ (/usr/local/texlive/2023/texmf-dist/tex/latex/graphics/keyval.sty
+Package: keyval 2022/05/29 v1.15 key=value parser (DPC)
+\KV@toks@=\toks16
+) (/usr/local/texlive/2023/texmf-dist/tex/generic/iftex/ifvtex.sty
+Package: ifvtex 2019/10/25 v1.7 ifvtex legacy package. Use iftex instead.
+ (/usr/local/texlive/2023/texmf-dist/tex/generic/iftex/iftex.sty
+Package: iftex 2022/02/03 v1.0f TeX engine tests
+))
+\Gm@cnth=\count193
+\Gm@cntv=\count194
+\c@Gm@tempcnt=\count195
+\Gm@bindingoffset=\dimen141
+\Gm@wd@mp=\dimen142
+\Gm@odd@mp=\dimen143
+\Gm@even@mp=\dimen144
+\Gm@layoutwidth=\dimen145
+\Gm@layoutheight=\dimen146
+\Gm@layouthoffset=\dimen147
+\Gm@layoutvoffset=\dimen148
+\Gm@dimlist=\toks17
+) (/usr/local/texlive/2023/texmf-dist/tex/latex/pgf/frontendlayer/tikz.sty (/usr/local/texlive/2023/texmf-dist/tex/latex/pgf/basiclayer/pgf.sty (/usr/local/texlive/2023/texmf-dist/tex/latex/pgf/utilities/pgfrcs.sty (/usr/local/texlive/2023/texmf-dist/tex/generic/pgf/utilities/pgfutil-common.tex
+\pgfutil@everybye=\toks18
+\pgfutil@tempdima=\dimen149
+\pgfutil@tempdimb=\dimen150
+) (/usr/local/texlive/2023/texmf-dist/tex/generic/pgf/utilities/pgfutil-latex.def
+\pgfutil@abb=\box51
+) (/usr/local/texlive/2023/texmf-dist/tex/generic/pgf/utilities/pgfrcs.code.tex (/usr/local/texlive/2023/texmf-dist/tex/generic/pgf/pgf.revision.tex)
+Package: pgfrcs 2023-01-15 v3.1.10 (3.1.10)
+))
+Package: pgf 2023-01-15 v3.1.10 (3.1.10)
+ (/usr/local/texlive/2023/texmf-dist/tex/latex/pgf/basiclayer/pgfcore.sty (/usr/local/texlive/2023/texmf-dist/tex/latex/graphics/graphicx.sty
+Package: graphicx 2021/09/16 v1.2d Enhanced LaTeX Graphics (DPC,SPQR)
+ (/usr/local/texlive/2023/texmf-dist/tex/latex/graphics/graphics.sty
+Package: graphics 2022/03/10 v1.4e Standard LaTeX Graphics (DPC,SPQR)
+ (/usr/local/texlive/2023/texmf-dist/tex/latex/graphics/trig.sty
+Package: trig 2021/08/11 v1.11 sin cos tan (DPC)
+) (/usr/local/texlive/2023/texmf-dist/tex/latex/graphics-cfg/graphics.cfg
+File: graphics.cfg 2016/06/04 v1.11 sample graphics configuration
+)
+Package graphics Info: Driver file: pdftex.def on input line 107.
+ (/usr/local/texlive/2023/texmf-dist/tex/latex/graphics-def/pdftex.def
+File: pdftex.def 2022/09/22 v1.2b Graphics/color driver for pdftex
+))
+\Gin@req@height=\dimen151
+\Gin@req@width=\dimen152
+) (/usr/local/texlive/2023/texmf-dist/tex/latex/pgf/systemlayer/pgfsys.sty (/usr/local/texlive/2023/texmf-dist/tex/generic/pgf/systemlayer/pgfsys.code.tex
+Package: pgfsys 2023-01-15 v3.1.10 (3.1.10)
+ (/usr/local/texlive/2023/texmf-dist/tex/generic/pgf/utilities/pgfkeys.code.tex
+\pgfkeys@pathtoks=\toks19
+\pgfkeys@temptoks=\toks20
+ (/usr/local/texlive/2023/texmf-dist/tex/generic/pgf/utilities/pgfkeyslibraryfiltered.code.tex
+\pgfkeys@tmptoks=\toks21
+))
+\pgf@x=\dimen153
+\pgf@y=\dimen154
+\pgf@xa=\dimen155
+\pgf@ya=\dimen156
+\pgf@xb=\dimen157
+\pgf@yb=\dimen158
+\pgf@xc=\dimen159
+\pgf@yc=\dimen160
+\pgf@xd=\dimen161
+\pgf@yd=\dimen162
+\w@pgf@writea=\write3
+\r@pgf@reada=\read2
+\c@pgf@counta=\count196
+\c@pgf@countb=\count197
+\c@pgf@countc=\count198
+\c@pgf@countd=\count199
+\t@pgf@toka=\toks22
+\t@pgf@tokb=\toks23
+\t@pgf@tokc=\toks24
+\pgf@sys@id@count=\count266
+ (/usr/local/texlive/2023/texmf-dist/tex/generic/pgf/systemlayer/pgf.cfg
+File: pgf.cfg 2023-01-15 v3.1.10 (3.1.10)
+)
+Driver file for pgf: pgfsys-pdftex.def
+ (/usr/local/texlive/2023/texmf-dist/tex/generic/pgf/systemlayer/pgfsys-pdftex.def
+File: pgfsys-pdftex.def 2023-01-15 v3.1.10 (3.1.10)
+ (/usr/local/texlive/2023/texmf-dist/tex/generic/pgf/systemlayer/pgfsys-common-pdf.def
+File: pgfsys-common-pdf.def 2023-01-15 v3.1.10 (3.1.10)
+))) (/usr/local/texlive/2023/texmf-dist/tex/generic/pgf/systemlayer/pgfsyssoftpath.code.tex
+File: pgfsyssoftpath.code.tex 2023-01-15 v3.1.10 (3.1.10)
+\pgfsyssoftpath@smallbuffer@items=\count267
+\pgfsyssoftpath@bigbuffer@items=\count268
+) (/usr/local/texlive/2023/texmf-dist/tex/generic/pgf/systemlayer/pgfsysprotocol.code.tex
+File: pgfsysprotocol.code.tex 2023-01-15 v3.1.10 (3.1.10)
+)) (/usr/local/texlive/2023/texmf-dist/tex/latex/xcolor/xcolor.sty
+Package: xcolor 2022/06/12 v2.14 LaTeX color extensions (UK)
+ (/usr/local/texlive/2023/texmf-dist/tex/latex/graphics-cfg/color.cfg
+File: color.cfg 2016/01/02 v1.6 sample color configuration
+)
+Package xcolor Info: Driver file: pdftex.def on input line 227.
+ (/usr/local/texlive/2023/texmf-dist/tex/latex/graphics/mathcolor.ltx)
+Package xcolor Info: Model `cmy' substituted by `cmy0' on input line 1353.
+Package xcolor Info: Model `hsb' substituted by `rgb' on input line 1357.
+Package xcolor Info: Model `RGB' extended on input line 1369.
+Package xcolor Info: Model `HTML' substituted by `rgb' on input line 1371.
+Package xcolor Info: Model `Hsb' substituted by `hsb' on input line 1372.
+Package xcolor Info: Model `tHsb' substituted by `hsb' on input line 1373.
+Package xcolor Info: Model `HSB' substituted by `hsb' on input line 1374.
+Package xcolor Info: Model `Gray' substituted by `gray' on input line 1375.
+Package xcolor Info: Model `wave' substituted by `hsb' on input line 1376.
+) (/usr/local/texlive/2023/texmf-dist/tex/generic/pgf/basiclayer/pgfcore.code.tex
+Package: pgfcore 2023-01-15 v3.1.10 (3.1.10)
+ (/usr/local/texlive/2023/texmf-dist/tex/generic/pgf/math/pgfmath.code.tex (/usr/local/texlive/2023/texmf-dist/tex/generic/pgf/math/pgfmathutil.code.tex) (/usr/local/texlive/2023/texmf-dist/tex/generic/pgf/math/pgfmathparser.code.tex
+\pgfmath@dimen=\dimen163
+\pgfmath@count=\count269
+\pgfmath@box=\box52
+\pgfmath@toks=\toks25
+\pgfmath@stack@operand=\toks26
+\pgfmath@stack@operation=\toks27
+) (/usr/local/texlive/2023/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.code.tex) (/usr/local/texlive/2023/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.basic.code.tex) (/usr/local/texlive/2023/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.trigonometric.code.tex) (/usr/local/texlive/2023/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.random.code.tex) (/usr/local/texlive/2023/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.comparison.code.tex) (/usr/local/texlive/2023/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.base.code.tex) (/usr/local/texlive/2023/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.round.code.tex) (/usr/local/texlive/2023/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.misc.code.tex) (/usr/local/texlive/2023/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.integerarithmetics.code.tex) (/usr/local/texlive/2023/texmf-dist/tex/generic/pgf/math/pgfmathcalc.code.tex) (/usr/local/texlive/2023/texmf-dist/tex/generic/pgf/math/pgfmathfloat.code.tex
+\c@pgfmathroundto@lastzeros=\count270
+)) (/usr/local/texlive/2023/texmf-dist/tex/generic/pgf/math/pgfint.code.tex) (/usr/local/texlive/2023/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepoints.code.tex
+File: pgfcorepoints.code.tex 2023-01-15 v3.1.10 (3.1.10)
+\pgf@picminx=\dimen164
+\pgf@picmaxx=\dimen165
+\pgf@picminy=\dimen166
+\pgf@picmaxy=\dimen167
+\pgf@pathminx=\dimen168
+\pgf@pathmaxx=\dimen169
+\pgf@pathminy=\dimen170
+\pgf@pathmaxy=\dimen171
+\pgf@xx=\dimen172
+\pgf@xy=\dimen173
+\pgf@yx=\dimen174
+\pgf@yy=\dimen175
+\pgf@zx=\dimen176
+\pgf@zy=\dimen177
+) (/usr/local/texlive/2023/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepathconstruct.code.tex
+File: pgfcorepathconstruct.code.tex 2023-01-15 v3.1.10 (3.1.10)
+\pgf@path@lastx=\dimen178
+\pgf@path@lasty=\dimen179
+) (/usr/local/texlive/2023/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepathusage.code.tex
+File: pgfcorepathusage.code.tex 2023-01-15 v3.1.10 (3.1.10)
+\pgf@shorten@end@additional=\dimen180
+\pgf@shorten@start@additional=\dimen181
+) (/usr/local/texlive/2023/texmf-dist/tex/generic/pgf/basiclayer/pgfcorescopes.code.tex
+File: pgfcorescopes.code.tex 2023-01-15 v3.1.10 (3.1.10)
+\pgfpic=\box53
+\pgf@hbox=\box54
+\pgf@layerbox@main=\box55
+\pgf@picture@serial@count=\count271
+) (/usr/local/texlive/2023/texmf-dist/tex/generic/pgf/basiclayer/pgfcoregraphicstate.code.tex
+File: pgfcoregraphicstate.code.tex 2023-01-15 v3.1.10 (3.1.10)
+\pgflinewidth=\dimen182
+) (/usr/local/texlive/2023/texmf-dist/tex/generic/pgf/basiclayer/pgfcoretransformations.code.tex
+File: pgfcoretransformations.code.tex 2023-01-15 v3.1.10 (3.1.10)
+\pgf@pt@x=\dimen183
+\pgf@pt@y=\dimen184
+\pgf@pt@temp=\dimen185
+) (/usr/local/texlive/2023/texmf-dist/tex/generic/pgf/basiclayer/pgfcorequick.code.tex
+File: pgfcorequick.code.tex 2023-01-15 v3.1.10 (3.1.10)
+) (/usr/local/texlive/2023/texmf-dist/tex/generic/pgf/basiclayer/pgfcoreobjects.code.tex
+File: pgfcoreobjects.code.tex 2023-01-15 v3.1.10 (3.1.10)
+) (/usr/local/texlive/2023/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepathprocessing.code.tex
+File: pgfcorepathprocessing.code.tex 2023-01-15 v3.1.10 (3.1.10)
+) (/usr/local/texlive/2023/texmf-dist/tex/generic/pgf/basiclayer/pgfcorearrows.code.tex
+File: pgfcorearrows.code.tex 2023-01-15 v3.1.10 (3.1.10)
+\pgfarrowsep=\dimen186
+) (/usr/local/texlive/2023/texmf-dist/tex/generic/pgf/basiclayer/pgfcoreshade.code.tex
+File: pgfcoreshade.code.tex 2023-01-15 v3.1.10 (3.1.10)
+\pgf@max=\dimen187
+\pgf@sys@shading@range@num=\count272
+\pgf@shadingcount=\count273
+) (/usr/local/texlive/2023/texmf-dist/tex/generic/pgf/basiclayer/pgfcoreimage.code.tex
+File: pgfcoreimage.code.tex 2023-01-15 v3.1.10 (3.1.10)
+) (/usr/local/texlive/2023/texmf-dist/tex/generic/pgf/basiclayer/pgfcoreexternal.code.tex
+File: pgfcoreexternal.code.tex 2023-01-15 v3.1.10 (3.1.10)
+\pgfexternal@startupbox=\box56
+) (/usr/local/texlive/2023/texmf-dist/tex/generic/pgf/basiclayer/pgfcorelayers.code.tex
+File: pgfcorelayers.code.tex 2023-01-15 v3.1.10 (3.1.10)
+) (/usr/local/texlive/2023/texmf-dist/tex/generic/pgf/basiclayer/pgfcoretransparency.code.tex
+File: pgfcoretransparency.code.tex 2023-01-15 v3.1.10 (3.1.10)
+) (/usr/local/texlive/2023/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepatterns.code.tex
+File: pgfcorepatterns.code.tex 2023-01-15 v3.1.10 (3.1.10)
+) (/usr/local/texlive/2023/texmf-dist/tex/generic/pgf/basiclayer/pgfcorerdf.code.tex
+File: pgfcorerdf.code.tex 2023-01-15 v3.1.10 (3.1.10)
+))) (/usr/local/texlive/2023/texmf-dist/tex/generic/pgf/modules/pgfmoduleshapes.code.tex
+File: pgfmoduleshapes.code.tex 2023-01-15 v3.1.10 (3.1.10)
+\pgfnodeparttextbox=\box57
+) (/usr/local/texlive/2023/texmf-dist/tex/generic/pgf/modules/pgfmoduleplot.code.tex
+File: pgfmoduleplot.code.tex 2023-01-15 v3.1.10 (3.1.10)
+) (/usr/local/texlive/2023/texmf-dist/tex/latex/pgf/compatibility/pgfcomp-version-0-65.sty
+Package: pgfcomp-version-0-65 2023-01-15 v3.1.10 (3.1.10)
+\pgf@nodesepstart=\dimen188
+\pgf@nodesepend=\dimen189
+) (/usr/local/texlive/2023/texmf-dist/tex/latex/pgf/compatibility/pgfcomp-version-1-18.sty
+Package: pgfcomp-version-1-18 2023-01-15 v3.1.10 (3.1.10)
+)) (/usr/local/texlive/2023/texmf-dist/tex/latex/pgf/utilities/pgffor.sty (/usr/local/texlive/2023/texmf-dist/tex/latex/pgf/utilities/pgfkeys.sty (/usr/local/texlive/2023/texmf-dist/tex/generic/pgf/utilities/pgfkeys.code.tex)) (/usr/local/texlive/2023/texmf-dist/tex/latex/pgf/math/pgfmath.sty (/usr/local/texlive/2023/texmf-dist/tex/generic/pgf/math/pgfmath.code.tex)) (/usr/local/texlive/2023/texmf-dist/tex/generic/pgf/utilities/pgffor.code.tex
+Package: pgffor 2023-01-15 v3.1.10 (3.1.10)
+\pgffor@iter=\dimen190
+\pgffor@skip=\dimen191
+\pgffor@stack=\toks28
+\pgffor@toks=\toks29
+)) (/usr/local/texlive/2023/texmf-dist/tex/generic/pgf/frontendlayer/tikz/tikz.code.tex
+Package: tikz 2023-01-15 v3.1.10 (3.1.10)
+ (/usr/local/texlive/2023/texmf-dist/tex/generic/pgf/libraries/pgflibraryplothandlers.code.tex
+File: pgflibraryplothandlers.code.tex 2023-01-15 v3.1.10 (3.1.10)
+\pgf@plot@mark@count=\count274
+\pgfplotmarksize=\dimen192
+)
+\tikz@lastx=\dimen193
+\tikz@lasty=\dimen194
+\tikz@lastxsaved=\dimen195
+\tikz@lastysaved=\dimen196
+\tikz@lastmovetox=\dimen197
+\tikz@lastmovetoy=\dimen198
+\tikzleveldistance=\dimen199
+\tikzsiblingdistance=\dimen256
+\tikz@figbox=\box58
+\tikz@figbox@bg=\box59
+\tikz@tempbox=\box60
+\tikz@tempbox@bg=\box61
+\tikztreelevel=\count275
+\tikznumberofchildren=\count276
+\tikznumberofcurrentchild=\count277
+\tikz@fig@count=\count278
+ (/usr/local/texlive/2023/texmf-dist/tex/generic/pgf/modules/pgfmodulematrix.code.tex
+File: pgfmodulematrix.code.tex 2023-01-15 v3.1.10 (3.1.10)
+\pgfmatrixcurrentrow=\count279
+\pgfmatrixcurrentcolumn=\count280
+\pgf@matrix@numberofcolumns=\count281
+)
+\tikz@expandcount=\count282
+ (/usr/local/texlive/2023/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tikzlibrarytopaths.code.tex
+File: tikzlibrarytopaths.code.tex 2023-01-15 v3.1.10 (3.1.10)
+))) (/usr/local/texlive/2023/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tikzlibrarycalc.code.tex
+File: tikzlibrarycalc.code.tex 2023-01-15 v3.1.10 (3.1.10)
+) (/usr/local/texlive/2023/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tikzlibrarypositioning.code.tex
+File: tikzlibrarypositioning.code.tex 2023-01-15 v3.1.10 (3.1.10)
+) (/usr/local/texlive/2023/texmf-dist/tex/latex/ragged2e/ragged2e.sty
+Package: ragged2e 2023/02/25 v3.4 ragged2e Package
+\CenteringLeftskip=\skip50
+\RaggedLeftLeftskip=\skip51
+\RaggedRightLeftskip=\skip52
+\CenteringRightskip=\skip53
+\RaggedLeftRightskip=\skip54
+\RaggedRightRightskip=\skip55
+\CenteringParfillskip=\skip56
+\RaggedLeftParfillskip=\skip57
+\RaggedRightParfillskip=\skip58
+\JustifyingParfillskip=\skip59
+\CenteringParindent=\skip60
+\RaggedLeftParindent=\skip61
+\RaggedRightParindent=\skip62
+\JustifyingParindent=\skip63
+) (/usr/local/texlive/2023/texmf-dist/tex/latex/tools/calc.sty
+Package: calc 2017/05/25 v4.3 Infix arithmetic (KKT,FJ)
+\calc@Acount=\count283
+\calc@Bcount=\count284
+\calc@Adimen=\dimen257
+\calc@Bdimen=\dimen258
+\calc@Askip=\skip64
+\calc@Bskip=\skip65
+LaTeX Info: Redefining \setlength on input line 80.
+LaTeX Info: Redefining \addtolength on input line 81.
+\calc@Ccount=\count285
+\calc@Cskip=\skip66
+)
+\margin=\skip67
+\contentwidth=\skip68
+\useablecontentwidth=\skip69
+\mycolumnwidth=\skip70
+ (/usr/local/texlive/2023/texmf-dist/tex/latex/tcolorbox/tcolorbox.sty
+Package: tcolorbox 2023/02/12 version 6.0.1 text color boxes
+ (/usr/local/texlive/2023/texmf-dist/tex/latex/tools/verbatim.sty
+Package: verbatim 2022-07-02 v1.5u LaTeX2e package for verbatim enhancements
+\every@verbatim=\toks30
+\verbatim@line=\toks31
+\verbatim@in@stream=\read3
+) (/usr/local/texlive/2023/texmf-dist/tex/latex/environ/environ.sty
+Package: environ 2014/05/04 v0.3 A new way to define environments
+ (/usr/local/texlive/2023/texmf-dist/tex/latex/trimspaces/trimspaces.sty
+Package: trimspaces 2009/09/17 v1.1 Trim spaces around a token list
+)
+\@envbody=\toks32
+) (/usr/local/texlive/2023/texmf-dist/tex/latex/etoolbox/etoolbox.sty
+Package: etoolbox 2020/10/05 v2.5k e-TeX tools for LaTeX (JAW)
+\etb@tempcnta=\count286
+)
+\tcb@titlebox=\box62
+\tcb@upperbox=\box63
+\tcb@lowerbox=\box64
+\tcb@phantombox=\box65
+\c@tcbbreakpart=\count287
+\c@tcblayer=\count288
+\c@tcolorbox@number=\count289
+\tcb@temp=\box66
+\tcb@temp=\box67
+\tcb@temp=\box68
+\tcb@temp=\box69
+) (/usr/local/texlive/2023/texmf-dist/tex/latex/psnfss/mathpazo.sty
+Package: mathpazo 2020/03/25 PSNFSS-v9.3 Palatino w/ Pazo Math (D.Puga, WaS) 
+\symupright=\mathgroup4
+) (/usr/local/texlive/2023/texmf-dist/tex/latex/base/fontenc.sty
+Package: fontenc 2021/04/29 v2.0v Standard LaTeX package
+LaTeX Font Info:    Trying to load font information for T1+ppl on input line 112.
+ (/usr/local/texlive/2023/texmf-dist/tex/latex/psnfss/t1ppl.fd
+File: t1ppl.fd 2001/06/04 font definitions for T1/ppl.
+)) (/usr/local/texlive/2023/texmf-dist/tex/latex/base/textcomp.sty
+Package: textcomp 2020/02/02 v2.0n Standard LaTeX package
+) (/usr/local/texlive/2023/texmf-dist/tex/latex/base/inputenc.sty
+Package: inputenc 2021/02/14 v1.3d Input encoding file
+\inpenc@prehook=\toks33
+\inpenc@posthook=\toks34
+) (/usr/local/texlive/2023/texmf-dist/tex/latex/hyperref/hyperref.sty
+Package: hyperref 2023-02-07 v7.00v Hypertext links for LaTeX
+ (/usr/local/texlive/2023/texmf-dist/tex/generic/ltxcmds/ltxcmds.sty
+Package: ltxcmds 2020-05-10 v1.25 LaTeX kernel commands for general use (HO)
+) (/usr/local/texlive/2023/texmf-dist/tex/generic/pdftexcmds/pdftexcmds.sty
+Package: pdftexcmds 2020-06-27 v0.33 Utility functions of pdfTeX for LuaTeX (HO)
+ (/usr/local/texlive/2023/texmf-dist/tex/generic/infwarerr/infwarerr.sty
+Package: infwarerr 2019/12/03 v1.5 Providing info/warning/error messages (HO)
+)
+Package pdftexcmds Info: \pdf@primitive is available.
+Package pdftexcmds Info: \pdf@ifprimitive is available.
+Package pdftexcmds Info: \pdfdraftmode found.
+) (/usr/local/texlive/2023/texmf-dist/tex/latex/kvsetkeys/kvsetkeys.sty
+Package: kvsetkeys 2022-10-05 v1.19 Key value parser (HO)
+) (/usr/local/texlive/2023/texmf-dist/tex/generic/kvdefinekeys/kvdefinekeys.sty
+Package: kvdefinekeys 2019-12-19 v1.6 Define keys (HO)
+) (/usr/local/texlive/2023/texmf-dist/tex/generic/pdfescape/pdfescape.sty
+Package: pdfescape 2019/12/09 v1.15 Implements pdfTeX's escape features (HO)
+) (/usr/local/texlive/2023/texmf-dist/tex/latex/hycolor/hycolor.sty
+Package: hycolor 2020-01-27 v1.10 Color options for hyperref/bookmark (HO)
+) (/usr/local/texlive/2023/texmf-dist/tex/latex/letltxmacro/letltxmacro.sty
+Package: letltxmacro 2019/12/03 v1.6 Let assignment for LaTeX macros (HO)
+) (/usr/local/texlive/2023/texmf-dist/tex/latex/auxhook/auxhook.sty
+Package: auxhook 2019-12-17 v1.6 Hooks for auxiliary files (HO)
+) (/usr/local/texlive/2023/texmf-dist/tex/latex/hyperref/nameref.sty
+Package: nameref 2022-05-17 v2.50 Cross-referencing by name of section
+ (/usr/local/texlive/2023/texmf-dist/tex/latex/refcount/refcount.sty
+Package: refcount 2019/12/15 v3.6 Data extraction from label references (HO)
+) (/usr/local/texlive/2023/texmf-dist/tex/generic/gettitlestring/gettitlestring.sty
+Package: gettitlestring 2019/12/15 v1.6 Cleanup title references (HO)
+ (/usr/local/texlive/2023/texmf-dist/tex/latex/kvoptions/kvoptions.sty
+Package: kvoptions 2022-06-15 v3.15 Key value format for package options (HO)
+))
+\c@section@level=\count290
+)
+\@linkdim=\dimen259
+\Hy@linkcounter=\count291
+\Hy@pagecounter=\count292
+ (/usr/local/texlive/2023/texmf-dist/tex/latex/hyperref/pd1enc.def
+File: pd1enc.def 2023-02-07 v7.00v Hyperref: PDFDocEncoding definition (HO)
+Now handling font encoding PD1 ...
+... no UTF-8 mapping file for font encoding PD1
+) (/usr/local/texlive/2023/texmf-dist/tex/generic/intcalc/intcalc.sty
+Package: intcalc 2019/12/15 v1.3 Expandable calculations with integers (HO)
+) (/usr/local/texlive/2023/texmf-dist/tex/generic/etexcmds/etexcmds.sty
+Package: etexcmds 2019/12/15 v1.7 Avoid name clashes with e-TeX commands (HO)
+)
+\Hy@SavedSpaceFactor=\count293
+ (/usr/local/texlive/2023/texmf-dist/tex/latex/hyperref/puenc.def
+File: puenc.def 2023-02-07 v7.00v Hyperref: PDF Unicode definition (HO)
+Now handling font encoding PU ...
+... no UTF-8 mapping file for font encoding PU
+)
+Package hyperref Info: Hyper figures OFF on input line 4177.
+Package hyperref Info: Link nesting OFF on input line 4182.
+Package hyperref Info: Hyper index ON on input line 4185.
+Package hyperref Info: Plain pages OFF on input line 4192.
+Package hyperref Info: Backreferencing OFF on input line 4197.
+Package hyperref Info: Implicit mode ON; LaTeX internals redefined.
+Package hyperref Info: Bookmarks ON on input line 4425.
+\c@Hy@tempcnt=\count294
+ (/usr/local/texlive/2023/texmf-dist/tex/latex/url/url.sty
+\Urlmuskip=\muskip16
+Package: url 2013/09/16  ver 3.4  Verb mode for urls, etc.
+)
+LaTeX Info: Redefining \url on input line 4763.
+\XeTeXLinkMargin=\dimen260
+ (/usr/local/texlive/2023/texmf-dist/tex/generic/bitset/bitset.sty
+Package: bitset 2019/12/09 v1.3 Handle bit-vector datatype (HO)
+ (/usr/local/texlive/2023/texmf-dist/tex/generic/bigintcalc/bigintcalc.sty
+Package: bigintcalc 2019/12/15 v1.5 Expandable calculations on big integers (HO)
+))
+\Fld@menulength=\count295
+\Field@Width=\dimen261
+\Fld@charsize=\dimen262
+Package hyperref Info: Hyper figures OFF on input line 6042.
+Package hyperref Info: Link nesting OFF on input line 6047.
+Package hyperref Info: Hyper index ON on input line 6050.
+Package hyperref Info: backreferencing OFF on input line 6057.
+Package hyperref Info: Link coloring OFF on input line 6062.
+Package hyperref Info: Link coloring with OCG OFF on input line 6067.
+Package hyperref Info: PDF/A mode OFF on input line 6072.
+ (/usr/local/texlive/2023/texmf-dist/tex/latex/base/atbegshi-ltx.sty
+Package: atbegshi-ltx 2021/01/10 v1.0c Emulation of the original atbegshi
+package with kernel methods
+)
+\Hy@abspage=\count296
+\c@Item=\count297
+\c@Hfootnote=\count298
+)
+Package hyperref Info: Driver (autodetected): hpdftex.
+ (/usr/local/texlive/2023/texmf-dist/tex/latex/hyperref/hpdftex.def
+File: hpdftex.def 2023-02-07 v7.00v Hyperref driver for pdfTeX
+ (/usr/local/texlive/2023/texmf-dist/tex/latex/base/atveryend-ltx.sty
+Package: atveryend-ltx 2020/08/19 v1.0a Emulation of the original atveryend package
+with kernel methods
+)
+\Fld@listcount=\count299
+\c@bookmark@seq@number=\count300
+ (/usr/local/texlive/2023/texmf-dist/tex/latex/rerunfilecheck/rerunfilecheck.sty
+Package: rerunfilecheck 2022-07-10 v1.10 Rerun checks for auxiliary files (HO)
+ (/usr/local/texlive/2023/texmf-dist/tex/generic/uniquecounter/uniquecounter.sty
+Package: uniquecounter 2019/12/15 v1.4 Provide unlimited unique counter (HO)
+)
+Package uniquecounter Info: New unique counter `rerunfilecheck' on input line 285.
+)
+\Hy@SectionHShift=\skip71
+) (/usr/local/texlive/2023/texmf-dist/tex/latex/lipsum/lipsum.sty (/usr/local/texlive/2023/texmf-dist/tex/latex/l3packages/l3keys2e/l3keys2e.sty (/usr/local/texlive/2023/texmf-dist/tex/latex/l3kernel/expl3.sty
+Package: expl3 2023-02-22 L3 programming layer (loader) 
+ (/usr/local/texlive/2023/texmf-dist/tex/latex/l3backend/l3backend-pdftex.def
+File: l3backend-pdftex.def 2023-01-16 L3 backend support: PDF output (pdfTeX)
+\l__color_backend_stack_int=\count301
+\l__pdf_internal_box=\box70
+))
+Package: l3keys2e 2023-02-02 LaTeX2e option processing using LaTeX3 keys
+)
+Package: lipsum 2021-09-20 v2.7 150 paragraphs of Lorem Ipsum dummy text
+\g__lipsum_par_int=\count302
+\l__lipsum_a_int=\count303
+\l__lipsum_b_int=\count304
+ (/usr/local/texlive/2023/texmf-dist/tex/latex/lipsum/lipsum.ltd.tex)) (/usr/local/texlive/2023/texmf-dist/tex/latex/titlesec/titlesec.sty
+Package: titlesec 2021/07/05 v2.14 Sectioning titles
+\ttl@box=\box71
+\beforetitleunit=\skip72
+\aftertitleunit=\skip73
+\ttl@plus=\dimen263
+\ttl@minus=\dimen264
+\ttl@toksa=\toks35
+\titlewidth=\dimen265
+\titlewidthlast=\dimen266
+\titlewidthfirst=\dimen267
+) (./summary-tabloid-content-wrc-27.tex) (./summary-tabloid.aux)
+\openout1 = `summary-tabloid.aux'.
+
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 85.
+LaTeX Font Info:    ... okay on input line 85.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 85.
+LaTeX Font Info:    ... okay on input line 85.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 85.
+LaTeX Font Info:    ... okay on input line 85.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 85.
+LaTeX Font Info:    ... okay on input line 85.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 85.
+LaTeX Font Info:    ... okay on input line 85.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 85.
+LaTeX Font Info:    ... okay on input line 85.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 85.
+LaTeX Font Info:    ... okay on input line 85.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 85.
+LaTeX Font Info:    ... okay on input line 85.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 85.
+LaTeX Font Info:    ... okay on input line 85.
+
+*geometry* driver: auto-detecting
+*geometry* detected driver: pdftex
+*geometry* verbose mode - [ preamble ] result:
+* driver: pdftex
+* paper: custom
+* layout: <same size as paper>
+* layoutoffset:(h,v)=(0.0pt,0.0pt)
+* modes: 
+* h-part:(L,W,R)=(0.0pt, 1228.59pt, 0.0pt)
+* v-part:(T,H,B)=(0.0pt, 794.96999pt, 0.0pt)
+* \paperwidth=1228.59pt
+* \paperheight=794.96999pt
+* \textwidth=1228.59pt
+* \textheight=794.96999pt
+* \oddsidemargin=-72.26999pt
+* \evensidemargin=-72.26999pt
+* \topmargin=-109.26999pt
+* \headheight=12.0pt
+* \headsep=25.0pt
+* \topskip=10.0pt
+* \footskip=30.0pt
+* \marginparwidth=65.0pt
+* \marginparsep=11.0pt
+* \columnsep=25.29494pt
+* \skip\footins=9.0pt plus 4.0pt minus 2.0pt
+* \hoffset=0.0pt
+* \voffset=0.0pt
+* \mag=1000
+* \@twocolumnfalse
+* \@twosidefalse
+* \@mparswitchfalse
+* \@reversemarginfalse
+* (1in=72.27pt=25.4mm, 1cm=28.453pt)
+
+(/usr/local/texlive/2023/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
+[Loading MPS to PDF converter (version 2006.09.02).]
+\scratchcounter=\count305
+\scratchdimen=\dimen268
+\scratchbox=\box72
+\nofMPsegments=\count306
+\nofMParguments=\count307
+\everyMPshowfont=\toks36
+\MPscratchCnt=\count308
+\MPscratchDim=\dimen269
+\MPnumerator=\count309
+\makeMPintoPDFobject=\count310
+\everyMPtoPDFconversion=\toks37
+) (/usr/local/texlive/2023/texmf-dist/tex/latex/epstopdf-pkg/epstopdf-base.sty
+Package: epstopdf-base 2020-01-24 v2.11 Base part for package epstopdf
+Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 485.
+ (/usr/local/texlive/2023/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg
+File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Live
+))
+\big@size=\dimen270
+Package hyperref Info: Link coloring OFF on input line 85.
+ (./summary-tabloid.out) (./summary-tabloid.out)
+\@outlinefile=\write4
+\openout4 = `summary-tabloid.out'.
+
+\contentheight=\skip74
+
+Underfull \hbox (badness 10000) in paragraph at lines 111--111
+[]\T1/ppl/b/n/10 AI-1.1: Aero-nau-ti-cal/Marine Earth Sta-tions in Mo-tion
+ []
+
+</users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.1.pdf, id=7, 299.59122pt x 79.52486pt>
+File: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.1.pdf Graphic file (type pdf)
+<use /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.1.pdf>
+Package pdftex.def Info: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.1.pdf  used on input line 111.
+(pdftex.def)             Requested size: 256.41827pt x 68.07088pt.
+</users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.2.pdf, id=8, 299.59122pt x 57.84386pt>
+File: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.2.pdf Graphic file (type pdf)
+<use /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.2.pdf>
+Package pdftex.def Info: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.2.pdf  used on input line 112.
+(pdftex.def)             Requested size: 256.41827pt x 49.5126pt.
+
+Underfull \hbox (badness 10000) in paragraph at lines 113--113
+[]\T1/ppl/b/n/10 AI-1.3: Fixed up-links to non-geostationary satel-lites at
+ []
+
+</users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.3.pdf, id=9, 299.59122pt x 79.52486pt>
+File: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.3.pdf Graphic file (type pdf)
+<use /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.3.pdf>
+Package pdftex.def Info: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.3.pdf  used on input line 113.
+(pdftex.def)             Requested size: 256.41827pt x 68.07088pt.
+</users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.4.pdf, id=10, 299.59122pt x 57.84386pt>
+File: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.4.pdf Graphic file (type pdf)
+<use /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.4.pdf>
+Package pdftex.def Info: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.4.pdf  used on input line 114.
+(pdftex.def)             Requested size: 256.41827pt x 49.5126pt.
+
+Underfull \hbox (badness 10000) in paragraph at lines 115--115
+[]\T1/ppl/b/n/10 AI-1.5: Lim-it-ing unau-tho-rized non-geostationary
+ []
+
+</users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.5.pdf, id=11, 299.59122pt x 68.68436pt>
+File: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.5.pdf Graphic file (type pdf)
+<use /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.5.pdf>
+Package pdftex.def Info: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.5.pdf  used on input line 115.
+(pdftex.def)             Requested size: 256.41827pt x 58.79175pt.
+
+Underfull \hbox (badness 10000) in paragraph at lines 116--116
+[]\T1/ppl/b/n/10 AI-1.6: Eq-ui-table ac-cess to fixed satel-lite ser-vice in se-
+ []
+
+</users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.6.pdf, id=12, 299.59122pt x 79.52486pt>
+File: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.6.pdf Graphic file (type pdf)
+<use /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.6.pdf>
+Package pdftex.def Info: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.6.pdf  used on input line 116.
+(pdftex.def)             Requested size: 256.41827pt x 68.07088pt.
+
+Underfull \hbox (badness 10000) in paragraph at lines 120--120
+[]\T1/ppl/b/n/10 AI-1.7: Al-lo-ca-tions to In-ter-na-tional Mo-bile Telecom-mu-
+ []
+
+</users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.7.pdf, id=13, 299.59122pt x 90.36536pt>
+File: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.7.pdf Graphic file (type pdf)
+<use /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.7.pdf>
+Package pdftex.def Info: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.7.pdf  used on input line 120.
+(pdftex.def)             Requested size: 256.41827pt x 77.35004pt.
+</users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.8.pdf, id=14, 299.59122pt x 90.36536pt>
+File: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.8.pdf Graphic file (type pdf)
+<use /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.8.pdf>
+Package pdftex.def Info: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.8.pdf  used on input line 121.
+(pdftex.def)             Requested size: 256.41827pt x 77.35004pt.
+
+Underfull \hbox (badness 10000) in paragraph at lines 122--122
+[]\T1/ppl/b/n/10 AI-1.9: Up-dat-ing Ap-pendix 26 for mod-ern-iza-tion of
+ []
+
+</users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.9.pdf, id=15, 299.59122pt x 57.84386pt>
+File: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.9.pdf Graphic file (type pdf)
+<use /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.9.pdf>
+Package pdftex.def Info: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.9.pdf  used on input line 122.
+(pdftex.def)             Requested size: 256.41827pt x 49.5126pt.
+
+Underfull \hbox (badness 10000) in paragraph at lines 123--123
+[]\T1/ppl/b/n/10 AI-1.10: Power lim-its for satel-lites in 71^^U76 and
+ []
+
+</users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.10.pdf, id=16, 299.59122pt x 79.52486pt>
+File: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.10.pdf Graphic file (type pdf)
+<use /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.10.pdf>
+Package pdftex.def Info: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.10.pdf  used on input line 123.
+(pdftex.def)             Requested size: 256.41827pt x 68.07088pt.
+</users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.11.pdf, id=17, 299.59122pt x 57.84386pt>
+File: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.11.pdf Graphic file (type pdf)
+<use /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.11.pdf>
+Package pdftex.def Info: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.11.pdf  used on input line 124.
+(pdftex.def)             Requested size: 256.41827pt x 49.5126pt.
+</users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.12.pdf, id=18, 299.59122pt x 79.52486pt>
+File: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.12.pdf Graphic file (type pdf)
+<use /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.12.pdf>
+Package pdftex.def Info: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.12.pdf  used on input line 125.
+(pdftex.def)             Requested size: 256.41827pt x 68.07088pt.
+\shortcontentheight=\skip75
+
+Underfull \hbox (badness 10000) in paragraph at lines 132--132
+[]\T1/ppl/b/n/10 AI-1.13: Di-rect satel-lite to cell-phone com-mu-ni-ca-tions in
+ []
+
+</users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.13.pdf, id=19, 299.59122pt x 90.36536pt>
+File: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.13.pdf Graphic file (type pdf)
+<use /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.13.pdf>
+Package pdftex.def Info: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.13.pdf  used on input line 132.
+(pdftex.def)             Requested size: 256.41827pt x 77.35004pt.
+</users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.14.pdf, id=20, 299.59122pt x 47.00336pt>
+File: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.14.pdf Graphic file (type pdf)
+<use /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.14.pdf>
+Package pdftex.def Info: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.14.pdf  used on input line 133.
+(pdftex.def)             Requested size: 256.41827pt x 40.23346pt.
+</users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.15.pdf, id=21, 299.59122pt x 90.36536pt>
+File: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.15.pdf Graphic file (type pdf)
+<use /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.15.pdf>
+Package pdftex.def Info: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.15.pdf  used on input line 134.
+(pdftex.def)             Requested size: 256.41827pt x 77.35004pt.
+</users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.16.pdf, id=22, 299.59122pt x 90.36536pt>
+File: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.16.pdf Graphic file (type pdf)
+<use /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.16.pdf>
+Package pdftex.def Info: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.16.pdf  used on input line 135.
+(pdftex.def)             Requested size: 256.41827pt x 77.35004pt.
+
+Underfull \hbox (badness 10000) in paragraph at lines 139--139
+[]\T1/ppl/b/n/10 AI-1.17: Al-lo-ca-tions for receive-only space weather
+ []
+
+</users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.17.pdf, id=23, 299.59122pt x 68.68436pt>
+File: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.17.pdf Graphic file (type pdf)
+<use /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.17.pdf>
+Package pdftex.def Info: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.17.pdf  used on input line 139.
+(pdftex.def)             Requested size: 256.41827pt x 58.79175pt.
+
+Underfull \hbox (badness 10000) in paragraph at lines 140--140
+[]\T1/ppl/b/n/10 AI-1.18: Pro-tec-tion of EESS (pas-sive) and RAS in bands
+ []
+
+</users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.18.pdf, id=24, 299.59122pt x 90.36536pt>
+File: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.18.pdf Graphic file (type pdf)
+<use /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.18.pdf>
+Package pdftex.def Info: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.18.pdf  used on input line 140.
+(pdftex.def)             Requested size: 256.41827pt x 77.35004pt.
+</users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.19.pdf, id=25, 299.59122pt x 79.52486pt>
+File: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.19.pdf Graphic file (type pdf)
+<use /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.19.pdf>
+Package pdftex.def Info: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.19.pdf  used on input line 141.
+(pdftex.def)             Requested size: 256.41827pt x 68.07088pt.
+</Users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/stand-alone-legend.pdf, id=26, 313.90015pt x 68.56958pt>
+File: /Users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/stand-alone-legend.pdf Graphic file (type pdf)
+<use /Users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/stand-alone-legend.pdf>
+Package pdftex.def Info: /Users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/stand-alone-legend.pdf  used on input line 142.
+(pdftex.def)             Requested size: 85.35826pt x 52.76529pt.
+File: /Users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/stand-alone-legend.pdf Graphic file (type pdf)
+<use /Users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/stand-alone-legend.pdf>
+Package pdftex.def Info: /Users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/stand-alone-legend.pdf  used on input line 152.
+(pdftex.def)             Requested size: 284.52756pt x 119.15742pt.
+[1
+
+{/Users/livesey/Library/texlive/2023/texmf-var/fonts/map/pdftex/updmap/pdftex.map}{/usr/local/texlive/2023/texmf-dist/fonts/enc/dvips/base/8r.enc} </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.1.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.2.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.3.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.4.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.5.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.6.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.7.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.8.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.9.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.10.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.11.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.12.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.13.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.14.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.15.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.16.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.17.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.18.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.19.pdf> </Users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/stand-alone-legend.pdf>] (./summary-tabloid.aux)
+Package rerunfilecheck Info: File `summary-tabloid.out' has not changed.
+(rerunfilecheck)             Checksum: D41D8CD98F00B204E9800998ECF8427E;0.
+ ) 
+Here is how much of TeX's memory you used:
+ 23178 strings out of 476025
+ 466721 string characters out of 5790018
+ 1888388 words of memory out of 5000000
+ 43251 multiletter control sequences out of 15000+600000
+ 518653 words of font info for 40 fonts, out of 8000000 for 9000
+ 1141 hyphenation exceptions out of 8191
+ 102i,11n,104p,850b,952s stack positions out of 10000i,1000n,20000p,200000b,200000s
+</usr/local/texlive/2023/texmf-dist/fonts/type1/public/fdsymbol/FdSymbolC-Bold.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/urw/palatino/uplb8a.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/urw/palatino/uplr8a.pfb>
+Output written on summary-tabloid.pdf (1 page, 194057 bytes).
+PDF statistics:
+ 224 PDF objects out of 1000 (max. 8388607)
+ 192 compressed objects within 2 object streams
+ 2 named destinations out of 1000 (max. 500000)
+ 125 words of extra memory for PDF output out of 10000 (max. 10000000)
+

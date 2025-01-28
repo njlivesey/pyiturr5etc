@@ -9,6 +9,8 @@
         "WP 7C/7D roles": "7C & 7D contributing",
         "Corresponding 2.x draft item from WRC-23/27 views": "2.2",
         "Writing assignments": "Nancy and Darrel (Scott filling in for Darrel)",
+        "Short title": "Aeronautical/Marine Earth Stations in Motion around 50\u00a0GHz",
+        "Combined short title": "",
         "Percent complete": "0.98",
         "Status": "Great shape, overall.  Needs recommendation to be finalized"
     },
@@ -22,6 +24,8 @@
         "WP 7C/7D roles": "7C & 7D contributing",
         "Corresponding 2.x draft item from WRC-23/27 views": "2.4, 2.5, 2.7",
         "Writing assignments": "Nathaniel and Scott",
+        "Short title": "Power limits for satellites in 71\u201376 and 81\u201386\u00a0GHz",
+        "Combined short title": "",
         "Percent complete": "0.6",
         "Status": "Intro. and resolution summary done. EESS text/recommendation basically done, RAS text and recommendation done"
     },
@@ -35,6 +39,8 @@
         "WP 7C/7D roles": "7C & 7D contributing",
         "Corresponding 2.x draft item from WRC-23/27 views": "",
         "Writing assignments": "Nathaniel and Laura",
+        "Short title": "Space-to-space transmissions in 1.5\u20132.5 GHz",
+        "Combined short title": "",
         "Percent complete": "1",
         "Status": "Intro, RAS, recommendation done. No EESS needed."
     },
@@ -48,6 +54,8 @@
         "WP 7C/7D roles": "7C & 7D contributing",
         "Corresponding 2.x draft item from WRC-23/27 views": "",
         "Writing assignments": "Dara and Kelsey",
+        "Short title": "Mobile satellite services from 1.4\u20132.025\u00a0GHz",
+        "Combined short title": "",
         "Percent complete": "0.9",
         "Status": "Looks pretty complete. No recommendation.  NJL to read properly"
     },
@@ -61,6 +69,8 @@
         "WP 7C/7D roles": "7C & 7D contributing",
         "Corresponding 2.x draft item from WRC-23/27 views": "",
         "Writing assignments": "Dara and Karen",
+        "Short title": "Direct satellite to cellphone communications in 694 MHz to 2.7 GHz",
+        "Combined short title": "",
         "Percent complete": "0.5",
         "Status": "This is one we need to emphasize.\nRAS looks comprehensive.\nEESS pending, recommendation pending."
     },
@@ -74,6 +84,8 @@
         "WP 7C/7D roles": "7C contributing",
         "Corresponding 2.x draft item from WRC-23/27 views": "",
         "Writing assignments": " Kshitija and Phil",
+        "Short title": "Mobile satellite service in 2.0\u20132.2\u00a0GHz",
+        "Combined short title": "",
         "Percent complete": "0",
         "Status": "Discussions ongoing"
     },
@@ -87,6 +99,8 @@
         "WP 7C/7D roles": "7C & 7D contributing",
         "Corresponding 2.x draft item from WRC-23/27 views": "",
         "Writing assignments": "Tom, Darrel",
+        "Short title": "Communications in the Lunar environment",
+        "Combined short title": "",
         "Percent complete": "1",
         "Status": "Comprehensive write up done, ready for internal review."
     },
@@ -100,6 +114,8 @@
         "WP 7C/7D roles": "7D leading",
         "Corresponding 2.x draft item from WRC-23/27 views": "",
         "Writing assignments": "Bang and Tom",
+        "Short title": "Protection of Radio Quiet Zones",
+        "Combined short title": "",
         "Percent complete": "1",
         "Status": "Comprehensive write up done, ready for internal review."
     },
@@ -113,6 +129,8 @@
         "WP 7C/7D roles": "7C leading, 7D contributing",
         "Corresponding 2.x draft item from WRC-23/27 views": "",
         "Writing assignments": "Phil and Kshitija",
+        "Short title": "Allocations for receive-only space weather sensors",
+        "Combined short title": "",
         "Percent complete": "0",
         "Status": "Discussions ongoing"
     },
@@ -126,6 +144,8 @@
         "WP 7C/7D roles": "7C & 7D leading",
         "Corresponding 2.x draft item from WRC-23/27 views": "",
         "Writing assignments": "Nathaniel and Scott",
+        "Short title": "Protection of EESS (passive) and RAS in bands above 76\u00a0GHz",
+        "Combined short title": "",
         "Percent complete": "0.6",
         "Status": "Nathaniel made start on EESS and recommendation.  Check EESS consistency with 1.8"
     },
@@ -139,6 +159,8 @@
         "WP 7C/7D roles": "7C leading",
         "Corresponding 2.x draft item from WRC-23/27 views": "",
         "Writing assignments": "Chris and Nathaniel",
+        "Short title": "Allocations to EESS in 4.2\u20134.4 and 8.4\u20138.5\u00a0GHz",
+        "Combined short title": "",
         "Percent complete": "0.7",
         "Status": "Latest version uploaded. Recommendation needed.  Nathaniel to review"
     },
@@ -152,6 +174,8 @@
         "WP 7C/7D roles": "7C contributing",
         "Corresponding 2.x draft item from WRC-23/27 views": "",
         "Writing assignments": "Chris and Mahta",
+        "Short title": "Fixed satellite uplinks in 13.75\u201314\u00a0GHz",
+        "Combined short title": "",
         "Percent complete": "1",
         "Status": "Looks in great shape \u2013 Mahta to review"
     },
@@ -165,6 +189,8 @@
         "WP 7C/7D roles": "7C & 7D contributing",
         "Corresponding 2.x draft item from WRC-23/27 views": "",
         "Writing assignments": "Nancy and Scott",
+        "Short title": "Fixed uplinks to non-geostationary satellites at 51.4\u201352.4\u00a0GHz",
+        "Combined short title": "",
         "Percent complete": "0.95",
         "Status": "Draft text done for intro and RAS.  Outline for EESS, full text pending"
     },
@@ -178,6 +204,8 @@
         "WP 7C/7D roles": "7C contributing",
         "Corresponding 2.x draft item from WRC-23/27 views": "",
         "Writing assignments": "Mahta and Chris",
+        "Short title": "Fixed satellite downlinks in 17.3\u201317.8\u00a0GHz",
+        "Combined short title": "",
         "Percent complete": "0.8",
         "Status": "Draft uploaded into Google Drive.  NJL attempted resolution summary and recommendation.\n \u2013 Mahta to review"
     },
@@ -191,6 +219,8 @@
         "WP 7C/7D roles": "",
         "Corresponding 2.x draft item from WRC-23/27 views": "",
         "Writing assignments": "Skip?",
+        "Short title": "Limiting unauthorized non-geostationary ground station operations",
+        "Combined short title": "",
         "Percent complete": "1",
         "Status": ""
     },
@@ -204,6 +234,8 @@
         "WP 7C/7D roles": "7C & 7D contributing",
         "Corresponding 2.x draft item from WRC-23/27 views": "2.2 & 2.3",
         "Writing assignments": "Nancy and Scott",
+        "Short title": "Equitable access to fixed satellite service in selected bands",
+        "Combined short title": "",
         "Percent complete": "0.4",
         "Status": "In progress"
     },
@@ -217,6 +249,8 @@
         "WP 7C/7D roles": "7C & 7D contributing",
         "Corresponding 2.x draft item from WRC-23/27 views": "",
         "Writing assignments": "Mahta, and Laura",
+        "Short title": "Allocations to International Mobile Telecommunications",
+        "Combined short title": "",
         "Percent complete": "0.6",
         "Status": "RAS contributions look done to me. NJL made some edits\nEESS needs to be added."
     },
@@ -230,6 +264,8 @@
         "WP 7C/7D roles": "7C & 7D contributing",
         "Corresponding 2.x draft item from WRC-23/27 views": "2.1, includes comprehensive tables for EESS and RAS from 275-700 GHz",
         "Writing assignments": "Scott and Nathaniel",
+        "Short title": "Radiolocation from 231.5\u2013700\u00a0GHz",
+        "Combined short title": "",
         "Percent complete": "0.8",
         "Status": "EESS mostly done (probably should revisit specific bands, contemplate limb protection).\nRAS looks good.\nRAS Recommendation pending"
     },
@@ -243,6 +279,8 @@
         "WP 7C/7D roles": "",
         "Corresponding 2.x draft item from WRC-23/27 views": "",
         "Writing assignments": "Phil and Karen",
+        "Short title": "Updating Appendix 26 for modernization of aeronautical HF spectrum",
+        "Combined short title": "",
         "Percent complete": "1",
         "Status": "RAS looks done.  No EESS needed. Draft completed?"
     },
@@ -256,6 +294,8 @@
         "WP 7C/7D roles": "",
         "Corresponding 2.x draft item from WRC-23/27 views": "",
         "Writing assignments": "Nathaniel and Scott\n(do 2.1 and 2.6 together)",
+        "Short title": "Allocations from 275-325\u00a0GHz",
+        "Combined short title": "Allocations from 102\u2013275\u00a0GHz and above",
         "Percent complete": "",
         "Status": "Completed and incorporated"
     },
@@ -269,6 +309,8 @@
         "WP 7C/7D roles": "",
         "Corresponding 2.x draft item from WRC-23/27 views": "",
         "Writing assignments": "Karen and Nancy\n(do 2.10 and 2.11 together)",
+        "Short title": "EESS (Earth-to-space) links in 22.55-23.15\u00a0GHz",
+        "Combined short title": "New communications links for EESS",
         "Percent complete": "",
         "Status": "Completed and incorporated"
     },
@@ -282,6 +324,8 @@
         "WP 7C/7D roles": "",
         "Corresponding 2.x draft item from WRC-23/27 views": "",
         "Writing assignments": "Karen and Nancy\n(do 2.10 and 2.11 together)",
+        "Short title": "EESS (space-to-Earth) between 37.5 and 52.4\u00a0GHz",
+        "Combined short title": "New communications links for EESS",
         "Percent complete": "",
         "Status": "With 2.10"
     },
@@ -295,6 +339,8 @@
         "WP 7C/7D roles": "7C leading",
         "Corresponding 2.x draft item from WRC-23/27 views": "",
         "Writing assignments": "Mahta and Nathaniel\n(do 2.12 and 2.13 together)",
+        "Short title": "EESS (active) between 3.0 and 3.4\u00a0GHz",
+        "Combined short title": "New EESS (active) allocations",
         "Percent complete": "",
         "Status": "Still pending it seems"
     },
@@ -308,6 +354,8 @@
         "WP 7C/7D roles": "7C leading",
         "Corresponding 2.x draft item from WRC-23/27 views": "",
         "Writing assignments": "Mahta and Nathaniel\n(do 2.12 and 2.13 together)",
+        "Short title": "EESS (active) between 9.2 and 10.4\u00a0GHz",
+        "Combined short title": "New EESS (active) allocations",
         "Percent complete": "",
         "Status": "Pending"
     },
@@ -321,6 +369,8 @@
         "WP 7C/7D roles": "SG7 contributing",
         "Corresponding 2.x draft item from WRC-23/27 views": "",
         "Writing assignments": "Laura?",
+        "Short title": "Alocations to EESS (passive) in 4.2\u20134.4 and 8.4\u20138.5\u00a0GHz",
+        "Combined short title": "",
         "Percent complete": "",
         "Status": "Completed and incorporated"
     },
@@ -334,6 +384,8 @@
         "WP 7C/7D roles": "",
         "Corresponding 2.x draft item from WRC-23/27 views": "",
         "Writing assignments": "Phil?",
+        "Short title": "Wireless power transmission (WPT)",
+        "Combined short title": "",
         "Percent complete": "",
         "Status": "Completed and incorporated"
     },
@@ -347,6 +399,8 @@
         "WP 7C/7D roles": "",
         "Corresponding 2.x draft item from WRC-23/27 views": "",
         "Writing assignments": "Mahta?",
+        "Short title": "Aeronautical and marine ground stations in 12.75\u201313.25\u00a0GHz",
+        "Combined short title": "",
         "Percent complete": "",
         "Status": "Completed and incorporated"
     },
@@ -360,6 +414,8 @@
         "WP 7C/7D roles": "",
         "Corresponding 2.x draft item from WRC-23/27 views": "",
         "Writing assignments": "Chris?",
+        "Short title": "Space-to-space links at 4 and 6\u00a0GHz",
+        "Combined short title": "",
         "Percent complete": "",
         "Status": "Completed and incorporated"
     },
@@ -373,6 +429,8 @@
         "WP 7C/7D roles": "",
         "Corresponding 2.x draft item from WRC-23/27 views": "",
         "Writing assignments": "Skip? (But perhaps not given the \"observe in non-protected bands)",
+        "Short title": "",
+        "Combined short title": "",
         "Percent complete": "",
         "Status": ""
     },
@@ -386,6 +444,8 @@
         "WP 7C/7D roles": "",
         "Corresponding 2.x draft item from WRC-23/27 views": "",
         "Writing assignments": "Nathaniel and Scott\n(do 2.1 and 2.6 together)",
+        "Short title": "",
+        "Combined short title": "",
         "Percent complete": "",
         "Status": "Done with 2.1"
     },
@@ -399,6 +459,8 @@
         "WP 7C/7D roles": "",
         "Corresponding 2.x draft item from WRC-23/27 views": "",
         "Writing assignments": "Skip?",
+        "Short title": "",
+        "Combined short title": "",
         "Percent complete": "",
         "Status": ""
     },
@@ -412,6 +474,8 @@
         "WP 7C/7D roles": "",
         "Corresponding 2.x draft item from WRC-23/27 views": "",
         "Writing assignments": "Probably skip as maritime",
+        "Short title": "",
+        "Combined short title": "",
         "Percent complete": "",
         "Status": ""
     },
@@ -425,6 +489,8 @@
         "WP 7C/7D roles": "",
         "Corresponding 2.x draft item from WRC-23/27 views": "",
         "Writing assignments": "Consider skipping? (Check with Mahta, GPS vs. EESS radar not a big concern, right?)",
+        "Short title": "Radionavigation at 5\u00a0GHz",
+        "Combined short title": "",
         "Percent complete": "",
         "Status": "Completed and incorporated"
     }

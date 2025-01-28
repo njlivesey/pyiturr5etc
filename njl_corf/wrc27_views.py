@@ -258,8 +258,9 @@ def get_ai_info(grouped: bool = False) -> dict[AgendaItem]:
         ),
         "WRC-27 AI-1.14": AgendaItem(
             frequency_bands=[
-                slice(2_010 * ureg.MHz, 2_025 * ureg.MHz),
-                slice(2_160 * ureg.MHz, 2_170 * ureg.MHz),
+                slice(2_010 * ureg.MHz, 2_025 * ureg.MHz, +1),
+                slice(2_160 * ureg.MHz, 2_170 * ureg.MHz, -1),
+                slice(2_120 * ureg.MHz, 2_160 * ureg.MHz, -1),
             ],
             soundbyte="MSS",
         ),
