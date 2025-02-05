@@ -29,7 +29,7 @@
 \newlength{\mycolumnwidth}
 \setlength{\mycolumnwidth}{0.25\useablecontentwidth}
 %
-\usepackage{setspace}
+\usepackage{setspace} 
 % ---------------------------------- Boxes
 \usepackage{tcolorbox}
 % ---------------------------------- Fonts
@@ -96,7 +96,7 @@ specific-ai-plots-no-legend/stand-alone-legend.pdf}}
 \newcommand{\PosterCaption}{
 \parbox[b]{\captionwidth}{%
 \setstretch{1.05}
-Figures show the radio bands under consideration in various WRC-27 ``Agenda Items'' along with bands allocated to and/or afforded some form of protection for scientific use in the International Telecommunications Union (ITU) Radio Regulations (RR). The top row in each figure notes the band(s) under consideration in the Agenda Item (grey). Rows beneath denote bands within the same spectral region that are allocated to (or afforded some level of acknowledgement/protection for) scientific observations, either for radio astronomy (the Radio Astronomy Service, RAS, purples/pinks) or Earth observation (the Earth Exploration Satellite Service, EESS, passive or active, greens). Any bands afforded ``all emissions prohibited'' protection under RR Footnote 5.340 will be indicated (in orange) in the bottommost row. RAS and/or EESS bands shown in strong colors are primary allocations (annotated with a ``Pri.\@'' in the legend above), those shown with paler colors are secondary allocations (annotated with a ``Sec\@.'' in the legend), and bands shown in the palest colors are afforded protections (or otherwise identified) in a specific footnote of the, such as RR~5.149 (annotated with ``Fn.'' in the legend).  Arrows are placed within (or beside for very narrow bands) bands under consideration in an Agenda Item denote cases where transmissions are space-to-Earth, Earth-to-space, and/or space-to-space. For clarity, particularly narrow bands that would otherwise not be visible on the page are shown with exaggerated bandwidth.}}
+Figures show the radio bands under consideration in WRC-27 ``Agenda Items'' along with nearby bands allocated to and/or afforded some form of protection for scientific use in the International Telecommunications Union (ITU) Radio Regulations (RR). The top row in each figure notes the band(s) under consideration in the Agenda Item (grey). Rows beneath denote bands within the same spectral region that are allocated to (or afforded some level of acknowledgement/protection for) scientific observations, either for radio astronomy (the Radio Astronomy Service, RAS, purples/pinks) or Earth observation (the Earth Exploration Satellite Service, EESS, passive or active, greens). Any bands afforded ``all emissions prohibited'' protection under RR Footnote 5.340 are indicated (in orange) in the bottommost row. RAS and/or EESS bands shown in strong colors are primary allocations (annotated with a ``Pri.\@'' in the legend above), those shown with paler colors are secondary allocations (annotated with a ``Sec\@.'' in the legend), and bands shown in the palest colors are afforded protections (or otherwise identified) in a specific footnote of the, such as RR~5.149 (annotated with ``Fn.'' in the legend).  Arrows placed within (or beside for very narrow bands) bands under consideration in an Agenda Item denote cases where transmissions are space-to-Earth, Earth-to-space, and/or space-to-space. For clarity, particularly narrow bands that would otherwise not be visible on the page are shown with exaggerated bandwidth.}}
 
 
 % ---------------------------------- Main document
@@ -162,7 +162,7 @@ Figures show the radio bands under consideration in various WRC-27 ``Agenda Item
 %
 \node (Report) [anchor=south east] at (ContentBottomRight) {%
 \parbox{2\mycolumnwidth-\captionwidth}{
-\includegraphics[width=\linewidth]{draft-report-cover.png}\par
+\includegraphics[width=\linewidth]{draft-report-cover.pdf}\par
 \vspace{2\baselineskip}
 \null\hfill{\qrcode[hyperlink, height=0.75\linewidth]{https://www.nationalacademies.org/our-work/views-on-the-world-radiocommunication-conference-2027}}
 }};

@@ -1,8 +1,8 @@
 # Fdb version 4
-["pdflatex"] 1738099706 "/Users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/summary-tabloids/summary-tabloid.tex" "summary-tabloid.pdf" "summary-tabloid" 1738099707 0
+["pdflatex"] 1738778088 "/Users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/summary-tabloids/summary-tabloid.tex" "summary-tabloid.pdf" "summary-tabloid" 1738778090 0
   "/Users/livesey/Library/texlive/2023/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1693500927 4964813 81bc408e9f4677179e40a0a56b982d73 ""
   "/Users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/stand-alone-legend.pdf" 1738040927 86526 09a6c638d81b3f1758412af29994e753 ""
-  "/Users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/summary-tabloids/summary-tabloid.tex" 1738099631 8136 28d61e24fc8ee9c8a2240b3dffcf8b6e ""
+  "/Users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/summary-tabloids/summary-tabloid.tex" 1738778088 8128 14a49698759f87fc79fe53d58c5b9809 ""
   "/users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.1.pdf" 1737952590 142288 d0670b7922b2d9391ed8f24c9412c071 ""
   "/users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.10.pdf" 1737952595 142559 e410d290bed028e67f6fcdd5329b904a ""
   "/users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.11.pdf" 1737952596 141920 f44e2d5db25a92aefa2fea7677f05954 ""
@@ -179,11 +179,11 @@
   "/usr/local/texlive/2023/texmf-dist/web2c/texmf.cnf" 1677365944 40745 87bb86a62d462f93a1efc6b0c65c872e ""
   "/usr/local/texlive/2023/texmf-var/web2c/pdftex/pdflatex.fmt" 1707432593 7883454 d50093d75bf835d99f7c7a8162eebb19 ""
   "/usr/local/texlive/2023/texmf.cnf" 1678822455 577 1b2b1af17af2508fb20dd85783af4050 ""
-  "draft-report-cover.png" 1738089580 444792 8c2746be5b309fbb5729933fa73e157e ""
+  "draft-report-cover.pdf" 1738776489 380989 675234510ec8768e3e16c0ae8550c377 ""
   "summary-tabloid-content-wrc-27.tex" 1738099705 11492 f6ab8fe6729ff6ef514ab3d86fa031a7 ""
-  "summary-tabloid.aux" 1738099707 2541 d2f55549162235e894b93cb12d83cf22 "pdflatex"
-  "summary-tabloid.out" 1738099706 0 d41d8cd98f00b204e9800998ecf8427e "pdflatex"
-  "summary-tabloid.tex" 1738099631 8136 28d61e24fc8ee9c8a2240b3dffcf8b6e ""
+  "summary-tabloid.aux" 1738778089 2541 d2f55549162235e894b93cb12d83cf22 "pdflatex"
+  "summary-tabloid.out" 1738778089 0 d41d8cd98f00b204e9800998ecf8427e "pdflatex"
+  "summary-tabloid.tex" 1738778088 8128 14a49698759f87fc79fe53d58c5b9809 ""
   (generated)
   "summary-tabloid.aux"
   "summary-tabloid.log"

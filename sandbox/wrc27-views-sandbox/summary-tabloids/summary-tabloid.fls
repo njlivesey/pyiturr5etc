@@ -1003,11 +1003,11 @@ INPUT /Users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots
 INPUT /Users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/stand-alone-legend.pdf
 INPUT /Users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/stand-alone-legend.pdf
 INPUT /Users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/stand-alone-legend.pdf
-INPUT ./draft-report-cover.png
-INPUT ./draft-report-cover.png
-INPUT draft-report-cover.png
-INPUT ./draft-report-cover.png
-INPUT ./draft-report-cover.png
+INPUT ./draft-report-cover.pdf
+INPUT ./draft-report-cover.pdf
+INPUT draft-report-cover.pdf
+INPUT ./draft-report-cover.pdf
+INPUT ./draft-report-cover.pdf
 INPUT /usr/local/texlive/2023/texmf-dist/tex/latex/psnfss/ot1ppl.fd
 INPUT /usr/local/texlive/2023/texmf-dist/tex/latex/psnfss/ot1ppl.fd
 INPUT /usr/local/texlive/2023/texmf-dist/tex/latex/psnfss/ot1ppl.fd

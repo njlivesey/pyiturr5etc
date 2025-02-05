@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2024.2.8)  28 JAN 2025 13:28
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2024.2.8)  5 FEB 2025 09:54
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -711,47 +711,47 @@ Package pdftex.def Info: /users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbo
 (pdftex.def)             Requested size: 256.41827pt x 77.35004pt.
 
 Underfull \hbox (badness 10000) in paragraph at lines 154--154
-[]\T1/ppl/m/n/10 Figures show the ra-dio bands un-der con-sid-er-a-tion in var-i-ous WRC-27 ``Agenda Items'' along
+[]\T1/ppl/m/n/10 Figures show the ra-dio bands un-der con-sid-er-a-tion in WRC-27 ``Agenda Items'' along with
  []
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 154--154
-\T1/ppl/m/n/10 with bands al-lo-cated to and/or af-forded some form of pro-tec-tion for sci-en-tific use in the In-ter-
+\T1/ppl/m/n/10 nearby bands al-lo-cated to and/or af-forded some form of pro-tec-tion for sci-en-tific use in the
  []
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 154--154
-\T1/ppl/m/n/10 na-tional Telecom-mu-ni-ca-tions Union (ITU) Ra-dio Reg-u-la-tions (RR). The top row in each fig-ure
+\T1/ppl/m/n/10 In-ter-na-tional Telecom-mu-ni-ca-tions Union (ITU) Ra-dio Reg-u-la-tions (RR). The top row in each
  []
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 154--154
-\T1/ppl/m/n/10 notes the band(s) un-der con-sid-er-a-tion in the Agenda Item (grey). Rows be-neath de-note bands
+\T1/ppl/m/n/10 fig-ure notes the band(s) un-der con-sid-er-a-tion in the Agenda Item (grey). Rows be-neath de-note
  []
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 154--154
-\T1/ppl/m/n/10 within the same spec-tral re-gion that are al-lo-cated to (or af-forded some level of ac-knowl-edge-
+\T1/ppl/m/n/10 bands within the same spec-tral re-gion that are al-lo-cated to (or af-forded some level of ac-knowl-
  []
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 154--154
-\T1/ppl/m/n/10 ment/protection for) sci-en-tific ob-ser-va-tions, ei-ther for ra-dio as-tron-omy (the Ra-dio As-tron-omy
+\T1/ppl/m/n/10 edge-ment/protection for) sci-en-tific ob-ser-va-tions, ei-ther for ra-dio as-tron-omy (the Ra-dio As-
  []
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 154--154
-\T1/ppl/m/n/10 Ser-vice, RAS, pur-ples/pinks) or Earth ob-ser-va-tion (the Earth Ex-plo-ration Satel-lite Ser-vice,
+\T1/ppl/m/n/10 tron-omy Ser-vice, RAS, pur-ples/pinks) or Earth ob-ser-va-tion (the Earth Ex-plo-ration Satel-lite
  []
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 154--154
-\T1/ppl/m/n/10 EESS, pas-sive or ac-tive, greens). Any bands af-forded ``all emis-sions pro-hib-ited'' pro-tec-tion
+\T1/ppl/m/n/10 Ser-vice, EESS, pas-sive or ac-tive, greens). Any bands af-forded ``all emis-sions pro-hib-ited'' pro-
  []
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 154--154
-\T1/ppl/m/n/10 un-der RR Foot-note 5.340 will be in-di-cated (in or-ange) in the bot-tom-most row. RAS and/or
+\T1/ppl/m/n/10 tec-tion un-der RR Foot-note 5.340 are in-di-cated (in or-ange) in the bot-tom-most row. RAS and/or
  []
 
 
@@ -776,7 +776,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 154--154
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 154--154
-\T1/ppl/m/n/10 Ar-rows are placed within (or be-side for very nar-row bands) bands un-der con-sid-er-a-tion in an
+\T1/ppl/m/n/10 Ar-rows placed within (or be-side for very nar-row bands) bands un-der con-sid-er-a-tion in an
  []
 
 
@@ -823,11 +823,11 @@ File: /Users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots
 <use /Users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/stand-alone-legend.pdf>
 Package pdftex.def Info: /Users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/stand-alone-legend.pdf  used on input line 161.
 (pdftex.def)             Requested size: 85.35826pt x 35.7471pt.
-<draft-report-cover.png, id=29, 372.64218pt x 511.15968pt>
-File: draft-report-cover.png Graphic file (type png)
-<use draft-report-cover.png>
-Package pdftex.def Info: draft-report-cover.png  used on input line 168.
-(pdftex.def)             Requested size: 121.05138pt x 166.04692pt.
+<draft-report-cover.pdf, id=29, 433.62pt x 650.43pt>
+File: draft-report-cover.pdf Graphic file (type pdf)
+<use draft-report-cover.pdf>
+Package pdftex.def Info: draft-report-cover.pdf  used on input line 168.
+(pdftex.def)             Requested size: 121.05138pt x 181.57329pt.
 
 
 <QR code requested for "https://www.nationalacademies.org/our-work/views-on-the-world-radiocommunication-conference-2027" in version 0-M.>
@@ -853,24 +853,24 @@ LaTeX Font Info:    Trying to load font information for OT1+zplm on input line 1
 File: ot1zplm.fd 2002/09/08 Fontinst v1.914 font definitions for OT1/zplm.
 ) [1
 
-{/Users/livesey/Library/texlive/2023/texmf-var/fonts/map/pdftex/updmap/pdftex.map}{/usr/local/texlive/2023/texmf-dist/fonts/enc/dvips/base/8r.enc} </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.1.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.2.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.3.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.4.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.5.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.6.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.7.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.8.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.9.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.10.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.11.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.12.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.13.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.14.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.15.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.16.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.17.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.18.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.19.pdf> <./draft-report-cover.png> </Users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/stand-alone-legend.pdf>] (./summary-tabloid.aux <Reading QR code for "https://www.nationalacademies.org/our-work/views-on-the-world-radiocommunication-conference-2027" at level 6-M from aux file.>
+{/Users/livesey/Library/texlive/2023/texmf-var/fonts/map/pdftex/updmap/pdftex.map}{/usr/local/texlive/2023/texmf-dist/fonts/enc/dvips/base/8r.enc} </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.1.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.2.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.3.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.4.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.5.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.6.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.7.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.8.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.9.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.10.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.11.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.12.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.13.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.14.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.15.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.16.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.17.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.18.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.19.pdf> <./draft-report-cover.pdf> </Users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/stand-alone-legend.pdf>] (./summary-tabloid.aux <Reading QR code for "https://www.nationalacademies.org/our-work/views-on-the-world-radiocommunication-conference-2027" at level 6-M from aux file.>
 )
 Package rerunfilecheck Info: File `summary-tabloid.out' has not changed.
 (rerunfilecheck)             Checksum: D41D8CD98F00B204E9800998ECF8427E;0.
  ) 
 Here is how much of TeX's memory you used:
- 25175 strings out of 476025
- 496305 string characters out of 5790018
+ 25174 strings out of 476025
+ 496325 string characters out of 5790018
  2003388 words of memory out of 5000000
  45203 multiletter control sequences out of 15000+600000
  524998 words of font info for 56 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  102i,11n,104p,2036b,952s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/local/texlive/2023/texmf-dist/fonts/type1/public/fdsymbol/FdSymbolC-Bold.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/urw/palatino/uplb8a.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/urw/palatino/uplr8a.pfb>
-Output written on summary-tabloid.pdf (1 page, 660570 bytes).
+Output written on summary-tabloid.pdf (1 page, 557094 bytes).
 PDF statistics:
- 228 PDF objects out of 1000 (max. 8388607)
- 194 compressed objects within 2 object streams
+ 264 PDF objects out of 1000 (max. 8388607)
+ 213 compressed objects within 3 object streams
  2 named destinations out of 1000 (max. 500000)
  130 words of extra memory for PDF output out of 10000 (max. 10000000)
 
