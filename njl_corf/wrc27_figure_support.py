@@ -6,6 +6,8 @@ from dataclasses import dataclass
 
 import matplotlib
 import matplotlib.pyplot as plt
+import matplotlib.font_manager as fm
+from matplotlib import ticker as mticker
 import numpy as np
 import pint
 from matplotlib.ticker import FuncFormatter, NullFormatter
@@ -13,18 +15,46 @@ from matplotlib.ticker import FuncFormatter, NullFormatter
 from njl_corf import ureg
 
 
+class LaTeXScalarFormatter(mticker.ScalarFormatter):
+    """Custom ScalarFormatter that forces LaTeX typesetting for tick labels."""
+
+    def __init__(self, useOffset=True, useMathText=True):
+        super().__init__(useOffset=useOffset, useMathText=useMathText)
+
+    def __call__(self, x, pos=None):
+        """Override the default __call__ to return LaTeX-formatted labels."""
+        label = super().__call__(x, pos)  # Get the default formatted text
+        label = label.replace(r"$\mathdefault{", "").replace(r"}$", "")
+        return label
+        # return rf"${label}"  # Ensure it's typeset in math mode
+        return r"$\text{\fontseries{l}\selectfont{}H" f"{label}" r"}$"
+
+    def format_data(self, value):
+        """Ensures that interactive display (cursor hover) uses LaTeX."""
+        # return rf"{super().format_data(value)}"
+        raise NotImplementedError
+        return r"$\text{" rf"{super().format_data(value)}" r"}$"
+
+    def format_data_short(self, value):
+        """Ensures shorter formatted data is still LaTeX-wrapped."""
+        # return rf"{super().format_data_short(value)}"
+        raise NotImplementedError
+        return r"$\text{" rf"{super().format_data_short(value)}" r"}$"
+
+
 def set_nas_graphic_style():
     """Choose fonts etc. to match NAS style"""
-    # Set plot defaults
     matplotlib.rcParams["text.usetex"] = True
-    matplotlib.rcParams["text.latex.preamble"] = (
-        r"\usepackage[boldweight=Bold]{fdsymbol}"
-    )
-    matplotlib.rcParams["font.family"] = "serif"
+    matplotlib.rcParams[
+        "text.latex.preamble"
+    ] = r"""
+        \usepackage[boldweight=Bold]{fdsymbol}
+        % \usepackage[light, sflining, sfdefault]{merriweather}
+        % \usepackage{mathastext}
+    """
+    matplotlib.rcParams["font.family"] = "serif"  # "sans-serif"
     matplotlib.rcParams["font.serif"] = ["Palatino"]
     matplotlib.rcParams["font.size"] = 9
-    matplotlib.rcParams["pdf.fonttype"] = 42
-    matplotlib.rcParams["ps.fonttype"] = 42
 
 
 def discern_ideal_unit(f: pint.Quantity | np.float64) -> pint.Unit:
@@ -206,6 +236,8 @@ def setup_frequency_axis(
             ax.set_xticks(xticks)
         if xminor is not None:
             ax.set_xticks(xminor, minor=True)
+    if isinstance(ax.xaxis.get_major_formatter(), mticker.ScalarFormatter):
+        ax.xaxis.set_major_formatter(LaTeXScalarFormatter())
     return log_axis
 
 

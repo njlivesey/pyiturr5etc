@@ -3,6 +3,7 @@
 from dataclasses import dataclass
 from typing import Optional, Callable
 import functools
+import warnings
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -205,6 +206,8 @@ def wrc27_ai_figure(
         xticks=xticks,
         xminor=xminor,
     )
+    frequency_range_shown = [f * ax.xaxis.units for f in ax.get_xlim()]
+    frequency_range_full = frequency_range_shown
     # Move the axis label a bit higher
     ax.xaxis.labelpad = 2.0
 
