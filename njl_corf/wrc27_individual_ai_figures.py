@@ -743,7 +743,9 @@ def all_individual_figures(
         xticks=np.linspace(70 * ureg.GHz, 90 * ureg.GHz, 11),
     )
     plot_configurations["WRC-27 AI-1.11"] = AIPlotConfiguration(
-        "WRC-27 AI-1.11", arrows_included=[False, True, False, False, True, True]
+        "WRC-27 AI-1.11",
+        arrows_included=[False, True, False, False, True, True],
+        frequency_range=[1.45 * ureg.GHz, 2.60 * ureg.GHz],
     )
     plot_configurations["WRC-27 AI-1.12"] = AIPlotConfiguration("WRC-27 AI-1.12")
     plot_configurations["WRC-27 AI-1.13"] = AIPlotConfiguration(

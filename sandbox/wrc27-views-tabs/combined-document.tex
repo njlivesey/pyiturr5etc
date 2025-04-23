@@ -1,0 +1,193 @@
+
+\documentclass{report}
+\usepackage{graphicx}
+\usepackage[margin=0pt, paperwidth=8.5in, paperheight=11in]{geometry}
+\usepackage[svgnames]{xcolor}
+\usepackage{tikz}
+\usepackage{helvet}
+\setlength{\parindent}{0pt}
+\pagestyle{empty}
+
+\tikzset{
+  thumb tab base/.style={
+    color=white,
+    fill=black!30,
+    font=\LARGE\bfseries\sffamily,
+    inner sep=4pt,
+    text width=0.7in,
+  },
+  thumb tab right/.style={
+    thumb tab base,
+    anchor=south east,
+    align=left,
+  },
+  thumb tab left/.style={
+    thumb tab base,
+    anchor=south west,
+    align=right,
+  }
+}
+
+\newcommand{\viewspage}[4]{%
+\begin{tikzpicture}
+    \path [use as bounding box] (0,0) rectangle (8.5in, 11in);
+    \node [anchor=south west] at (0,0) {\includegraphics[width=8.5in, page=#1]{AdvCopy_Prepub_Views WRC-27_21Apr.pdf}};
+    \ifx#4R
+      \node [thumb tab right] at (8.5in, #2) {#3};
+    \else\ifx#4L
+      \node [thumb tab left] at (0in, #2) {#3};
+    \fi\fi
+\end{tikzpicture}%
+\clearpage%
+}
+%
+\begin{document}%
+\viewspage{1}{10.0in}{X}{X}%
+\viewspage{2}{10.0in}{X}{X}%
+\viewspage{3}{10.0in}{X}{X}%
+\viewspage{4}{10.0in}{X}{X}%
+\viewspage{5}{10.0in}{X}{X}%
+\viewspage{6}{10.0in}{X}{X}%
+\viewspage{7}{10.0in}{X}{X}%
+\viewspage{8}{10.0in}{X}{X}%
+\viewspage{9}{10.0in}{X}{X}%
+\viewspage{10}{10.0in}{X}{X}%
+\viewspage{11}{10.0in}{X}{X}%
+\viewspage{12}{10.0in}{X}{X}%
+\viewspage{13}{10.0in}{X}{X}%
+\viewspage{14}{10.0in}{X}{X}%
+\viewspage{15}{10.0in}{X}{X}%
+\viewspage{16}{10.0in}{X}{X}%
+\viewspage{17}{10.0in}{X}{X}%
+\viewspage{18}{10.0in}{X}{X}%
+\viewspage{19}{10.0in}{X}{X}%
+\viewspage{20}{10.0in}{X}{X}%
+\viewspage{21}{10.0in}{X}{X}%
+\viewspage{22}{10.0in}{X}{X}%
+\viewspage{23}{10.0in}{X}{X}%
+\viewspage{24}{10.0in}{X}{X}%
+\viewspage{25}{10.0in}{X}{X}%
+\viewspage{26}{10.0in}{X}{X}%
+\viewspage{27}{10.0in}{X}{X}%
+\viewspage{28}{10.0in}{X}{X}%
+\viewspage{29}{10.0in}{X}{X}%
+\viewspage{30}{10.0in}{X}{X}%
+\viewspage{31}{10.0in}{X}{X}%
+\viewspage{32}{10.0in}{X}{X}%
+\viewspage{33}{9.7in}{1.1}{R}%
+\viewspage{34}{9.7in}{1.1}{L}%
+\viewspage{35}{9.7in}{1.1}{R}%
+\viewspage{36}{9.7in}{1.1}{L}%
+\viewspage{37}{9.7in}{1.1}{R}%
+\viewspage{38}{9.4in}{1.2}{L}%
+\viewspage{39}{9.4in}{1.2}{R}%
+\viewspage{40}{9.4in}{1.2}{L}%
+\viewspage{41}{9.1in}{1.3}{R}%
+\viewspage{42}{9.1in}{1.3}{L}%
+\viewspage{43}{9.1in}{1.3}{R}%
+\viewspage{44}{9.1in}{1.3}{L}%
+\viewspage{45}{8.8in}{1.4}{R}%
+\viewspage{46}{8.8in}{1.4}{L}%
+\viewspage{47}{8.5in}{1.5}{R}%
+\viewspage{48}{8.2in}{1.6}{L}%
+\viewspage{49}{7.9in}{1.7}{R}%
+\viewspage{50}{7.9in}{1.7}{L}%
+\viewspage{51}{7.9in}{1.7}{R}%
+\viewspage{52}{7.9in}{1.7}{L}%
+\viewspage{53}{7.6in}{1.8}{R}%
+\viewspage{54}{7.6in}{1.8}{L}%
+\viewspage{55}{7.6in}{1.8}{R}%
+\viewspage{56}{7.6in}{1.8}{L}%
+\viewspage{57}{7.300000000000001in}{1.9}{R}%
+\viewspage{58}{7.300000000000001in}{1.9}{L}%
+\viewspage{59}{7.0in}{1.10}{R}%
+\viewspage{60}{7.0in}{1.10}{L}%
+\viewspage{61}{7.0in}{1.10}{R}%
+\viewspage{62}{6.7in}{1.11}{L}%
+\viewspage{63}{6.7in}{1.11}{R}%
+\viewspage{64}{6.4in}{1.12}{L}%
+\viewspage{65}{6.4in}{1.12}{R}%
+\viewspage{66}{6.4in}{1.12}{L}%
+\viewspage{67}{6.4in}{1.12}{R}%
+\viewspage{68}{6.1in}{1.13}{L}%
+\viewspage{69}{6.1in}{1.13}{R}%
+\viewspage{70}{6.1in}{1.13}{L}%
+\viewspage{71}{6.1in}{1.13}{R}%
+\viewspage{72}{6.1in}{1.13}{L}%
+\viewspage{73}{6.1in}{1.13}{R}%
+\viewspage{74}{5.8in}{1.14}{L}%
+\viewspage{75}{5.5in}{1.15}{R}%
+\viewspage{76}{5.5in}{1.15}{L}%
+\viewspage{77}{5.5in}{1.15}{R}%
+\viewspage{78}{5.5in}{1.15}{L}%
+\viewspage{79}{5.2in}{1.16}{R}%
+\viewspage{80}{5.2in}{1.16}{L}%
+\viewspage{81}{5.2in}{1.16}{R}%
+\viewspage{82}{5.2in}{1.16}{L}%
+\viewspage{83}{5.2in}{1.16}{R}%
+\viewspage{84}{5.2in}{1.16}{L}%
+\viewspage{85}{4.9in}{1.17}{R}%
+\viewspage{86}{4.9in}{1.17}{L}%
+\viewspage{87}{4.9in}{1.17}{R}%
+\viewspage{88}{4.6000000000000005in}{1.18}{L}%
+\viewspage{89}{4.6000000000000005in}{1.18}{R}%
+\viewspage{90}{4.6000000000000005in}{1.18}{L}%
+\viewspage{91}{4.6000000000000005in}{1.18}{R}%
+\viewspage{92}{4.3in}{1.19}{L}%
+\viewspage{93}{4.3in}{1.19}{R}%
+\viewspage{94}{4.0in}{X}{X}%
+\viewspage{95}{4.0in}{X}{X}%
+\viewspage{96}{3.7in}{2.1\\2.6}{L}%
+\viewspage{97}{3.7in}{2.1\\2.6}{R}%
+\viewspage{98}{3.7in}{2.1\\2.6}{L}%
+\viewspage{99}{3.4000000000000004in}{2.2}{R}%
+\viewspage{100}{3.4000000000000004in}{2.2}{L}%
+\viewspage{101}{3.1000000000000005in}{2.3}{R}%
+\viewspage{102}{3.1000000000000005in}{2.3}{L}%
+\viewspage{103}{3.1000000000000005in}{2.3}{R}%
+\viewspage{104}{3.1000000000000005in}{2.3}{L}%
+\viewspage{105}{2.8000000000000007in}{2.4}{R}%
+\viewspage{106}{2.8000000000000007in}{2.4}{L}%
+\viewspage{107}{2.8000000000000007in}{2.4}{R}%
+\viewspage{108}{2.5in}{2.9}{L}%
+\viewspage{109}{2.5in}{2.9}{R}%
+\viewspage{110}{2.5in}{2.9}{L}%
+\viewspage{111}{2.2in}{2.10\\2.11}{R}%
+\viewspage{112}{2.2in}{2.10\\2.11}{L}%
+\viewspage{113}{2.2in}{2.10\\2.11}{R}%
+\viewspage{114}{2.2in}{2.10\\2.11}{L}%
+\viewspage{115}{2.2in}{2.10\\2.11}{R}%
+\viewspage{116}{2.2in}{2.10\\2.11}{L}%
+\viewspage{117}{1.9000000000000004in}{2.12\\2.13}{R}%
+\viewspage{118}{1.9000000000000004in}{2.12\\2.13}{L}%
+\viewspage{119}{1.9000000000000004in}{2.12\\2.13}{R}%
+\viewspage{120}{1.9000000000000004in}{2.12\\2.13}{L}%
+\viewspage{121}{1.5999999999999996in}{2.14}{R}%
+\viewspage{122}{1.5999999999999996in}{2.14}{L}%
+\viewspage{123}{1.3000000000000007in}{X}{X}%
+\viewspage{124}{1.3000000000000007in}{X}{X}%
+\viewspage{125}{1.3000000000000007in}{X}{X}%
+\viewspage{126}{1.3000000000000007in}{X}{X}%
+\viewspage{127}{1.3000000000000007in}{X}{X}%
+\viewspage{128}{1.3000000000000007in}{X}{X}%
+\viewspage{129}{1.3000000000000007in}{X}{X}%
+\viewspage{130}{1.3000000000000007in}{X}{X}%
+\viewspage{131}{1.3000000000000007in}{X}{X}%
+\viewspage{132}{1.3000000000000007in}{X}{X}%
+\viewspage{133}{1.3000000000000007in}{X}{X}%
+\viewspage{134}{1.3000000000000007in}{X}{X}%
+\viewspage{135}{1.3000000000000007in}{X}{X}%
+\viewspage{136}{1.3000000000000007in}{X}{X}%
+\viewspage{137}{1.3000000000000007in}{X}{X}%
+\viewspage{138}{1.3000000000000007in}{X}{X}%
+\viewspage{139}{1.3000000000000007in}{X}{X}%
+\viewspage{140}{1.3000000000000007in}{X}{X}%
+\viewspage{141}{1.3000000000000007in}{X}{X}%
+\viewspage{142}{1.3000000000000007in}{X}{X}%
+\viewspage{143}{1.3000000000000007in}{X}{X}%
+\viewspage{144}{1.3000000000000007in}{X}{X}%
+\viewspage{145}{1.3000000000000007in}{X}{X}%
+\viewspage{146}{1.3000000000000007in}{X}{X}%
+\viewspage{147}{1.3000000000000007in}{X}{X}%
+\viewspage{148}{1.3000000000000007in}{X}{X}%
+\end{document}

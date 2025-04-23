@@ -194,6 +194,8 @@ def wrc27_overview_figure(
         ax2.tick_params(axis="y", which="both", left=False, right=False)
     # Suppress the y ticks.
     ax.tick_params(axis="y", which="both", left=False, right=False)
+    # But add a title by way of a y-axis title
+    ax.text(-0.05, 1.002, "Agenda Item", transform=ax.transAxes, ha="left", va="bottom")
     # -------------------------------------------------- Legend
     wrc_overview_figure_legend(ax=ax, figure_colors=figure_colors)
     # -------------------------------------------------- Finish

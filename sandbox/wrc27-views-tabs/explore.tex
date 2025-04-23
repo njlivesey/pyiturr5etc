@@ -1,0 +1,46 @@
+\documentclass{report}
+\usepackage{graphicx}
+\usepackage[margin=0pt, paperwidth=8.5in, paperheight=11in]{geometry}
+\usepackage[svgnames]{xcolor}
+\usepackage{tikz}
+\usepackage{helvet}
+\setlength{\parindent}{0pt}
+\pagestyle{empty}
+
+\tikzset{
+  thumb tab base/.style={
+    color=white,
+    fill=black!30,
+    font=\LARGE\bfseries\sffamily,
+    inner sep=4pt,
+    text width=0.7in,
+  },
+  thumb tab right/.style={
+    thumb tab base,
+    anchor=south east,
+    align=left,
+  },
+  thumb tab left/.style={
+    thumb tab base,
+    anchor=south west,
+    align=right,
+  }
+}
+
+\newcommand{\viewspage}[4]{%
+\begin{tikzpicture}
+    \path [use as bounding box] (0,0) rectangle (8.5in, 11in);
+    \node [anchor=south west] at (0,0) {\includegraphics[width=8.5in, page=#1]{AdvCopy_Prepub_Views WRC-27_21Apr.pdf}};
+    \ifx#4R
+      \node [thumb tab right] at (8.5in, #2) {#3};
+    \else\ifx#4L
+      \node [thumb tab left] at (0in, #2) {#3};
+    \fi\fi
+\end{tikzpicture}%
+\clearpage%
+}
+%
+\begin{document}
+%
+\viewspage{50}{5.5in}{1.1}{L}%
+\end{document}

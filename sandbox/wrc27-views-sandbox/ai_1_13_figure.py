@@ -6,10 +6,11 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import FuncFormatter
 from matplotlib.patches import Rectangle
 from dataclasses import dataclass
+from typing import Optional
 
 import pint
 from njl_corf import ureg
-from njl_corf.wrc27_overview_figures import (
+from njl_corf.wrc27_figure_support import (
     set_nas_graphic_style,
     major_frequency_formatter_with_units,
 )
@@ -33,6 +34,7 @@ def box2rect(x_span, y_span, **kwargs):
 def get_next_color(ax):
     """Get the next color from the prop cycler and advance it"""
     # pylint: disable-next=protected-access
+    return next(ax.get_prop_cycle)["color"]
     return next(ax._get_lines.prop_cycler)["color"]
 
 
@@ -129,7 +131,7 @@ def table_rr_22_4():
     return pint.Quantity.from_list(f), pint.Quantity.from_list(pfd)
 
 
-def ai_1_13():
+def ai_1_13(for_poster: Optional[bool] = False):
     """Generate the figure for WRC-27 AI-1.13"""
     # ---------------------------------------------------- Data
     # RA-769 Table 1
@@ -198,7 +200,7 @@ def ai_1_13():
     # ---------------------------------------------------- Figure
     # Define the figure style
     set_nas_graphic_style()
-    fig, ax = plt.subplots(figsize=[10.6 / 2.54, 4])
+    fig, ax = plt.subplots(figsize=[10.6 / 2.54, 4], layout="constrained")
     # x-axis scale etc.
     # Set up the x-axis ticks
     ax.set_xscale("log")
@@ -212,7 +214,7 @@ def ai_1_13():
     ax.xaxis.set_major_formatter(unit_formatter)
     ax.set_xlabel("")
     # y-axis scale etc.
-    ax.set_ylabel(r"Spectral PFD / dB(W/m$^2$/Hz)")
+    ax.set_ylabel(r"Spectral power flux density / dB(W/m$^2$/Hz)")
     #
     # Show the lines
     ax.plot(ra769_t1_f, ra769_t1_pfd, ".", label="RA-769 Table 1")
@@ -225,7 +227,7 @@ def ai_1_13():
         scs_f,
         scs_pfd,
         label="Spaceborne IMT",
-        facecolor=get_next_color(ax),
+        facecolor="tab:Red",
         edgecolor="none",
     )
     ax.add_patch(patch)
@@ -234,8 +236,15 @@ def ai_1_13():
         trr214_f,
         trr214_pfd,
         marker=".",
+        color="tab:purple",
         linestyle="none",
         label="RR Table 21-4",
     )
     # Add the legend
     ax.legend(loc="center", bbox_to_anchor=(0.5, -0.15), ncol=3, frameon=False)
+    # --------------------------------- Any specifics for posters
+    if for_poster:
+        # Set axis facecolor to opaque white
+        ax.set_facecolor("white")
+        # Set figure transparency by adjusting the facecolor alpha
+        fig.patch.set_alpha(0.0)  # Fully transparent figure background
