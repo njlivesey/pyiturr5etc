@@ -1,12 +1,22 @@
 from setuptools import setup, find_packages
 
-# List of requirements
-requirements = []  # This could be retrieved from requirements.txt
-# Package (minimal) configuration
 setup(
-    name="njl-corf",
-    version="0.01",
-    description="Various CORF-related tools",
-    packages=find_packages(),  # __init__.py folders search
-    install_requires=requirements,
+    name="pyiturr5etc",
+    version="1.0.0",
+    packages=find_packages(where="src"),
+    package_dir={"": "src"},
+    install_requires=[
+        "astropy",
+        "intervaltree",
+        "matplotlib",
+        "natsort",
+        "numpy",
+        "pandas",
+        "pdfplumber",
+        "Pint",
+        "python-docx",
+        "termcolor",
+        "Unidecode",
+    ],
+    python_requires=">=3.9",
 )
