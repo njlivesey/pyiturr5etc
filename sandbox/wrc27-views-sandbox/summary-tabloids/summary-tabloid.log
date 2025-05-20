@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2024.2.8)  5 FEB 2025 09:54
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2024.2.8)  29 APR 2025 17:39
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -505,7 +505,7 @@ Package: titlesec 2021/07/05 v2.14 Sectioning titles
 \titlewidthfirst=\dimen267
 ) (./summary-tabloid-content-wrc-27.tex)
 \captionwidth=\skip77
- (./summary-tabloid.aux <Reading QR code for "https://www.nationalacademies.org/our-work/views-on-the-world-radiocommunication-conference-2027" at level 6-M from aux file.>
+ (./summary-tabloid.aux <Reading QR code for "https://nap.nationalacademies.org/catalog/28596/views-of-the-us-national-academies-of-sciences-engineering-and-medicine-on-agenda-items-at-issue-at-the-world-radiocommunication-conference-2027" at level 10-M from aux file.>
 )
 \openout1 = `summary-tabloid.aux'.
 
@@ -830,8 +830,8 @@ Package pdftex.def Info: draft-report-cover.pdf  used on input line 168.
 (pdftex.def)             Requested size: 121.05138pt x 181.57329pt.
 
 
-<QR code requested for "https://www.nationalacademies.org/our-work/views-on-the-world-radiocommunication-conference-2027" in version 0-M.>
-<Copying the QR code for "https://www.nationalacademies.org/our-work/views-on-the-world-radiocommunication-conference-2027" in version 6-M as previously calculated.>
+<QR code requested for "https://nap.nationalacademies.org/catalog/28596/views-of-the-us-national-academies-of-sciences-engineering-and-medicine-on-agenda-items-at-issue-at-the-world-radiocommunication-conference-2027" in version 0-M.>
+<Copying the QR code for "https://nap.nationalacademies.org/catalog/28596/views-of-the-us-national-academies-of-sciences-engineering-and-medicine-on-agenda-items-at-issue-at-the-world-radiocommunication-conference-2027" in version 10-M as previously calculated.>
 LaTeX Font Info:    Trying to load font information for OT1+ppl on input line 168.
 (/usr/local/texlive/2023/texmf-dist/tex/latex/psnfss/ot1ppl.fd
 File: ot1ppl.fd 2001/06/04 font definitions for OT1/ppl.
@@ -853,21 +853,21 @@ LaTeX Font Info:    Trying to load font information for OT1+zplm on input line 1
 File: ot1zplm.fd 2002/09/08 Fontinst v1.914 font definitions for OT1/zplm.
 ) [1
 
-{/Users/livesey/Library/texlive/2023/texmf-var/fonts/map/pdftex/updmap/pdftex.map}{/usr/local/texlive/2023/texmf-dist/fonts/enc/dvips/base/8r.enc} </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.1.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.2.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.3.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.4.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.5.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.6.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.7.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.8.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.9.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.10.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.11.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.12.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.13.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.14.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.15.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.16.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.17.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.18.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.19.pdf> <./draft-report-cover.pdf> </Users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/stand-alone-legend.pdf>] (./summary-tabloid.aux <Reading QR code for "https://www.nationalacademies.org/our-work/views-on-the-world-radiocommunication-conference-2027" at level 6-M from aux file.>
+{/Users/livesey/Library/texlive/2023/texmf-var/fonts/map/pdftex/updmap/pdftex.map}{/usr/local/texlive/2023/texmf-dist/fonts/enc/dvips/base/8r.enc} </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.1.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.2.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.3.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.4.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.5.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.6.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.7.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.8.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.9.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.10.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.11.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.12.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.13.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.14.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.15.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.16.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.17.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.18.pdf> </users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/SpecificAI-WRC-27 AI-1.19.pdf> <./draft-report-cover.pdf> </Users/livesey/corf/njl-corf/sandbox/wrc27-views-sandbox/specific-ai-plots-no-legend/stand-alone-legend.pdf>] (./summary-tabloid.aux <Reading QR code for "https://nap.nationalacademies.org/catalog/28596/views-of-the-us-national-academies-of-sciences-engineering-and-medicine-on-agenda-items-at-issue-at-the-world-radiocommunication-conference-2027" at level 10-M from aux file.>
 )
 Package rerunfilecheck Info: File `summary-tabloid.out' has not changed.
 (rerunfilecheck)             Checksum: D41D8CD98F00B204E9800998ECF8427E;0.
  ) 
 Here is how much of TeX's memory you used:
  25174 strings out of 476025
- 496325 string characters out of 5790018
- 2003388 words of memory out of 5000000
+ 496519 string characters out of 5790018
+ 2100388 words of memory out of 5000000
  45203 multiletter control sequences out of 15000+600000
  524998 words of font info for 56 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 102i,11n,104p,2036b,952s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 102i,11n,104p,3798b,952s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/local/texlive/2023/texmf-dist/fonts/type1/public/fdsymbol/FdSymbolC-Bold.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/urw/palatino/uplb8a.pfb></usr/local/texlive/2023/texmf-dist/fonts/type1/urw/palatino/uplr8a.pfb>
-Output written on summary-tabloid.pdf (1 page, 557094 bytes).
+Output written on summary-tabloid.pdf (1 page, 561374 bytes).
 PDF statistics:
  264 PDF objects out of 1000 (max. 8388607)
  213 compressed objects within 3 object streams

@@ -152,14 +152,15 @@ def parse_page(
     """Parse the contents of an individual page of the RR
 
     Note that this code explicitly assumes that pages are self-contained. That is to say
-    that neither a table or a footenote definition spans multiple pages.  This enables
-    each page to be parsed as a unit.
+    that neither a table or a footnote definition spans multiple pages.  This enables
+    each page to be parsed as a unit.  In the current version of the RR that is
+    certainly the case.
 
     Parameters
     ----------
     page : pdfplumber.page.Page
         The page from within the RR PDF file
-    rr_verion_info : RRVerionInfo
+    rr_version_info : RRVersionInfo
         Information about this specific version of the RRs. Mainly contains special
         cases etc.
     specific_page_tags : str or list[str], optional
@@ -479,7 +480,7 @@ def parse_cell(
         allocation for allocation in allocations if allocation.secondary
     ]
     # Bands constructed from the ITU tables cannot be footnote mentions, they have to be
-    # incoroprated another way.
+    # incorporated another way.
     footnote_mentions = []
     # Now do all the footnote-only lines, gather them into a list of footnotes
     footnotes = " ".join(footnote_only_lines).split(" ")
