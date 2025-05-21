@@ -2,8 +2,7 @@
 
 import copy
 import pathlib
-import pickle
-from typing import Optional, Sequence
+from typing import Sequence
 
 import docx
 import numpy as np
@@ -175,25 +174,6 @@ def read(
         collections=collections,
         footnote_definitions=footnote_definitions,
     )
-
-
-def save(tables: FCCTables, filename: Optional[str] = None):
-    """Write tables to a pickle file"""
-    if filename is None:
-        filename = DEFAULT_PATH + "fcctable.pickle"
-    outfile = open(filename, "wb")
-    pickle.dump(tables, outfile)
-    outfile.close()
-
-
-def load(filename: Optional[str] = None) -> FCCTables:
-    """Read tables from a pickle file"""
-    if filename is None:
-        filename = DEFAULT_PATH + "fcctable.pickle"
-    infile = open(filename, "rb")
-    result = pickle.load(infile)
-    infile.close()
-    return result
 
 
 def htmlcolumn(bands: BandCollection | Sequence[Band], append_footnotes: bool = False):

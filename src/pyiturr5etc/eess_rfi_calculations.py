@@ -170,11 +170,7 @@ def link_budget(
             "notes",
         ]
         details = {}
-        for variable in variables:
-            try:
-                # pylint: disable-next=eval-used
-                details[variable] = eval(variable)
-            except NameError:
-                details[variable] = None
+        frame_locals = locals()  # snapshot of the current locals
+        details = {name: frame_locals.get(name) for name in variables}
         return received_power, details
     return received_power

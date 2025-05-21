@@ -3,39 +3,43 @@
 
 <div align="center">
 
-[INSERT YOUR LOGO IMAGE HERE (IF APPLICABLE)]
+<!-- [INSERT YOUR LOGO IMAGE HERE (IF APPLICABLE)] -->
 <!-- ☝️ Replace with your logo (if applicable) via ![](https://uri-to-your-logo-image) ☝️ -->
 <!-- ☝️ If you see logo rendering errors, make sure you're not using indentation, or try an HTML IMG tag -->
 
-<h1 align="center">[INSERT YOUR REPO / PROJ NAME HERE]</h1>
+<h1 align="center">PyITURR5etc</h1>
 <!-- ☝️ Replace with your repo name ☝️ -->
 
 </div>
 
-<pre align="center">[INSERT A SINGLE SENTENCE DESCRIBING THE PURPOSE OF YOUR REPO / PROJ]</pre>
+<pre align="center">Python library for ingesting querying and reporting on frequency allocation tables.</pre>
 <!-- ☝️ Replace with a single sentence describing the purpose of your repo / proj ☝️ -->
 
 <!-- Header block for project -->
 
-[INSERT YOUR BADGES HERE (SEE: https://shields.io)] [![SLIM](https://img.shields.io/badge/Best%20Practices%20from-SLIM-blue)](https://nasa-ammos.github.io/slim/)
+<!-- [INSERT YOUR BADGES HERE (SEE: https://shields.io)]  -->
+[![SLIM](https://img.shields.io/badge/Best%20Practices%20from-SLIM-blue)](https://nasa-ammos.github.io/slim/)
 <!-- ☝️ Add badges via: https://shields.io e.g. ![](https://img.shields.io/github/your_chosen_action/your_org/your_repo) ☝️ -->
 
-[INSERT SCREENSHOT OF YOUR SOFTWARE, IF APPLICABLE]
+<!-- [INSERT SCREENSHOT OF YOUR SOFTWARE, IF APPLICABLE] -->
+
 <!-- ☝️ Screenshot of your software (if applicable) via ![](https://uri-to-your-screenshot) ☝️ -->
 
-[INSERT MORE DETAILED DESCRIPTION OF YOUR REPOSITORY HERE]
-<!-- ☝️ Replace with a more detailed description of your repository, including why it was made and whom its intended for.  ☝️ -->
+The package is a Python library for dealing with frequency allocations within the radio spectrum, and for gathering and interpreting related information.  Specifically, it reads the frequency allocation tables from Article 5 of the ITU-R Radio Regulations.  It can also read comparable information (including US allocations) from the FCC tables.  It can also read an interpret information from the OSCAR database of Earth-observing spacecraft.
 
-[INSERT LIST OF IMPORTANT PROJECT / REPO LINKS HERE]
+Included are the routines that made plots for the (US) National Academies of Science, Engineering, and Medicine report ["Views of the U.S. National Academies of Sciences, Engineering, and Medicine on Agenda Items at Issue at the World Radiocommunication Conference 2027"](https://doi.org/10.17226/28596) (2025).  It is hoped that this package will be of broad use for people involved in the realm of radio spectrum management.
+
+
 <!-- example links>
 [Website](INSERT WEBSITE LINK HERE) | [Docs/Wiki](INSERT DOCS/WIKI SITE LINK HERE) | [Discussion Board](INSERT DISCUSSION BOARD LINK HERE) | [Issue Tracker](INSERT ISSUE TRACKER LINK HERE)
 -->
 
 ## Features
 
-* [INSERT LIST OF FEATURES IMPORTANT TO YOUR USERS HERE]
-  
-<!-- ☝️ Replace with a bullet-point list of your features ☝️ -->
+* Reads and ingests the ITU-R frequency allocation tables into a custom database
+* Rigidly ensures that the correct version of tables is read based on the sha1-hash of the pdf file
+* Can also read the FCC tables (currently from an outdated Word file), though the ITU-R document should be considered the definitive source for the international allocations, and the FCC document is not kept up to date in that regard.
+* Reads information extracted from the WMO OSCAR database of frequencies used by Earth-observing satellites
 
 ## Contents
 
@@ -48,41 +52,48 @@
 
 ## Quick Start
 
-This guide provides a quick way to get started with our project. Please see our [docs]([INSERT LINK TO DOCS SITE / WIKI HERE]) for a more comprehensive overview.
+This guide provides a quick way to get started with our project.  Fuller documentation is pending.
+<!-- Please see our [docs]([INSERT LINK TO DOCS SITE / WIKI HERE]) for a more comprehensive overview. -->
 
 ### Requirements
 
-* [INSERT LIST OF REQUIREMENTS HERE]
+* Requires Python 3 (not sure which version)
+* Makes heavy use of the `IntervalTree` package as the storage mechanism for all the bands in question (a tree-based storage mechanism that allows storage and manipulation of different frequency ranges)
+* Uses `numpy`, `Pint`, `astropy` (perhaps not needed any more)
+* Uses `pdfplumber` and `python-docx` for reading and parsing PDF and Word files
+* Some other standardish libraries (`Pandas` etc.)
   
 <!-- ☝️ Replace with a numbered list of your requirements, including hardware if applicable ☝️ -->
 
 ### Setup Instructions
 
-1. [INSERT STEP-BY-STEP SETUP INSTRUCTIONS HERE, WITH OPTIONAL SCREENSHOTS]
+1. Currently only supports installation via GitHub etc., followed by
+
+```pip install -e .```
    
 <!-- ☝️ Replace with a numbered list of how to set up your software prior to running ☝️ -->
 
 ### Run Instructions
 
-1. [INSERT STEP-BY-STEP RUN INSTRUCTIONS HERE, WITH OPTIONAL SCREENSHOTS]
+1. More detailed instructions pending
 
 <!-- ☝️ Replace with a numbered list of your run instructions, including expected results ☝️ -->
 
 ### Usage Examples
 
-* [INSERT LIST OF COMMON USAGE EXAMPLES HERE, WITH OPTIONAL SCREENSHOTS]
+* Examples pending
 
 <!-- ☝️ Replace with a list of your usage examples, including screenshots if possible, and link to external documentation for details ☝️ -->
 
-### Build Instructions (if applicable)
+<!-- ### Build Instructions (if applicable)
 
-1. [INSERT STEP-BY-STEP BUILD INSTRUCTIONS HERE, WITH OPTIONAL SCREENSHOTS]
+1. [INSERT STEP-BY-STEP BUILD INSTRUCTIONS HERE, WITH OPTIONAL SCREENSHOTS] -->
 
 <!-- ☝️ Replace with a numbered list of your build instructions, including expected results / outputs with optional screenshots ☝️ -->
 
-### Test Instructions (if applicable)
+<!-- ### Test Instructions (if applicable)
 
-1. [INSERT STEP-BY-STEP TEST INSTRUCTIONS HERE, WITH OPTIONAL SCREENSHOTS]
+1. [INSERT STEP-BY-STEP TEST INSTRUCTIONS HERE, WITH OPTIONAL SCREENSHOTS] -->
 
 <!-- ☝️ Replace with a numbered list of your test instructions, including expected results / outputs with optional screenshots ☝️ -->
 
@@ -90,13 +101,14 @@ This guide provides a quick way to get started with our project. Please see our 
 
 See our [CHANGELOG.md](CHANGELOG.md) for a history of our changes.
 
-See our [releases page]([INSERT LINK TO YOUR RELEASES PAGE]) for our key versioned releases.
+<!-- See our [releases page]([INSERT LINK TO YOUR RELEASES PAGE]) for our key versioned releases. -->
 
 <!-- ☝️ Replace with links to your changelog and releases page ☝️ -->
 
-## Frequently Asked Questions (FAQ)
+<!-- ## Frequently Asked Questions (FAQ)
 
-[INSERT LINK TO FAQ PAGE OR PROVIDE FAQ INLINE HERE]
+[INSERT LINK TO FAQ PAGE OR PROVIDE FAQ INLINE HERE] -->
+
 <!-- example link to FAQ PAGE>
 Questions about our project? Please see our: [FAQ]([INSERT LINK TO FAQ / DISCUSSION BOARD])
 -->
@@ -116,10 +128,8 @@ No questions yet. Propose a question to be added here by reaching out to our con
 
 ## Contributing
 
-[INSERT LINK TO CONTRIBUTING GUIDE OR FILL INLINE HERE]
-<!-- example link to CONTRIBUTING.md>
+
 Interested in contributing to our project? Please see our: [CONTRIBUTING.md](CONTRIBUTING.md)
--->
 
 <!-- example inline contributing guide>
 1. Create an GitHub issue ticket describing what changes you need (e.g. issue-1)
@@ -130,17 +140,10 @@ Interested in contributing to our project? Please see our: [CONTRIBUTING.md](CON
 **Working on your first pull request?** See guide: [How to Contribute to an Open Source Project on GitHub](https://kcd.im/pull-request)
 -->
 
-[INSERT LINK TO YOUR CODE_OF_CONDUCT.md OR SHARE TEXT HERE]
-<!-- example link to CODE_OF_CONDUCT.md>
+
 For guidance on how to interact with our team, please see our code of conduct located at: [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
--->
 
-<!-- ☝️ Replace with a text describing how people may contribute to your project, or link to your contribution guide directly ☝️ -->
-
-[INSERT LINK TO YOUR GOVERNANCE.md OR SHARE TEXT HERE]
-<!-- example link to GOVERNANCE.md>
 For guidance on our governance approach, including decision-making process and our various roles, please see our governance model at: [GOVERNANCE.md](GOVERNANCE.md)
--->
 
 ## License
 
@@ -149,10 +152,4 @@ See our: [LICENSE](LICENSE)
 
 ## Support
 
-[INSERT CONTACT INFORMATION OR PROFILE LINKS TO MAINTAINERS AMONG COMMITTER LIST]
-
-<!-- example list of contacts>
-Key points of contact are: [@github-user-1](link to github profile) [@github-user-2](link to github profile)
--->
-
-<!-- ☝️ Replace with the key individuals who should be contacted for questions ☝️ -->
+Key points of contact are: [Nathaniel Livesey](mailto:Nathaniel.J.Livesey@jpl.nasa.gov)
