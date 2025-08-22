@@ -12,7 +12,7 @@ import numpy as np
 import pint
 from matplotlib.ticker import FuncFormatter, NullFormatter
 
-from njl_corf import ureg
+from pyiturr5etc import ureg
 
 
 class LaTeXScalarFormatter(mticker.ScalarFormatter):

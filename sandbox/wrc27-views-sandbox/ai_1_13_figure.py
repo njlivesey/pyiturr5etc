@@ -9,8 +9,8 @@ from dataclasses import dataclass
 from typing import Optional
 
 import pint
-from njl_corf import ureg
-from njl_corf.wrc27_figure_support import (
+from pyiturr5etc import ureg
+from pyiturr5etc.wrc27_figure_support import (
     set_nas_graphic_style,
     major_frequency_formatter_with_units,
 )
@@ -214,7 +214,7 @@ def ai_1_13(for_poster: Optional[bool] = False):
     ax.xaxis.set_major_formatter(unit_formatter)
     ax.set_xlabel("")
     # y-axis scale etc.
-    ax.set_ylabel(r"Spectral power flux density / dB(W/m$^2$/Hz)")
+    ax.set_ylabel(r"Spectral power flux density / dB(W/(m$^2$ Hz))")
     #
     # Show the lines
     ax.plot(ra769_t1_f, ra769_t1_pfd, ".", label="RA-769 Table 1")
