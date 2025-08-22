@@ -14,7 +14,7 @@ from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 from numpy.typing import ArrayLike
 
-from njl_corf import pyiturr5 as rr, ureg, wrc27_views
+from pyiturr5etc import pyiturr5 as rr, ureg, wrc27_views
 
 from . import wrc27_figure_support as fs
 

@@ -12,8 +12,8 @@ import matplotlib.pyplot as plt
 from intervaltree import IntervalTree
 from natsort import natsorted
 
-from njl_corf import band_figure, pyfcctab
-from njl_corf.corf_pint import ureg
+from pyiturr5etc import band_figure, pyfcctab
+from pyiturr5etc.corf_pint import ureg
 
 
 @dataclass

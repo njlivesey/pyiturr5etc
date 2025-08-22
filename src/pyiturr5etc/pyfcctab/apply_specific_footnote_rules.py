@@ -1,6 +1,6 @@
 """Code to provide additional alocations"""
 
-from njl_corf.corf_pint import ureg
+from pyiturr5etc.corf_pint import ureg
 from .bands import Band
 from .band_collections import BandCollection
 
@@ -411,9 +411,8 @@ def footnote_5_562d():
 def footnote_5_563b():
     """Return band or bands corresponding to footnote 5.563b:
 
-    The band 237.9-238 GHz is also allocated to the Earth
-    exploration-satellite service (active) and the space research service (active) for
-    spaceborne cloud radars only.
+    The band 237.9-238 GHz is also allocated to the Earth exploration-satellite service
+    (active) and the space research service (active) for spaceborne cloud radars only.
     """
     return [
         Band.create_band_from_footnote(

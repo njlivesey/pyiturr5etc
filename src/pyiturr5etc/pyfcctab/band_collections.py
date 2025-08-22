@@ -9,7 +9,7 @@ from intervaltree import IntervalTree
 
 from .bands import Band
 
-from njl_corf.corf_pint import ureg
+from pyiturr5etc.corf_pint import ureg
 
 __all__ = ["BandCollection"]
 

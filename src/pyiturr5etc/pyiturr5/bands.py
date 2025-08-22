@@ -12,7 +12,7 @@ import numpy as np
 import pint
 from termcolor import colored
 
-from njl_corf.corf_pint import ureg
+from pyiturr5etc.corf_pint import ureg
 
 from .allocations import Allocation
 from .footnote_tools import footnote2html

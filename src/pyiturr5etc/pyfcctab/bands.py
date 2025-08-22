@@ -11,7 +11,7 @@ from .allocations import Allocation
 from .footnotes import footnote2html
 from .jurisdictions import Jurisdiction
 from .cells import FCCCell
-from njl_corf.corf_pint import ureg
+from pyiturr5etc.corf_pint import ureg
 
 
 __all__ = ["NotBoundsError", "NotBandError", "Band"]

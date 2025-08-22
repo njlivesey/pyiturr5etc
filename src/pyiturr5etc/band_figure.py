@@ -14,10 +14,10 @@ import matplotlib
 import numpy as np
 import pint
 
-from njl_corf import pyfcctab
-from njl_corf.pyfcctab.allocations import Allocation
-from njl_corf.pyoscar import OscarEntry
-from njl_corf.corf_pint import ureg
+from pyiturr5etc import pyfcctab
+from pyiturr5etc.pyfcctab.allocations import Allocation
+from pyiturr5etc.pyoscar import OscarEntry
+from pyiturr5etc.corf_pint import ureg
 
 
 def _capitalize_service_name(service_name: str | None) -> str | None:

@@ -15,7 +15,7 @@ from pdfplumber.table import Table
 from pint import Unit
 from unidecode import unidecode
 
-from njl_corf import ureg
+from pyiturr5etc import ureg
 
 from .allocation_database import AllocationDatabase
 from .allocations import NotAllocationError, parse_allocation

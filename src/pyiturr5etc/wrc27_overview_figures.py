@@ -9,8 +9,8 @@ from matplotlib.patches import Rectangle
 from matplotlib.axes import Axes
 from matplotlib.lines import Line2D
 
-from njl_corf import pyiturr5 as rr
-from njl_corf import ureg, wrc27_views
+from pyiturr5etc import pyiturr5 as rr
+from pyiturr5etc import ureg, wrc27_views
 
 from . import wrc27_figure_support as fs
 

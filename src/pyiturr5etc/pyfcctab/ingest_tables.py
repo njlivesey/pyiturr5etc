@@ -13,7 +13,7 @@ from .versions import Version
 from .utils import cell2text, first_line, last_line, pretty_print
 from .cells import FCCCell
 from .band_collections import BandCollection
-from njl_corf.corf_pint import ureg
+from pyiturr5etc.corf_pint import ureg
 
 
 class FCCTableError(Exception):

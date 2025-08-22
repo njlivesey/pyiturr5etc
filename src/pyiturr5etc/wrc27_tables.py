@@ -7,7 +7,7 @@ from dataclasses import fields as dataclass_fields
 import docx
 from pint import Quantity
 
-from njl_corf import pyoscar, ureg
+from pyiturr5etc import pyoscar, ureg
 
 
 @dataclass
