@@ -554,7 +554,7 @@ class Band:
             user_annotations=user_annotations,
         )
 
-    def definitely_usa(self):
+    def definitely_usa(self) -> bool:
         """Return true if the band includes USA footnotes"""
         for f in self.all_footnotes():
             if f[0] != "5" and f[0] != "(":
@@ -565,7 +565,7 @@ class Band:
         self,
         footnote: str,
         band_level_only: bool = False,
-    ):
+    ) -> bool:
         """Return true if band includes a given footnote
 
         Parameters
